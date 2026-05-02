@@ -353,9 +353,9 @@ India provides the most compelling real-world proof that targeted programs measu
 5. Ask: what if every program like this moved a global score, and that score was investable?
 6. That's SHE. Fund the index. Change the world.
 
-### 14.2 Institutional Partnership: Pivotal Ventures
+### 14.2 Institutional Seed Partnership
 
-Melinda French Gates' Pivotal Ventures is the primary institutional pitch target — $1 billion committed through 2026 to advance women's power globally.
+SHEtoken is actively seeking a $2M seed partnership from impact investors, philanthropic foundations, and ESG-aligned institutions. SHEtoken aligns with organisations that take a data-driven approach to gender equity and fund innovative, market-based solutions for women's empowerment globally.
 
 | Ask | Amount |
 |---|---|
@@ -365,7 +365,7 @@ Melinda French Gates' Pivotal Ventures is the primary institutional pitch target
 | Community & Launch | $200,000 |
 | **Total Seed Ask** | **$2,000,000** |
 
-*In return: DAO board observer seat, naming rights on WEI Impact Fund grant category, co-branding on annual WEI Report.*
+*In return, our seed partner receives: a DAO board observer seat, naming rights on a WEI Impact Fund grant category, and co-branding on the annual WEI Report.*
 
 ### 14.3 TechDIVA Co-Brand Strategy
 
@@ -399,7 +399,7 @@ SHEtoken is co-branded with **TechDIVA** — a kids' AI education brand (techdiv
 | Phase | Timeline | Milestones |
 |---|---|---|
 | **Phase 1: Foundation** | Months 1–3 | Publish whitepaper. Build WEI formula. Launch shetoken.org and GitHub. Launch GoFundMe |
-| **Phase 2: Build** | Months 4–6 | Smart contract development. CertiK audit. NGO partnerships. Pivotal Ventures pitch |
+| **Phase 2: Build** | Months 4–6 | Smart contract development. CertiK audit begins. NGO partnerships. Institutional investor outreach |
 | **Phase 3: Testnet** | Months 7–9 | Ethereum testnet. Chainlink oracle. DAO governance. West Bengal pilot |
 | **Phase 4: Mainnet** | Months 10–12 | Public token sale. Uniswap V3 listing. CoinGecko/CoinMarketCap. First WEI Report |
 | **Phase 5: Country Tokens** | Year 2 | Launch $SHE-IND, $SHE-NGA, $SHE-USA + 10 country sub-tokens. First Impact Bond pilot |

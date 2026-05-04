@@ -97,12 +97,12 @@ const Index = () => {
             World's first data-backed gender accountability token
           </div>
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.05] mb-6">
-            When the world gets <br className="hidden md:block" />
-            <span className="text-gradient">better for women,</span><br />
+            She was always the currency. <br className="hidden md:block" />
+            <span className="text-gradient">We just never measured it.</span><br />
             <span className="italic font-serif">$SHE goes up.</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-            SheCoin is an Ethereum token whose supply rises and falls with the Women's Empowerment Index — built on UN, World Bank & UNESCO data.
+            SHE is the world's first data-backed cryptocurrency, algorithmically tied to the Women's Empowerment Index — 8 pillars built from UN, World Bank, WHO, UNESCO & UNODC data across every nation.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90 text-base h-12 px-8">

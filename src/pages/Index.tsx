@@ -127,7 +127,7 @@ const Index = () => {
               </div>
             ))}
           </div>
-          <p className="text-center text-xs text-muted-foreground/60 mt-10">Sources: WHO, UN Women, UNESCO, IPU 2024</p>
+          <p className="text-center text-xs text-muted-foreground/60 mt-10">Sources: WHO 2021, UN Women, UNESCO, IPU 2024, ILO</p>
         </div>
       </section>
 

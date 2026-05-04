@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { ArrowRight, Sparkles, TrendingUp, Shield, GraduationCap, Heart, Scale, Globe2, Coins, Flame, Lock } from "lucide-react";
+import { ArrowRight, Sparkles, TrendingUp, Shield, GraduationCap, Heart, Scale, Globe2, Coins, Flame, Lock, HandHeart, Wifi, Sprout } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
 import logo from "@/assets/she-logo.jpg";
 

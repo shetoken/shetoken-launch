@@ -46,11 +46,15 @@ const Index = () => {
   ];
 
   const pillars = [
-    { icon: Scale, title: "Empowerment", weight: "25%", desc: "Political seats, legal rights, leadership" },
-    { icon: GraduationCap, title: "Education", weight: "20%", desc: "Literacy, enrollment, STEM access" },
-    { icon: Coins, title: "Economic", weight: "20%", desc: "Wage gap, ownership, financial inclusion" },
-    { icon: Heart, title: "Health", weight: "15%", desc: "Maternal mortality, healthcare access" },
-    { icon: Shield, title: "Crime Penalty", weight: "20%", desc: "Violence, femicide, trafficking" },
+    { icon: Scale, title: "Empowerment", weight: "15%", desc: "Parliamentary seats, ministerial roles, legal rights, freedom of movement" },
+    { icon: Sprout, title: "Bodily Autonomy", weight: "15%", desc: "Reproductive rights, child marriage, FGM, period poverty — new in v3.0" },
+    { icon: Shield, title: "Safety & Justice", weight: "14%", desc: "DV laws, femicide, honour-based violence, legal aid, police responsiveness" },
+    { icon: GraduationCap, title: "Education", weight: "12%", desc: "Literacy, enrollment, STEM, menstrual barriers to attendance" },
+    { icon: Coins, title: "Economic Inclusion", weight: "12%", desc: "Pay gap, formal employment, banking access, property rights" },
+    { icon: Heart, title: "Health & Survival", weight: "12%", desc: "Maternal mortality, life expectancy, anaemia, cancer screening" },
+    { icon: HandHeart, title: "Dignity & Welfare", weight: "10%", desc: "Widow rights, caregiver burden, food insecurity, mental health" },
+    { icon: Wifi, title: "Digital & Social", weight: "10%", desc: "Online harassment, internet & mobile gender gaps — new in v3.0" },
+    { icon: Flame, title: "Violence Penalty", weight: "−10%", desc: "Rape, acid attacks, dowry violence, femicide — subtracted from score" },
   ];
 
   const features = [

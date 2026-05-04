@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { ArrowRight, Sparkles, TrendingUp, Shield, GraduationCap, Heart, Scale, Globe2, Coins, Flame, Lock } from "lucide-react";
+import { ArrowRight, Sparkles, TrendingUp, Shield, GraduationCap, Heart, Scale, Globe2, Coins, Flame, Lock, HandHeart, Wifi, Sprout } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
 import logo from "@/assets/she-logo.jpg";
 
@@ -46,11 +46,15 @@ const Index = () => {
   ];
 
   const pillars = [
-    { icon: Scale, title: "Empowerment", weight: "25%", desc: "Political seats, legal rights, leadership" },
-    { icon: GraduationCap, title: "Education", weight: "20%", desc: "Literacy, enrollment, STEM access" },
-    { icon: Coins, title: "Economic", weight: "20%", desc: "Wage gap, ownership, financial inclusion" },
-    { icon: Heart, title: "Health", weight: "15%", desc: "Maternal mortality, healthcare access" },
-    { icon: Shield, title: "Crime Penalty", weight: "20%", desc: "Violence, femicide, trafficking" },
+    { icon: Scale, title: "Empowerment", weight: "15%", desc: "Parliamentary seats, ministerial roles, legal rights, freedom of movement" },
+    { icon: Sprout, title: "Bodily Autonomy", weight: "15%", desc: "Reproductive rights, child marriage, FGM, period poverty — new in v3.0" },
+    { icon: Shield, title: "Safety & Justice", weight: "14%", desc: "DV laws, femicide, honour-based violence, legal aid, police responsiveness" },
+    { icon: GraduationCap, title: "Education", weight: "12%", desc: "Literacy, enrollment, STEM, menstrual barriers to attendance" },
+    { icon: Coins, title: "Economic Inclusion", weight: "12%", desc: "Pay gap, formal employment, banking access, property rights" },
+    { icon: Heart, title: "Health & Survival", weight: "12%", desc: "Maternal mortality, life expectancy, anaemia, cancer screening" },
+    { icon: HandHeart, title: "Dignity & Welfare", weight: "10%", desc: "Widow rights, caregiver burden, food insecurity, mental health" },
+    { icon: Wifi, title: "Digital & Social", weight: "10%", desc: "Online harassment, internet & mobile gender gaps — new in v3.0" },
+    { icon: Flame, title: "Violence Penalty", weight: "−10%", desc: "Rape, acid attacks, dowry violence, femicide — subtracted from score" },
   ];
 
   const features = [
@@ -93,12 +97,12 @@ const Index = () => {
             World's first data-backed gender accountability token
           </div>
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.05] mb-6">
-            When the world gets <br className="hidden md:block" />
-            <span className="text-gradient">better for women,</span><br />
+            She was always the currency. <br className="hidden md:block" />
+            <span className="text-gradient">We just never measured it.</span><br />
             <span className="italic font-serif">$SHE goes up.</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-            SheCoin is an Ethereum token whose supply rises and falls with the Women's Empowerment Index — built on UN, World Bank & UNESCO data.
+            SHE is the world's first data-backed cryptocurrency, algorithmically tied to the Women's Empowerment Index — 8 pillars built from UN, World Bank, WHO, UNESCO & UNODC data across every nation.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90 text-base h-12 px-8">
@@ -123,7 +127,7 @@ const Index = () => {
               </div>
             ))}
           </div>
-          <p className="text-center text-xs text-muted-foreground/60 mt-10">Sources: WHO, UN Women, UNESCO, IPU 2024</p>
+          <p className="text-center text-xs text-muted-foreground/60 mt-10">Sources: WHO 2021, UN Women, UNESCO, IPU 2024, ILO</p>
         </div>
       </section>
 
@@ -131,9 +135,9 @@ const Index = () => {
       <section id="index" className="py-28">
         <div className="container max-w-6xl">
           <div className="text-center mb-16">
-            <p className="text-accent text-sm uppercase tracking-widest mb-4">The WEI Formula</p>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Five pillars. One score. <span className="text-gradient">Real accountability.</span></h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">A composite annual score for every country — fully open-source, fully auditable.</p>
+            <p className="text-accent text-sm uppercase tracking-widest mb-4">The WEI Formula · v3.0</p>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">Eight pillars. One score. <span className="text-gradient">Real accountability.</span></h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">The most comprehensive women's empowerment index ever published — the only one that prices period poverty, FGM, dowry violence, caregiver burden and digital harassment. Open-source. Auditable. Annual.</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {pillars.map((p) => (

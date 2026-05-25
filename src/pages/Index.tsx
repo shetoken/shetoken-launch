@@ -134,8 +134,8 @@ const Index = () => {
         <div className="container max-w-6xl">
           <div className="text-center mb-16">
             <p className="text-accent text-sm uppercase tracking-widest mb-4">The WEI Formula · v3.0</p>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Eight pillars. One score. <span className="text-gradient">Real accountability.</span></h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">The most comprehensive women's empowerment index ever published — the only one that prices period poverty, FGM, dowry violence, caregiver burden and digital harassment. Open-source. Auditable. Annual.</p>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">Eight pillars + one violence penalty. <span className="text-gradient">One score.</span></h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">The most comprehensive women's empowerment index ever published — the only one that prices period poverty, FGM, dowry violence, caregiver burden and digital harassment. Eight weighted pillars add up to 100. Violence subtracts. Open-source. Auditable. Annual.</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {pillars.map((p) => (

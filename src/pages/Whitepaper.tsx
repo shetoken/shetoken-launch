@@ -16,7 +16,7 @@ const formSchema = z.object({
   job_title: z.string().optional(),
   org_type: z.string().min(1, "Please select your organisation type"),
   country: z.string().min(1, "Please enter your country"),
-  intended_use: z.string().optional(),
+  intended_use: z.string().min(5, "Please describe how you intend to use this information"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -436,7 +436,7 @@ export default function Whitepaper() {
 
                 {/* Intended Use */}
                 <div className="sm:col-span-2">
-                  <label className="text-sm font-medium mb-1.5 block">How do you intend to use this information?</label>
+                  <label className="text-sm font-medium mb-1.5 block">How do you intend to use this information? *</label>
                   <textarea
                     placeholder="e.g. Due diligence for ESG investment, academic research, policy analysis…"
                     value={form.intended_use ?? ""}
@@ -444,6 +444,7 @@ export default function Whitepaper() {
                     rows={3}
                     className="w-full rounded-md border border-border/60 bg-background/60 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
                   />
+                  {errors.intended_use && <p className="text-red-400 text-xs mt-1">{errors.intended_use}</p>}
                 </div>
 
                 <div className="sm:col-span-2">

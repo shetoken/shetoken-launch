@@ -251,7 +251,7 @@ export default function Whitepaper() {
     setLoading(true);
     try {
       // Save lead to Supabase
-      const { error } = await supabase.from("whitepaper_leads").insert({
+      const { error } = await supabase.from("she_whitepaper_leads").insert({
         full_name: result.data.full_name,
         email: result.data.email,
         company: result.data.company ?? null,

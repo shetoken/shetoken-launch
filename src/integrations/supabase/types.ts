@@ -14,7 +14,31 @@ export type Database = {
   }
   public: {
     Tables: {
-      whitepaper_leads: {
+      she_subscribers: {
+        Row: {
+          email: string
+          tier: string
+          active: boolean | null
+          source: string | null
+          subscribed_at: string | null
+        }
+        Insert: {
+          email: string
+          tier?: string
+          active?: boolean | null
+          source?: string | null
+          subscribed_at?: string | null
+        }
+        Update: {
+          email?: string
+          tier?: string
+          active?: boolean | null
+          source?: string | null
+          subscribed_at?: string | null
+        }
+        Relationships: []
+      }
+      she_whitepaper_leads: {
         Row: {
           id: string
           created_at: string

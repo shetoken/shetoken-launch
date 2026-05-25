@@ -24,10 +24,11 @@ const Index = () => {
     }
     setLoading(true);
     try {
-      const res = await api.subscribe(parsed.data);
       // Mirror to own Supabase so subscribers appear in dashboard
       await supabase.from("newsletter_subscribers").upsert({ email: parsed.data }, { onConflict: "email" });
-      toast.success(res.message || "Welcome to the movement. Check your inbox soon.");
+      // Also sync to API (non-blocking — CORS may vary by env)
+      api.subscribe(parsed.data).catch(() => {});
+      toast.success("Welcome to the movement. Check your inbox soon.");
       setEmail("");
     } catch {
       toast.error("Something went wrong. Please try again.");

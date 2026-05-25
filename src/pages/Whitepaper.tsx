@@ -265,8 +265,8 @@ export default function Whitepaper() {
         throw error;
       }
 
-      // Also subscribe to newsletter via API
-      await api.subscribe(result.data.email, "ngo");
+      // Also subscribe to newsletter via API (non-blocking — CORS may vary by env)
+      api.subscribe(result.data.email, "ngo").catch(() => {});
 
       toast.success("Access granted — welcome to the SHEtoken research community.");
       setUnlocked(true);

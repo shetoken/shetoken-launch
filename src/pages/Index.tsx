@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { z } from "zod";
 import { api } from "@/lib/api";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -24,10 +23,8 @@ const Index = () => {
     }
     setLoading(true);
     try {
-      // Mirror to own Supabase so subscribers appear in dashboard
-      await supabase.from("newsletter_subscribers").upsert({ email: parsed.data }, { onConflict: "email" });
-      // Also sync to API (non-blocking — CORS may vary by env)
-      api.subscribe(parsed.data).catch(() => {});
+      // Writes to she_subscribers via API (service-role key required — can't write direct)
+      await api.subscribe(parsed.data);
       toast.success("Welcome to the movement. Check your inbox soon.");
       setEmail("");
     } catch {

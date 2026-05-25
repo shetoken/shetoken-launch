@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
+import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { ArrowRight, Sparkles, TrendingUp, Shield, GraduationCap, Heart, Scale, Globe2, Coins, Flame, Lock, HandHeart, Wifi, Sprout } from "lucide-react";
+import { ArrowRight, Sparkles, TrendingUp, Shield, GraduationCap, Heart, Scale, Globe2, Coins, Flame, Lock, HandHeart, Wifi, Sprout, BarChart2 } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
 import logo from "@/assets/she-logo.jpg";
 
@@ -22,20 +22,15 @@ const Index = () => {
       return;
     }
     setLoading(true);
-    const { error } = await supabase
-      .from("newsletter_subscribers")
-      .insert({ email: parsed.data });
-    setLoading(false);
-    if (error) {
-      if (error.code === "23505") {
-        toast.success("You're already on the list — thank you!");
-      } else {
-        toast.error("Something went wrong. Please try again.");
-      }
-      return;
+    try {
+      const res = await api.subscribe(parsed.data);
+      toast.success(res.message || "Welcome to the movement. Check your inbox soon.");
+      setEmail("");
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    toast.success("Welcome to the movement. Check your inbox soon.");
-    setEmail("");
   };
 
   const stats = [
@@ -77,6 +72,9 @@ const Index = () => {
             <a href="#index" className="hover:text-foreground transition-smooth">WEI Index</a>
             <a href="#earn" className="hover:text-foreground transition-smooth">Earn</a>
             <a href="#subscribe" className="hover:text-foreground transition-smooth">Newsletter</a>
+            <a href="/dashboard" className="hover:text-foreground transition-smooth flex items-center gap-1">
+              <BarChart2 className="h-3.5 w-3.5" /> Live Data
+            </a>
           </div>
           <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground border-0 shadow-gold hover:opacity-90">
             <a href="#subscribe">Join <ArrowRight className="ml-1 h-4 w-4" /></a>

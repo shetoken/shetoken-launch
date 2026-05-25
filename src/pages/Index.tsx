@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { z } from "zod";
 import { api } from "@/lib/api";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -24,6 +25,8 @@ const Index = () => {
     setLoading(true);
     try {
       const res = await api.subscribe(parsed.data);
+      // Mirror to own Supabase so subscribers appear in dashboard
+      await supabase.from("newsletter_subscribers").upsert({ email: parsed.data }, { onConflict: "email" });
       toast.success(res.message || "Welcome to the movement. Check your inbox soon.");
       setEmail("");
     } catch {
@@ -72,6 +75,7 @@ const Index = () => {
             <a href="#index" className="hover:text-foreground transition-smooth">WEI Index</a>
             <a href="#earn" className="hover:text-foreground transition-smooth">Earn</a>
             <a href="#subscribe" className="hover:text-foreground transition-smooth">Newsletter</a>
+            <a href="/whitepaper" className="hover:text-foreground transition-smooth">Whitepaper</a>
             <a href="/dashboard" className="hover:text-foreground transition-smooth flex items-center gap-1">
               <BarChart2 className="h-3.5 w-3.5" /> Live Data
             </a>

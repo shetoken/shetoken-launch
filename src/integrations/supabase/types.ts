@@ -32,6 +32,42 @@ export type Database = {
         }
         Relationships: []
       }
+      whitepaper_leads: {
+        Row: {
+          id: string
+          created_at: string
+          full_name: string
+          email: string
+          company: string | null
+          job_title: string | null
+          org_type: string | null
+          country: string | null
+          intended_use: string | null
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          full_name: string
+          email: string
+          company?: string | null
+          job_title?: string | null
+          org_type?: string | null
+          country?: string | null
+          intended_use?: string | null
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          full_name?: string
+          email?: string
+          company?: string | null
+          job_title?: string | null
+          org_type?: string | null
+          country?: string | null
+          intended_use?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

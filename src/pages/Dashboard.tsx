@@ -684,10 +684,10 @@ export default function Dashboard() {
               </div>
 
               {/* ── Row 2: KDE distribution (left 50%) + Tier heatmap (right 50%) ── */}
-              <div className="grid xl:grid-cols-2 gap-5 items-start">
+              <div className="grid xl:grid-cols-2 gap-5 items-stretch">
 
                 {/* Distribution KDE chart */}
-                <div className="bg-gradient-card border border-border/40 rounded-2xl p-5 shadow-card">
+                <div className="bg-gradient-card border border-border/40 rounded-2xl p-5 shadow-card flex flex-col h-full">
                   <div className="flex items-center justify-between mb-1">
                     <h3 className="text-sm font-semibold">
                       {isWEI
@@ -714,7 +714,8 @@ export default function Dashboard() {
                     )}
                   </p>
 
-                  <ResponsiveContainer width="100%" height={200}>
+                  <div className="flex-1 min-h-0" style={{ minHeight: 180 }}>
+                  <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={activeDistData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
                       <XAxis
                         dataKey="x"
@@ -782,6 +783,7 @@ export default function Dashboard() {
                       ))}
                     </LineChart>
                   </ResponsiveContainer>
+                  </div>
 
                   {/* Legend */}
                   <div className="flex flex-wrap gap-3 mt-3">
@@ -798,7 +800,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Tier heatmap bar chart */}
-                <div className="bg-gradient-card border border-border/40 rounded-2xl p-5 shadow-card">
+                <div className="bg-gradient-card border border-border/40 rounded-2xl p-5 shadow-card flex flex-col h-full">
                   <div className="flex items-center justify-between mb-1">
                     <h3 className="text-sm font-semibold">Country Distribution by Tier</h3>
                     <span className="text-xs text-muted-foreground hidden sm:block">WEI tiers · {countries.length} countries</span>
@@ -807,7 +809,8 @@ export default function Dashboard() {
                     How countries are distributed across the four WEI investment tiers.
                   </p>
 
-                  <ResponsiveContainer width="100%" height={200}>
+                  <div className="flex-1 min-h-0" style={{ minHeight: 180 }}>
+                  <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={tierDistData}
                       layout="vertical"
@@ -823,16 +826,20 @@ export default function Dashboard() {
                         tickLine={false}
                       />
                       <ReTooltip
-                        contentStyle={{
-                          background: "hsl(260 35% 9%)",
-                          border: "1px solid hsl(260 30% 20%)",
-                          borderRadius: 8,
-                          fontSize: 11,
-                          padding: "6px 10px",
-                        }}
-                        labelStyle={{ color: "hsl(40 30% 96%)", fontWeight: 600 }}
-                        formatter={(v: number) => [`${v} countries`, "Count"]}
                         cursor={{ fill: "hsl(260 30% 20% / 0.3)" }}
+                        content={({ active, payload }) => {
+                          if (!active || !payload?.length) return null;
+                          const d = payload[0].payload as { label: string; count: number; color: string };
+                          const total = tierDistData.reduce((s, t) => s + t.count, 0);
+                          const pct = total > 0 ? ((d.count / total) * 100).toFixed(1) : "0";
+                          return (
+                            <div style={{ background: "hsl(260 35% 9%)", border: "1px solid hsl(260 30% 20%)", borderRadius: 8, padding: "8px 12px", fontSize: 11 }}>
+                              <p style={{ color: d.color, fontWeight: 700, marginBottom: 4 }}>{d.label}</p>
+                              <p style={{ color: "hsl(40 30% 85%)" }}>{d.count} countries</p>
+                              <p style={{ color: "hsl(260 15% 60%)", marginTop: 2 }}>{pct}% of all scored countries</p>
+                            </div>
+                          );
+                        }}
                       />
                       <Bar dataKey="count" radius={[0, 6, 6, 0]} barSize={30}>
                         {tierDistData.map((entry) => (
@@ -847,6 +854,7 @@ export default function Dashboard() {
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
+                  </div>
 
                   {/* Tier legend */}
                   <div className="flex flex-wrap gap-3 mt-3">

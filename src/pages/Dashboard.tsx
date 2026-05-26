@@ -3,11 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { api, CountryWEI } from "@/lib/api";
 import { SEO } from "@/lib/seo";
+import { Nav } from "@/components/Nav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { WorldMap } from "@/components/WorldMap";
 import {
-  ArrowLeft, ArrowRight, ArrowUpDown, TrendingUp, TrendingDown,
+  ArrowRight, ArrowUpDown, TrendingUp, TrendingDown,
   Search, Globe2, Sparkles, BarChart2, AlertCircle, Map, List
 } from "lucide-react";
 import logo from "@/assets/she-logo.jpg";
@@ -117,26 +118,7 @@ export default function Dashboard() {
         description="Track the Women's Empowerment Index live across 105 countries. Interactive world map, country leaderboard, and 8 pillar scores — all built from UN, World Bank and WHO data."
         url="https://www.shetoken.org/dashboard"
       />
-      {/* NAV */}
-      <header className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-background/60 border-b border-border/40">
-        <nav className="container flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-2 font-bold text-lg">
-            <img src={logo} alt="SheToken logo" className="h-8 w-8 rounded-full object-cover" />
-            <span className="text-gradient">SheToken</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-            <Link to="/" className="hover:text-foreground transition-smooth flex items-center gap-1">
-              <ArrowLeft className="h-3.5 w-3.5" /> Home
-            </Link>
-            <span className="text-foreground font-medium flex items-center gap-1">
-              <BarChart2 className="h-3.5 w-3.5" /> Live Dashboard
-            </span>
-          </div>
-          <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground border-0 shadow-gold hover:opacity-90">
-            <a href="/#subscribe">Get early access <ArrowRight className="ml-1 h-4 w-4" /></a>
-          </Button>
-        </nav>
-      </header>
+      <Nav />
 
       <main className="pt-24 pb-20 container max-w-7xl">
         {/* TOKEN HEADER */}

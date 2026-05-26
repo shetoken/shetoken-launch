@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { SEO } from "@/lib/seo";
+import { Nav } from "@/components/Nav";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowLeft, TrendingUp, Shield, Globe2, Coins, AlertCircle, CheckCircle, XCircle } from "lucide-react";
-import logo from "@/assets/she-logo.jpg";
+import { ArrowRight, TrendingUp, Shield, Globe2, Coins, AlertCircle, CheckCircle, XCircle } from "lucide-react";
 
 function Stat({ value, label, source, href }: { value: string; label: string; source: string; href?: string }) {
   return (
@@ -47,25 +47,7 @@ export default function Why() {
         description="Aid doesn't scale. ESG scores aren't transparent. Traditional crypto has no mission. SHEtoken is the third way — a token whose value is mathematically tied to real-world women's empowerment outcomes."
         url="https://www.shetoken.org/why"
       />
-
-      {/* NAV */}
-      <header className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-background/60 border-b border-border/40">
-        <nav className="container flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-2 font-bold text-lg">
-            <img src={logo} alt="SheToken logo" className="h-8 w-8 rounded-full object-cover" />
-            <span className="text-gradient">SheToken</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-            <Link to="/" className="hover:text-foreground transition-smooth flex items-center gap-1"><ArrowLeft className="h-3.5 w-3.5" /> Home</Link>
-            <Link to="/community" className="hover:text-foreground transition-smooth">Community</Link>
-            <Link to="/dashboard" className="hover:text-foreground transition-smooth">Live Data</Link>
-            <Link to="/whitepaper" className="hover:text-foreground transition-smooth">Whitepaper</Link>
-          </div>
-          <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground border-0 shadow-gold hover:opacity-90">
-            <a href="/#subscribe">Get early access <ArrowRight className="ml-1 h-4 w-4" /></a>
-          </Button>
-        </nav>
-      </header>
+      <Nav />
 
       <main className="pt-24 pb-20">
 

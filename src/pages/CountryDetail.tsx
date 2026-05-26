@@ -1,16 +1,16 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api, CountryWEI } from "@/lib/api";
+import { Nav } from "@/components/Nav";
 import { Button } from "@/components/ui/button";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine
 } from "recharts";
 import {
-  ArrowLeft, ArrowRight, BarChart2, TrendingUp, TrendingDown,
+  ArrowLeft, ArrowRight, TrendingUp, TrendingDown,
   Info, AlertCircle, Users
 } from "lucide-react";
-import logo from "@/assets/she-logo.jpg";
 
 const PILLAR_COLS: Array<{ key: keyof CountryWEI; label: string; description: string; color: string }> = [
   { key: "empowerment_score", label: "Empowerment", description: "Parliamentary seats, ministerial roles, legal rights", color: "text-purple-400" },
@@ -99,23 +99,7 @@ export default function CountryDetail() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* NAV */}
-      <header className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-background/60 border-b border-border/40">
-        <nav className="container flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-2 font-bold text-lg">
-            <img src={logo} alt="SheToken logo" className="h-8 w-8 rounded-full object-cover" />
-            <span className="text-gradient">SheToken</span>
-          </Link>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <Link to="/dashboard" className="hover:text-foreground transition-smooth flex items-center gap-1">
-              <ArrowLeft className="h-3.5 w-3.5" /> Leaderboard
-            </Link>
-          </div>
-          <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground border-0 shadow-gold hover:opacity-90">
-            <a href="/#subscribe">Join early access <ArrowRight className="ml-1 h-4 w-4" /></a>
-          </Button>
-        </nav>
-      </header>
+      <Nav />
 
       <main className="pt-24 pb-20 container max-w-6xl">
         {loadingCountry ? (

@@ -3,16 +3,16 @@ import { Link } from "react-router-dom";
 import { z } from "zod";
 import { api } from "@/lib/api";
 import { SEO } from "@/lib/seo";
+import { Nav } from "@/components/Nav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import {
   ArrowRight, Sparkles, TrendingUp, Shield, GraduationCap, Heart, Scale,
-  Globe2, Coins, Flame, Lock, HandHeart, Wifi, Sprout, BarChart2, Users,
+  Globe2, Coins, Flame, Lock, HandHeart, Wifi, Sprout, Users,
   Star, Building2, Gem
 } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
-import logo from "@/assets/she-logo.jpg";
 
 const emailSchema = z.string().trim().email({ message: "Enter a valid email" }).max(255);
 
@@ -94,28 +94,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEO />
-
-      {/* NAV */}
-      <header className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-background/60 border-b border-border/40">
-        <nav className="container flex items-center justify-between h-16">
-          <a href="#" className="flex items-center gap-2 font-bold text-lg">
-            <img src={logo} alt="SheToken logo" className="h-8 w-8 rounded-full object-cover" />
-            <span className="text-gradient">SheToken</span>
-          </a>
-          <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-            <Link to="/why" className="hover:text-foreground transition-smooth">Why $SHE</Link>
-            <Link to="/community" className="hover:text-foreground transition-smooth">Community</Link>
-            <Link to="/dashboard" className="hover:text-foreground transition-smooth flex items-center gap-1">
-              <BarChart2 className="h-3.5 w-3.5" /> Live Data
-            </Link>
-            <Link to="/whitepaper" className="hover:text-foreground transition-smooth">Whitepaper</Link>
-            <a href="#join" className="hover:text-foreground transition-smooth">Work with us</a>
-          </div>
-          <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground border-0 shadow-gold hover:opacity-90">
-            <a href="#subscribe">Join early access <ArrowRight className="ml-1 h-4 w-4" /></a>
-          </Button>
-        </nav>
-      </header>
+      <Nav />
 
       {/* HERO */}
       <section className="relative pt-32 pb-24 overflow-hidden">

@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      she_profiles: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string | null
+          full_name: string | null
+          email: string | null
+          org_type: string | null
+          country: string | null
+          job_title: string | null
+          company: string | null
+          saved_countries: string[]
+          bio: string | null
+          avatar_url: string | null
+        }
+        Insert: {
+          id: string
+          created_at?: string
+          updated_at?: string | null
+          full_name?: string | null
+          email?: string | null
+          org_type?: string | null
+          country?: string | null
+          job_title?: string | null
+          company?: string | null
+          saved_countries?: string[]
+          bio?: string | null
+          avatar_url?: string | null
+        }
+        Update: {
+          id?: string
+          updated_at?: string | null
+          full_name?: string | null
+          email?: string | null
+          org_type?: string | null
+          country?: string | null
+          job_title?: string | null
+          company?: string | null
+          saved_countries?: string[]
+          bio?: string | null
+          avatar_url?: string | null
+        }
+        Relationships: []
+      }
       she_subscribers: {
         Row: {
           email: string

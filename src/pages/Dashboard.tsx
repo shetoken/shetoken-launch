@@ -566,9 +566,9 @@ export default function Dashboard() {
             <AlertCircle className="h-3 w-3" /> 8 indexes powering $SHE · click to filter map &amp; chart
           </p>
 
-          <div className="bg-card/30 border border-border/30 rounded-2xl px-4 py-4 shadow-card">
-            {/* px-2 py-2 gives the ring (ring-2 ring-offset-2 = 4 px outward) room before the overflow clip boundary */}
-            <div className="flex gap-2 overflow-x-auto px-2 py-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="bg-card/30 border border-border/30 rounded-2xl px-4 py-4 shadow-card overflow-visible">
+            {/* flex-wrap instead of overflow-x-auto so absolute tooltips aren't clipped */}
+            <div className="flex gap-2 flex-wrap px-2 py-2">
               {INDEX_CONFIGS.map((idx) => {
                 const isActive = selectedIndex === idx.label;
                 const isNative = idx.label === "WEI";
@@ -1121,6 +1121,77 @@ export default function Dashboard() {
             </div>
           )}
         </section>
+
+        {/* ── ABOUT THE DATA ── */}
+        <section className="mt-14 mb-4">
+          <div className="bg-card/30 border border-border/30 rounded-2xl px-6 py-6 shadow-card">
+            <h2 className="text-base font-bold mb-4 flex items-center gap-2">
+              <span className="text-accent">📊</span> About the Data
+            </h2>
+
+            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6 text-xs text-muted-foreground leading-relaxed">
+
+              {/* WEI */}
+              <div>
+                <p className="font-semibold text-foreground mb-1">Women's Empowerment Index (WEI)</p>
+                <p>
+                  SHEtoken's native composite index. Scores 105 countries across 8 pillars —
+                  Empowerment, Bodily Autonomy, Safety &amp; Justice, Education, Economic,
+                  Health, Dignity &amp; Welfare, and Digital &amp; Social — weighted and
+                  adjusted by a Violence Penalty. Updated weekly by the SHEtoken AI agent
+                  from 100+ multilingual news sources, arXiv, PubMed, and GDELT.
+                </p>
+              </div>
+
+              {/* External indexes */}
+              <div>
+                <p className="font-semibold text-foreground mb-1">Comparison Indexes</p>
+                <ul className="space-y-1">
+                  <li><span className="text-purple-400 font-medium">GPI</span> — Gender Poverty Index: female poverty rates &amp; resource access</li>
+                  <li><span className="text-red-400 font-medium">SVI</span> — Sexual Violence Index: prevalence &amp; legal protection</li>
+                  <li><span className="text-blue-400 font-medium">WADI</span> — Women &amp; AI Displacement Index: automation risk by gender</li>
+                  <li><span className="text-orange-400 font-medium">WEVI</span> — Widow Vulnerability Index: legal &amp; economic widow status</li>
+                  <li><span className="text-pink-400 font-medium">WHI</span> — Women's Health Index: maternal, reproductive &amp; mental health</li>
+                  <li><span className="text-cyan-400 font-medium">WVI</span> — Women's Voice Index: political representation &amp; civic freedom</li>
+                  <li><span className="text-emerald-400 font-medium">Compliance</span> — Rights Compliance: CEDAW, SDG 5 &amp; treaty adherence</li>
+                </ul>
+              </div>
+
+              {/* Methodology & sources */}
+              <div>
+                <p className="font-semibold text-foreground mb-1">Sources &amp; Methodology</p>
+                <p className="mb-2">
+                  Baseline data is derived from UN Women, World Bank Gender Data Portal,
+                  WHO, UNICEF, OECD, ILO, and Amnesty International reports (2023–2025).
+                </p>
+                <p className="mb-2">
+                  Weekly signals are extracted by a local AI classifier (Phi-3.5 Mini +
+                  Qwen2.5) from 100+ news sources across 15 languages and supplemented by
+                  academic research from arXiv and PubMed.
+                </p>
+                <p>
+                  All scores are normalised 0–100. Higher = better for women.
+                  Scores are indicative and intended for research &amp; awareness, not as
+                  financial advice.
+                </p>
+              </div>
+
+            </div>
+
+            <p className="text-[10px] text-muted-foreground/50 mt-5 pt-4 border-t border-border/20">
+              Data last updated:{" "}
+              {summary?.last_updated
+                ? new Date(summary.last_updated).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+                : "—"}{" "}
+              · WEI v3.0 · {summary?.countries_scored ?? "…"} countries scored ·{" "}
+              <a href="https://www.shetoken.org/whitepaper" target="_blank" rel="noopener noreferrer"
+                 className="underline hover:text-muted-foreground/80">
+                Full methodology →
+              </a>
+            </p>
+          </div>
+        </section>
+
       </main>
 
       <footer className="border-t border-border/40 py-8">

@@ -11,7 +11,6 @@ import {
   ArrowRight, ArrowUpDown, TrendingUp, TrendingDown,
   Search, Globe2, Sparkles, BarChart2, AlertCircle, Map, List
 } from "lucide-react";
-import logo from "@/assets/she-logo.jpg";
 
 const TIER_LABELS: Record<number, { label: string; color: string }> = {
   1: { label: "Preferred", color: "text-emerald-400" },

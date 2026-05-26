@@ -13,6 +13,7 @@ import {
   Star, Building2, Gem
 } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
+import logo from "@/assets/she-logo.jpg";
 
 const emailSchema = z.string().trim().email({ message: "Enter a valid email" }).max(255);
 

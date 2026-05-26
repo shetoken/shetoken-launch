@@ -72,16 +72,16 @@ export default function Why() {
         {/* HERO */}
         <section className="container max-w-4xl text-center py-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/30 bg-accent/10 text-accent text-xs mb-8">
-            <AlertCircle className="h-3 w-3" /> The case for financial accountability
+            <AlertCircle className="h-3 w-3" /> Why impact tokens matter
           </div>
           <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
-            The world has measured<br />women's suffering for decades.<br />
-            <span className="text-gradient">Nobody priced it.</span>
+            She was always the currency.<br />
+            <span className="text-gradient">The world just needed a way to measure it.</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Aid is charity. ESG is self-reporting. Traditional crypto is speculation.
             SHEtoken is a third way — a financial instrument mathematically tied to real outcomes,
-            auditable by anyone, on-chain forever.
+            built from independent data, auditable by anyone.
           </p>
         </section>
 
@@ -251,10 +251,11 @@ export default function Why() {
           <div className="absolute inset-0 bg-background/50" />
           <div className="container max-w-2xl text-center relative z-10">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Hold $SHE. <span className="text-gradient">Hold governments accountable.</span>
+              Hold $SHE. <span className="text-gradient">Back the data that backs the women.</span>
             </h2>
             <p className="text-muted-foreground mb-8">
-              Join the investors, researchers, NGOs and advocates who are making women's empowerment financially measurable.
+              Join the investors, researchers, NGOs and advocates who are making women's empowerment
+              financially measurable — one index point at a time.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90 h-12 px-8">

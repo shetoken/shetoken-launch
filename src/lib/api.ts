@@ -21,6 +21,14 @@ export interface Summary {
   last_updated: string;
 }
 
+export interface PerformanceSource {
+  title: string;
+  url: string;
+  source: string;
+  date: string;
+  pillar: string;
+}
+
 export interface CountryWEI {
   rank: number;
   country: string;
@@ -41,6 +49,9 @@ export interface CountryWEI {
   digital_social_score: number;
   violence_penalty_score: number;
   year: number;
+  // SLM-generated fields (present when pipeline has run and signals exist)
+  performance_summary?: string;
+  sources?: PerformanceSource[];
 }
 
 export interface CountryListResponse {

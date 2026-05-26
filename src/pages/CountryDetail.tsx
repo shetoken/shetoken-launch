@@ -10,8 +10,9 @@ import {
 } from "recharts";
 import {
   ArrowLeft, BarChart2, TrendingUp, TrendingDown,
-  Info, AlertCircle, Users, ShieldAlert
+  Info, AlertCircle, Users, ShieldAlert, ExternalLink, Cpu
 } from "lucide-react";
+import { PerformanceSource } from "@/lib/api";
 
 /* ── Pillar definitions with global-average and improvement lever ── */
 const PILLAR_COLS: Array<{
@@ -345,21 +346,65 @@ export default function CountryDetail() {
               )}
             </section>
 
-            {/* PERFORMANCE BLURB */}
+            {/* PERFORMANCE SUMMARY — SLM blurb when available, template fallback */}
             <section className="mb-10">
               <div className="bg-gradient-card border border-border/40 rounded-2xl p-6 shadow-card">
                 <h2 className="text-sm font-semibold uppercase tracking-widest text-accent mb-3 flex items-center gap-2">
                   <Info className="h-4 w-4" /> Performance Summary
+                  {country.performance_summary && (
+                    <span className="ml-auto flex items-center gap-1 text-xs font-normal text-muted-foreground normal-case tracking-normal">
+                      <Cpu className="h-3 w-3" /> signal-backed · Phi-3.5
+                    </span>
+                  )}
                 </h2>
+
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  {performanceBlurb(country)}
+                  {country.performance_summary ?? performanceBlurb(country)}
                 </p>
-                <div className="mt-4 pt-4 border-t border-border/20">
-                  <p className="text-xs text-muted-foreground/60 italic">
-                    Scores are derived from UN Women, World Bank, WHO, UNESCO and UNODC data for {country.year}.
-                    Signal alerts reflect policy events and index movements tracked weekly.
-                  </p>
-                </div>
+
+                {/* Source links — only shown when SLM blurb is present */}
+                {country.sources && country.sources.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-border/20 space-y-2">
+                    <p className="text-xs text-muted-foreground/60 uppercase tracking-widest mb-2">
+                      Signal sources this week
+                    </p>
+                    {country.sources.map((src: PerformanceSource, i: number) => (
+                      <a
+                        key={i}
+                        href={src.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-start gap-2 group hover:bg-accent/5 rounded-lg p-2 -mx-2 transition-smooth"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5 text-accent shrink-0 mt-0.5" />
+                        <div className="min-w-0">
+                          <p className="text-xs font-medium text-foreground group-hover:text-accent transition-smooth truncate leading-snug">
+                            {src.title || src.source}
+                          </p>
+                          <p className="text-xs text-muted-foreground/60 mt-0.5 flex items-center gap-2">
+                            <span>{src.source}</span>
+                            {src.pillar && (
+                              <span className="uppercase tracking-widest text-accent/60">
+                                {src.pillar.replace(/_/g, " ")}
+                              </span>
+                            )}
+                            {src.date && <span>{new Date(src.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>}
+                          </p>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                )}
+
+                {/* No sources — show data attribution */}
+                {(!country.sources || country.sources.length === 0) && (
+                  <div className="mt-4 pt-4 border-t border-border/20">
+                    <p className="text-xs text-muted-foreground/60 italic">
+                      Scores derived from UN Women, World Bank, WHO, UNESCO and UNODC data for {country.year}.
+                      Signal-backed summaries appear after the weekly pipeline runs.
+                    </p>
+                  </div>
+                )}
               </div>
             </section>
 

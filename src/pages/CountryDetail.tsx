@@ -488,95 +488,12 @@ export default function CountryDetail() {
               </div>
             </section>
 
-            {/* PILLAR BREAKDOWN */}
+            {/* PILLAR CARDS */}
             <section className="mb-10">
               <h2 className="text-xl font-bold mb-2">8 Pillar Breakdown</h2>
               <p className="text-xs text-muted-foreground mb-5 flex items-center gap-1">
-                <Info className="h-3 w-3" /> Hover any pillar card to see improvement lever · gold bar = {country.country} · grey = global average
+                <Info className="h-3 w-3" /> Hover any card to see improvement lever and vs. global average
               </p>
-
-              {/* ── Horizontal comparison bar chart ── */}
-              {(() => {
-                const barData = PILLAR_COLS.map((col) => ({
-                  pillar: col.label.replace(" & ", "/").replace("& ", "/"),
-                  score:  Math.round(((country[col.key] as number) ?? 0) * 10) / 10,
-                  avg:    col.globalAvg,
-                  color:  col.color,
-                }));
-                return (
-                  <div className="bg-gradient-card border border-border/40 rounded-2xl p-5 shadow-card mb-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-sm font-semibold">Score vs. Global Average — All 8 Pillars</h3>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1.5">
-                          <span className="w-3 h-1.5 bg-amber-400 rounded-full inline-block" />
-                          {country.country}
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                          <span className="w-3 h-1.5 rounded-full inline-block bg-muted/60" />
-                          Global avg
-                        </span>
-                      </div>
-                    </div>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <BarChart
-                        layout="vertical"
-                        data={barData}
-                        margin={{ top: 0, right: 52, left: 0, bottom: 0 }}
-                        barGap={3}
-                        barCategoryGap="28%"
-                      >
-                        <XAxis
-                          type="number"
-                          domain={[0, 100]}
-                          tick={{ fontSize: 10, fill: "hsl(260 15% 50%)" }}
-                          tickLine={false}
-                          axisLine={false}
-                        />
-                        <YAxis
-                          type="category"
-                          dataKey="pillar"
-                          tick={{ fontSize: 11, fill: "hsl(260 15% 70%)" }}
-                          width={90}
-                          axisLine={false}
-                          tickLine={false}
-                        />
-                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(260 30% 18%)" />
-                        <Tooltip
-                          contentStyle={{
-                            background: "hsl(260 35% 9%)",
-                            border: "1px solid hsl(260 30% 20%)",
-                            borderRadius: 8,
-                            fontSize: 11,
-                          }}
-                          formatter={(v: number, name: string) => [`${v.toFixed(1)} / 100`, name]}
-                          cursor={{ fill: "hsl(260 30% 14%)" }}
-                        />
-                        <Bar dataKey="score" name={country.country} radius={[0, 4, 4, 0]} maxBarSize={14}>
-                          {barData.map((entry) => (
-                            <Cell key={entry.pillar} fill="#f59e0b" fillOpacity={0.9} />
-                          ))}
-                          <LabelList
-                            dataKey="score"
-                            position="right"
-                            style={{ fill: "#f59e0b", fontSize: 11, fontWeight: 600 }}
-                            formatter={(v: number) => v.toFixed(1)}
-                          />
-                        </Bar>
-                        <Bar dataKey="avg" name="Global avg" radius={[0, 4, 4, 0]} maxBarSize={14} fill="hsl(260 30% 30%)">
-                          <LabelList
-                            dataKey="avg"
-                            position="right"
-                            style={{ fill: "hsl(260 15% 55%)", fontSize: 10 }}
-                            formatter={(v: number) => v.toFixed(0)}
-                          />
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                );
-              })()}
-
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {PILLAR_COLS.map((col) => (
                   <PillarCard
@@ -591,16 +508,18 @@ export default function CountryDetail() {
                   />
                 ))}
               </div>
+            </section>
 
-              {/* Violence Penalty — expanded */}
-              {country.violence_penalty_score != null && vSeverity && (
-                <div className="mt-4 bg-gradient-card border border-red-400/20 rounded-xl p-5 shadow-card">
+            {/* VIOLENCE PENALTY */}
+            {country.violence_penalty_score != null && vSeverity && (
+              <section className="mb-10">
+                <div className="bg-gradient-card border border-red-400/20 rounded-xl p-5 shadow-card">
                   <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                     <div className="flex items-center gap-3 shrink-0">
                       <ShieldAlert className="h-6 w-6 text-red-400" />
                       <div>
                         <div className="text-xs font-semibold uppercase tracking-widest text-red-400 mb-0.5">
-                          Violence Penalty · {" "}
+                          Violence Penalty ·{" "}
                           <span className={vSeverity.color}>{vSeverity.label}</span>
                         </div>
                         <div className="text-4xl font-bold text-red-400 leading-none">
@@ -631,8 +550,8 @@ export default function CountryDetail() {
                     </div>
                   </div>
                 </div>
-              )}
-            </section>
+              </section>
+            )}
 
             {/* WEI TREND CHART */}
             <section className="mb-10">

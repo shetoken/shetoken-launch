@@ -430,8 +430,9 @@ export default function Dashboard() {
             <AlertCircle className="h-3 w-3" /> 8 indexes powering $SHE · click to filter map &amp; chart
           </p>
 
-          <div className="bg-card/30 border border-border/30 rounded-2xl px-5 py-5 shadow-card">
-            <div className="flex gap-2.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="bg-card/30 border border-border/30 rounded-2xl px-4 py-4 shadow-card">
+            {/* px-2 py-2 gives the ring (ring-2 ring-offset-2 = 4 px outward) room before the overflow clip boundary */}
+            <div className="flex gap-2 overflow-x-auto px-2 py-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {INDEX_CONFIGS.map((idx) => {
                 const isActive = selectedIndex === idx.label;
                 return (
@@ -443,10 +444,10 @@ export default function Dashboard() {
                         ? `${idx.desc} (${idx.label}) · global average: ${indexGlobalAvgs[idx.label]!.toFixed(1)}`
                         : `${idx.desc} (${idx.label}) · global average loading…`
                     }
-                    className={`shrink-0 border rounded-xl px-4 py-2.5 text-xs text-left transition-all duration-200 ${idx.tailwind} ${
+                    className={`flex-1 min-w-[105px] border rounded-xl px-3 py-2.5 text-xs text-left transition-all duration-200 ${idx.tailwind} ${
                       isActive
-                        ? "ring-2 ring-current ring-offset-1 ring-offset-background shadow-lg opacity-100 scale-[1.03]"
-                        : "opacity-55 hover:opacity-85 hover:scale-[1.01] cursor-pointer"
+                        ? "ring-2 ring-current ring-offset-2 ring-offset-background shadow-lg opacity-100"
+                        : "opacity-55 hover:opacity-80 hover:scale-[1.01] cursor-pointer"
                     }`}
                   >
                     <div className="font-bold text-base flex items-center gap-1.5">

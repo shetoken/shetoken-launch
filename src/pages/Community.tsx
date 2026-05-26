@@ -2,7 +2,9 @@ import { Link } from "react-router-dom";
 import { SEO } from "@/lib/seo";
 import { Nav } from "@/components/Nav";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Lock, Users, Globe2, TrendingUp, BookOpen, Shield, Cpu, Flag } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import { ArrowRight, Lock, Users, Globe2, TrendingUp, BookOpen, Shield, Cpu, Flag, CheckCircle } from "lucide-react";
 
 const FOCUS_GROUPS = [
   {
@@ -121,6 +123,19 @@ const ARCHETYPES = [
 ];
 
 export default function Community() {
+  const { user, openAuth } = useAuth();
+
+  function handleJoinRequest(groupName: string) {
+    if (!user) {
+      openAuth("signup");
+      return;
+    }
+    toast.success(`Request submitted for "${groupName}". We'll review and add you within 48 hours.`, {
+      duration: 5000,
+    });
+    // Future: write to she_community_requests table
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <SEO
@@ -147,8 +162,12 @@ export default function Community() {
             Closed focus groups connecting impact investors, NGOs, researchers, policy makers
             and advocates around shared WEI data and real intelligence — not noise.
           </p>
-          <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90 h-12 px-10 text-base">
-            <a href="/#subscribe">Request access <ArrowRight className="ml-2 h-4 w-4" /></a>
+          <Button
+            size="lg"
+            onClick={() => user ? toast.info("You're already in — browse the groups below to request access to specific circles.") : openAuth("signup")}
+            className="bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90 h-12 px-10 text-base"
+          >
+            {user ? "Browse focus groups" : "Request access"} <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
           <p className="text-xs text-muted-foreground mt-4">Members only. We review each application.</p>
         </section>
@@ -203,7 +222,7 @@ export default function Community() {
                   <p className="text-sm text-muted-foreground mb-4">{group.description}</p>
 
                   {/* Locked preview */}
-                  <div className="relative rounded-lg border border-border/30 bg-background/20 p-3 overflow-hidden">
+                  <div className="relative rounded-lg border border-border/30 bg-background/20 p-3 overflow-hidden mb-4">
                     <div className="blur-sm select-none text-xs text-muted-foreground">
                       {group.teaser}
                     </div>
@@ -211,6 +230,19 @@ export default function Community() {
                       <Lock className="h-3 w-3" /> Members only
                     </div>
                   </div>
+
+                  {/* Join CTA */}
+                  <Button
+                    size="sm"
+                    onClick={() => handleJoinRequest(group.name)}
+                    className="w-full bg-gradient-primary text-primary-foreground border-0 shadow-gold hover:opacity-90 text-xs"
+                  >
+                    {user ? (
+                      <><CheckCircle className="h-3.5 w-3.5 mr-1.5" /> Request to join</>
+                    ) : (
+                      <><ArrowRight className="h-3.5 w-3.5 mr-1.5" /> Sign up to request access</>
+                    )}
+                  </Button>
                 </div>
               </div>
             ))}
@@ -251,8 +283,12 @@ export default function Community() {
             Start with the newsletter to get a sense of the intelligence we share. Full community access comes with your account.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90 h-12 px-8">
-              <a href="/#subscribe">Join the newsletter <ArrowRight className="ml-2 h-4 w-4" /></a>
+            <Button
+              size="lg"
+              onClick={() => user ? toast.info("Scroll up to request access to any focus group above.") : openAuth("signup")}
+              className="bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90 h-12 px-8"
+            >
+              {user ? "Request group access" : "Create an account"} <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
             <Button asChild size="lg" variant="outline" className="h-12 px-8 border-border/60 bg-card/40 backdrop-blur">
               <Link to="/why">Read our case →</Link>

@@ -7,7 +7,7 @@ import { Nav } from "@/components/Nav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Lock, CheckCircle, ExternalLink } from "lucide-react";
+import { Lock, CheckCircle, ExternalLink, FileText } from "lucide-react";
 
 const formSchema = z.object({
   full_name: z.string().min(2, "Please enter your full name"),

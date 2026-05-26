@@ -37,7 +37,7 @@ const NUM_TO_ISO3: Record<string, string> = {
   "788": "TUN", "792": "TUR", "795": "TKM", "800": "UGA", "804": "UKR",
   "807": "MKD", "818": "EGY", "826": "GBR", "834": "TZA", "840": "USA",
   "854": "BFA", "858": "URY", "860": "UZB", "862": "VEN", "887": "YEM",
-  "894": "ZMB", "51": "ARM", "417": "KGZ",
+  "894": "ZMB", "51": "ARM",
 };
 
 function scoreToColor(score: number | undefined): string {
@@ -72,7 +72,15 @@ interface TooltipState {
   y: number;
 }
 
-export function WorldMap({ countries }: { countries: CountryWEI[] }) {
+interface WorldMapProps {
+  countries: CountryWEI[];
+  /** ISO alpha-3 of the currently selected country (highlights it in gold) */
+  selectedIso?: string;
+  /** If provided, clicking fires this instead of navigating to the country page */
+  onSelect?: (country: CountryWEI) => void;
+}
+
+export function WorldMap({ countries, selectedIso, onSelect }: WorldMapProps) {
   const navigate = useNavigate();
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
 
@@ -117,9 +125,14 @@ export function WorldMap({ countries }: { countries: CountryWEI[] }) {
   const handleClick = useCallback(
     (geo: { id?: string | number }) => {
       const data = getDataForGeo(geo);
-      if (data) navigate(`/country/${data.iso_code}`);
+      if (!data) return;
+      if (onSelect) {
+        onSelect(data);
+      } else {
+        navigate(`/country/${data.iso_code}`);
+      }
     },
-    [getDataForGeo, navigate]
+    [getDataForGeo, navigate, onSelect]
   );
 
   return (
@@ -139,7 +152,9 @@ export function WorldMap({ countries }: { countries: CountryWEI[] }) {
               {TIER_LABELS[tooltip.tier]}
             </span>
           </p>
-          <p className="text-xs text-accent mt-1">Click to explore →</p>
+          <p className="text-xs text-accent mt-1">
+            {onSelect ? "Click to select & compare →" : "Click to explore →"}
+          </p>
         </div>
       )}
 
@@ -148,7 +163,7 @@ export function WorldMap({ countries }: { countries: CountryWEI[] }) {
         <ComposableMap
           projection="geoMercator"
           projectionConfig={{ scale: 138, center: [10, 18] }}
-          height={440}
+          height={500}
           style={{ width: "100%", height: "auto" }}
         >
           <ZoomableGroup zoom={1} minZoom={0.7} maxZoom={8}>
@@ -156,7 +171,8 @@ export function WorldMap({ countries }: { countries: CountryWEI[] }) {
               {({ geographies }) =>
                 geographies.map((geo) => {
                   const data = getDataForGeo(geo);
-                  const fill = scoreToColor(data?.wei_score);
+                  const isSelected = !!selectedIso && data?.iso_code === selectedIso;
+                  const fill = isSelected ? "#f59e0b" : scoreToColor(data?.wei_score);
                   const hasData = !!data;
 
                   return (
@@ -164,8 +180,8 @@ export function WorldMap({ countries }: { countries: CountryWEI[] }) {
                       key={geo.rsmKey}
                       geography={geo}
                       fill={fill}
-                      stroke="#0f172a"
-                      strokeWidth={0.4}
+                      stroke={isSelected ? "#fcd34d" : "#0f172a"}
+                      strokeWidth={isSelected ? 1.5 : 0.4}
                       style={{
                         default: {
                           outline: "none",
@@ -173,7 +189,7 @@ export function WorldMap({ countries }: { countries: CountryWEI[] }) {
                         },
                         hover: {
                           outline: "none",
-                          fill: hasData ? "#a78bfa" : fill,
+                          fill: hasData ? (isSelected ? "#fcd34d" : "#a78bfa") : fill,
                           cursor: hasData ? "pointer" : "default",
                         },
                         pressed: { outline: "none", fill: "#7c3aed" },
@@ -194,6 +210,7 @@ export function WorldMap({ countries }: { countries: CountryWEI[] }) {
       {/* Legend */}
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 justify-center mt-4 text-xs text-muted-foreground">
         {[
+          { color: "#f59e0b", label: "Selected" },
           { color: "#10b981", label: "75+  Preferred" },
           { color: "#22c55e", label: "60–74  Good" },
           { color: "#eab308", label: "45–59  Moderate" },
@@ -211,7 +228,7 @@ export function WorldMap({ countries }: { countries: CountryWEI[] }) {
         ))}
       </div>
       <p className="text-center text-xs text-muted-foreground/40 mt-2">
-        Scroll to zoom · Drag to pan · Click a country to explore
+        Scroll to zoom · Drag to pan · Click a country to select
       </p>
     </div>
   );

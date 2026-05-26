@@ -4,12 +4,23 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft, TrendingUp, Shield, Globe2, Coins, AlertCircle, CheckCircle, XCircle } from "lucide-react";
 import logo from "@/assets/she-logo.jpg";
 
-function Stat({ value, label, source }: { value: string; label: string; source: string }) {
+function Stat({ value, label, source, href }: { value: string; label: string; source: string; href?: string }) {
   return (
     <div className="text-center p-6 bg-gradient-card border border-border/40 rounded-2xl shadow-card">
       <div className="text-4xl md:text-5xl font-bold text-gradient mb-3">{value}</div>
-      <div className="text-sm font-medium mb-1">{label}</div>
-      <div className="text-xs text-muted-foreground">{source}</div>
+      <div className="text-sm font-medium mb-2">{label}</div>
+      {href ? (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-muted-foreground hover:text-accent underline underline-offset-2 transition-smooth"
+        >
+          {source} ↗
+        </a>
+      ) : (
+        <div className="text-xs text-muted-foreground">{source}</div>
+      )}
     </div>
   );
 }
@@ -79,10 +90,29 @@ export default function Why() {
           <div className="container max-w-5xl">
             <p className="text-center text-xs uppercase tracking-widest text-muted-foreground mb-10">The scale of the problem</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Stat value="$360B" label="Annual cost of gender inequality to global GDP" source="McKinsey Global Institute" />
-              <Stat value="1 in 3" label="Women experience physical or sexual violence in their lifetime" source="WHO 2021" />
-              <Stat value="135 yrs" label="Time to close the global gender gap at current pace" source="World Economic Forum 2023" />
-              <Stat value="$0" label="Amount of capital directly priced against measurable gender outcomes" source="SHEtoken research" />
+              <Stat
+                value="$360B"
+                label="Annual cost of gender inequality to global GDP"
+                source="McKinsey Global Institute"
+                href="https://www.mckinsey.com/featured-insights/gender-equality/the-power-of-parity-how-advancing-womens-equality-can-add-12-trillion-to-global-growth"
+              />
+              <Stat
+                value="1 in 3"
+                label="Women experience physical or sexual violence in their lifetime"
+                source="WHO 2021"
+                href="https://www.who.int/news-room/fact-sheets/detail/violence-against-women"
+              />
+              <Stat
+                value="135 yrs"
+                label="Time to close the global gender gap at current pace"
+                source="World Economic Forum 2023"
+                href="https://www.weforum.org/reports/global-gender-gap-report-2023/"
+              />
+              <Stat
+                value="$0"
+                label="Amount of capital directly priced against measurable gender outcomes"
+                source="SHEtoken research"
+              />
             </div>
           </div>
         </section>
@@ -164,6 +194,32 @@ export default function Why() {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* DATA SOURCES STRIP */}
+        <section className="py-10 container max-w-5xl">
+          <p className="text-center text-xs uppercase tracking-widest text-muted-foreground mb-6">WEI data draws from</p>
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
+            {[
+              { name: "UN Women", href: "https://www.unwomen.org/en/digital-library/sdg-report" },
+              { name: "World Health Organization", href: "https://www.who.int/data/gho/data/themes/topics/indicator-groups/indicator-group-details/GHO/violence-against-women" },
+              { name: "World Bank Gender Data", href: "https://genderdata.worldbank.org/" },
+              { name: "UNESCO Institute for Statistics", href: "https://uis.unesco.org/en/topic/education-and-gender" },
+              { name: "UNODC", href: "https://www.unodc.org/unodc/en/data-and-analysis/gender.html" },
+              { name: "IPU Women in Parliament", href: "https://data.ipu.org/women-ranking" },
+              { name: "ILO Gender Statistics", href: "https://ilostat.ilo.org/topics/gender/" },
+            ].map(({ name, href }) => (
+              <a
+                key={name}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-muted-foreground hover:text-accent underline underline-offset-2 transition-smooth"
+              >
+                {name} ↗
+              </a>
+            ))}
           </div>
         </section>
 

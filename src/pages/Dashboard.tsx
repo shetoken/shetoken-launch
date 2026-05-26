@@ -2,11 +2,13 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { api, CountryWEI } from "@/lib/api";
+import { SEO } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { WorldMap } from "@/components/WorldMap";
 import {
   ArrowLeft, ArrowRight, ArrowUpDown, TrendingUp, TrendingDown,
-  Search, Globe2, Sparkles, BarChart2, AlertCircle
+  Search, Globe2, Sparkles, BarChart2, AlertCircle, Map, List
 } from "lucide-react";
 import logo from "@/assets/she-logo.jpg";
 
@@ -68,11 +70,13 @@ function IndexCard({
 }
 
 type SortKey = "rank" | "wei_score" | "country";
+type ViewMode = "map" | "table";
 
 export default function Dashboard() {
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("rank");
   const [sortAsc, setSortAsc] = useState(true);
+  const [view, setView] = useState<ViewMode>("map");
 
   const { data: summary, isLoading: loadingSummary } = useQuery({
     queryKey: ["summary"],
@@ -108,6 +112,11 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Live WEI Dashboard — Women's Empowerment Index for 105 Countries"
+        description="Track the Women's Empowerment Index live across 105 countries. Interactive world map, country leaderboard, and 8 pillar scores — all built from UN, World Bank and WHO data."
+        url="https://www.shetoken.org/dashboard"
+      />
       {/* NAV */}
       <header className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-background/60 border-b border-border/40">
         <nav className="container flex items-center justify-between h-16">
@@ -186,26 +195,61 @@ export default function Dashboard() {
           </p>
         </section>
 
-        {/* COUNTRY LEADERBOARD */}
+        {/* COUNTRY EXPLORER — Map + Table */}
         <section>
+          {/* Header row with toggle */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <h2 className="text-2xl font-bold">
-              Country Leaderboard <span className="text-muted-foreground font-normal text-base ml-2">{filtered.length} countries</span>
+              Country Explorer{" "}
+              <span className="text-muted-foreground font-normal text-base ml-2">
+                {countries.length} countries
+              </span>
             </h2>
-            <div className="relative max-w-xs w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search country or region…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 h-9 bg-card/40 border-border/60"
-              />
+            <div className="flex items-center gap-3">
+              {/* View toggle */}
+              <div className="flex items-center rounded-lg border border-border/60 bg-card/40 p-1">
+                <button
+                  onClick={() => setView("map")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-smooth ${
+                    view === "map"
+                      ? "bg-accent text-accent-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Map className="h-3.5 w-3.5" /> Map
+                </button>
+                <button
+                  onClick={() => setView("table")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-smooth ${
+                    view === "table"
+                      ? "bg-accent text-accent-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <List className="h-3.5 w-3.5" /> Table
+                </button>
+              </div>
+
+              {/* Search (always visible) */}
+              <div className="relative max-w-xs w-full">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search country or region…"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-9 h-9 bg-card/40 border-border/60"
+                />
+              </div>
             </div>
           </div>
 
           {loadingCountries ? (
-            <div className="text-muted-foreground py-12 text-center">Loading country data…</div>
+            <div className="text-muted-foreground py-20 text-center">Loading country data…</div>
+          ) : view === "map" ? (
+            /* ── MAP VIEW ── */
+            <WorldMap countries={countries} />
           ) : (
+            /* ── TABLE VIEW ── */
             <div className="rounded-2xl border border-border/40 overflow-hidden shadow-card">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">

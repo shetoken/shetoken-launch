@@ -39,10 +39,10 @@ const Index = () => {
   };
 
   const stats = [
-    { value: "1 in 3", label: "Women experience violence globally" },
-    { value: "70%", label: "Of the world's extreme poor are women" },
-    { value: "2/3", label: "Of illiterate adults are women" },
-    { value: "26%", label: "Of parliamentary seats held by women" },
+    { value: "1 in 3", label: "Women experience violence globally", source: "WHO 2021", href: "https://www.who.int/news-room/fact-sheets/detail/violence-against-women" },
+    { value: "70%", label: "Of the world's extreme poor are women", source: "World Bank", href: "https://www.worldbank.org/en/topic/gender/overview" },
+    { value: "2/3", label: "Of illiterate adults are women", source: "UNESCO", href: "https://www.unesco.org/en/gender-equality/education" },
+    { value: "26%", label: "Of parliamentary seats held by women", source: "IPU 2024", href: "https://data.ipu.org/women-ranking" },
   ];
 
   const pillars = [
@@ -155,11 +155,18 @@ const Index = () => {
             {stats.map((s) => (
               <div key={s.label} className="text-center">
                 <div className="text-4xl md:text-5xl font-bold text-gradient mb-3">{s.value}</div>
-                <div className="text-sm text-muted-foreground">{s.label}</div>
+                <div className="text-sm text-muted-foreground mb-2">{s.label}</div>
+                <a
+                  href={s.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-muted-foreground/50 hover:text-accent underline underline-offset-2 transition-smooth"
+                >
+                  {s.source} ↗
+                </a>
               </div>
             ))}
           </div>
-          <p className="text-center text-xs text-muted-foreground/60 mt-10">Sources: WHO 2021, UN Women, UNESCO, IPU 2024, ILO</p>
         </div>
       </section>
 

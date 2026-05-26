@@ -13,6 +13,7 @@ import Whitepaper from "./pages/Whitepaper.tsx";
 import Why from "./pages/Why.tsx";
 import Community from "./pages/Community.tsx";
 import Profile from "./pages/Profile.tsx";
+import Compare from "./pages/Compare.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient({
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/why" element={<Why />} />
               <Route path="/community" element={<Community />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/compare" element={<Compare />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

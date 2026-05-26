@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import {
   ArrowRight, Sparkles, TrendingUp, Shield, GraduationCap, Heart, Scale,
   Globe2, Coins, Flame, Lock, HandHeart, Wifi, Sprout, Users,
-  Star, Building2, Gem
+  Star, Building2, Gem, ExternalLink
 } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
 import logo from "@/assets/she-logo.jpg";
@@ -41,10 +41,54 @@ const Index = () => {
   };
 
   const stats = [
-    { value: "1 in 3", label: "Women experience violence globally", source: "WHO 2021", href: "https://www.who.int/news-room/fact-sheets/detail/violence-against-women" },
-    { value: "70%", label: "Of the world's extreme poor are women", source: "World Bank", href: "https://www.worldbank.org/en/topic/gender/overview" },
-    { value: "2/3", label: "Of illiterate adults are women", source: "UNESCO", href: "https://www.unesco.org/en/gender-equality/education" },
-    { value: "26%", label: "Of parliamentary seats held by women", source: "IPU 2024", href: "https://data.ipu.org/women-ranking" },
+    {
+      value: "1 in 3",
+      label: "Women experience physical or sexual violence in their lifetime",
+      source: "WHO 2021",
+      href: "https://www.who.int/news-room/fact-sheets/detail/violence-against-women",
+      color: "from-red-500/10 to-transparent border-red-400/20 hover:border-red-400/50",
+      textColor: "text-red-400",
+    },
+    {
+      value: "70%",
+      label: "Of the world's extreme poor are women",
+      source: "World Bank",
+      href: "https://www.worldbank.org/en/topic/gender/overview",
+      color: "from-orange-500/10 to-transparent border-orange-400/20 hover:border-orange-400/50",
+      textColor: "text-orange-400",
+    },
+    {
+      value: "2/3",
+      label: "Of illiterate adults worldwide are women",
+      source: "UNESCO",
+      href: "https://www.unesco.org/en/gender-equality/education",
+      color: "from-yellow-500/10 to-transparent border-yellow-400/20 hover:border-yellow-400/50",
+      textColor: "text-yellow-400",
+    },
+    {
+      value: "26%",
+      label: "Of parliamentary seats are held by women globally",
+      source: "IPU 2024",
+      href: "https://data.ipu.org/women-ranking",
+      color: "from-purple-500/10 to-transparent border-purple-400/20 hover:border-purple-400/50",
+      textColor: "text-purple-400",
+    },
+    {
+      value: "$172T",
+      label: "Estimated lost global wealth from gender inequality",
+      source: "World Bank 2023",
+      href: "https://www.worldbank.org/en/news/press-release/2023/09/14/gender-equality-could-add-172-trillion-dollars-to-global-wealth",
+      color: "from-pink-500/10 to-transparent border-pink-400/20 hover:border-pink-400/50",
+      textColor: "text-pink-400",
+    },
+    {
+      value: "4.4yrs",
+      label: "Time to close the global gender gap at current pace",
+      source: "WEF 2024",
+      href: "https://www.weforum.org/reports/global-gender-gap-report-2024/",
+      color: "from-accent/10 to-transparent border-accent/20 hover:border-accent/50",
+      textColor: "text-accent",
+    },
   ];
 
   const pillars = [
@@ -129,24 +173,36 @@ const Index = () => {
         </div>
       </section>
 
-      {/* STATS */}
+      {/* STATS — The scale of the problem */}
       <section id="mission" className="py-20 border-y border-border/40 bg-card/30">
         <div className="container">
-          <p className="text-center text-sm uppercase tracking-widest text-muted-foreground mb-12">The scale of the problem</p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="text-center mb-12">
+            <p className="text-sm uppercase tracking-widest text-muted-foreground mb-3">The scale of the problem</p>
+            <p className="text-muted-foreground max-w-xl mx-auto text-sm">
+              Every statistic below is sourced directly from UN, World Bank or WHO research.
+              Click any tile to read the primary source.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-5 max-w-5xl mx-auto">
             {stats.map((s) => (
-              <div key={s.label} className="text-center">
-                <div className="text-4xl md:text-5xl font-bold text-gradient mb-3">{s.value}</div>
-                <div className="text-sm text-muted-foreground mb-2">{s.label}</div>
-                <a
-                  href={s.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-muted-foreground/50 hover:text-accent underline underline-offset-2 transition-smooth"
-                >
-                  {s.source} ↗
-                </a>
-              </div>
+              <a
+                key={s.label}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`group bg-gradient-to-b ${s.color} border rounded-2xl p-6 shadow-card transition-all duration-200 hover:-translate-y-0.5 block`}
+              >
+                <div className={`text-5xl md:text-6xl font-bold ${s.textColor} mb-3 leading-none group-hover:scale-105 transition-transform duration-200`}>
+                  {s.value}
+                </div>
+                <div className="text-sm text-muted-foreground leading-snug mb-4">
+                  {s.label}
+                </div>
+                <div className={`inline-flex items-center gap-1.5 text-xs font-medium ${s.textColor} opacity-60 group-hover:opacity-100 transition-opacity`}>
+                  <ExternalLink className="h-3 w-3" />
+                  {s.source}
+                </div>
+              </a>
             ))}
           </div>
         </div>

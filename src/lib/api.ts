@@ -141,7 +141,7 @@ export const api = {
   lifepath: (iso: string) => apiFetch<Lifepath>(`/v1/lifepath/${iso}`),
 
   signals: {
-    latest: () => apiFetch<IndexScore[]>('/v1/signals/latest?limit=10'),
+    latest: (limit = 50) => apiFetch<IndexScore[]>(`/v1/signals/latest?limit=${limit}`),
     topMovers: () => apiFetch<IndexScore[]>('/v1/signals/top-movers?limit=5'),
   },
 

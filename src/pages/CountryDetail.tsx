@@ -5,8 +5,8 @@ import { api, CountryWEI } from "@/lib/api";
 import { Nav } from "@/components/Nav";
 import { Button } from "@/components/ui/button";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, ReferenceLine
+  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, ReferenceLine, LabelList, Cell
 } from "recharts";
 import {
   ArrowLeft, BarChart2, TrendingUp, TrendingDown,
@@ -289,13 +289,19 @@ export default function CountryDetail() {
       <main className="pt-24 pb-20 container max-w-6xl">
 
         {/* BACK NAVIGATION */}
-        <div className="mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <button
             onClick={() => navigate(-1)}
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-4 w-4" /> Back
           </button>
+          <Link
+            to={`/compare?countries=${iso}`}
+            className="flex items-center gap-1.5 text-xs text-accent hover:text-accent/80 border border-accent/30 hover:border-accent/60 bg-accent/5 hover:bg-accent/10 rounded-lg px-3 py-1.5 transition-smooth"
+          >
+            <BarChart2 className="h-3.5 w-3.5" /> Compare with another country
+          </Link>
         </div>
 
         {loadingCountry ? (
@@ -412,8 +418,91 @@ export default function CountryDetail() {
             <section className="mb-10">
               <h2 className="text-xl font-bold mb-2">8 Pillar Breakdown</h2>
               <p className="text-xs text-muted-foreground mb-5 flex items-center gap-1">
-                <Info className="h-3 w-3" /> Hover any pillar to see global comparison and improvement lever
+                <Info className="h-3 w-3" /> Hover any pillar card to see improvement lever · gold bar = {country.country} · grey = global average
               </p>
+
+              {/* ── Horizontal comparison bar chart ── */}
+              {(() => {
+                const barData = PILLAR_COLS.map((col) => ({
+                  pillar: col.label.replace(" & ", "/").replace("& ", "/"),
+                  score:  Math.round(((country[col.key] as number) ?? 0) * 10) / 10,
+                  avg:    col.globalAvg,
+                  color:  col.color,
+                }));
+                return (
+                  <div className="bg-gradient-card border border-border/40 rounded-2xl p-5 shadow-card mb-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-sm font-semibold">Score vs. Global Average — All 8 Pillars</h3>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1.5">
+                          <span className="w-3 h-1.5 bg-amber-400 rounded-full inline-block" />
+                          {country.country}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <span className="w-3 h-1.5 rounded-full inline-block bg-muted/60" />
+                          Global avg
+                        </span>
+                      </div>
+                    </div>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart
+                        layout="vertical"
+                        data={barData}
+                        margin={{ top: 0, right: 52, left: 0, bottom: 0 }}
+                        barGap={3}
+                        barCategoryGap="28%"
+                      >
+                        <XAxis
+                          type="number"
+                          domain={[0, 100]}
+                          tick={{ fontSize: 10, fill: "hsl(260 15% 50%)" }}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <YAxis
+                          type="category"
+                          dataKey="pillar"
+                          tick={{ fontSize: 11, fill: "hsl(260 15% 70%)" }}
+                          width={90}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(260 30% 18%)" />
+                        <Tooltip
+                          contentStyle={{
+                            background: "hsl(260 35% 9%)",
+                            border: "1px solid hsl(260 30% 20%)",
+                            borderRadius: 8,
+                            fontSize: 11,
+                          }}
+                          formatter={(v: number, name: string) => [`${v.toFixed(1)} / 100`, name]}
+                          cursor={{ fill: "hsl(260 30% 14%)" }}
+                        />
+                        <Bar dataKey="score" name={country.country} radius={[0, 4, 4, 0]} maxBarSize={14}>
+                          {barData.map((entry) => (
+                            <Cell key={entry.pillar} fill="#f59e0b" fillOpacity={0.9} />
+                          ))}
+                          <LabelList
+                            dataKey="score"
+                            position="right"
+                            style={{ fill: "#f59e0b", fontSize: 11, fontWeight: 600 }}
+                            formatter={(v: number) => v.toFixed(1)}
+                          />
+                        </Bar>
+                        <Bar dataKey="avg" name="Global avg" radius={[0, 4, 4, 0]} maxBarSize={14} fill="hsl(260 30% 30%)">
+                          <LabelList
+                            dataKey="avg"
+                            position="right"
+                            style={{ fill: "hsl(260 15% 55%)", fontSize: 10 }}
+                            formatter={(v: number) => v.toFixed(0)}
+                          />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                );
+              })()}
+
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {PILLAR_COLS.map((col) => (
                   <PillarCard

@@ -86,6 +86,8 @@ interface WorldMapProps {
   scoreOverride?: Map<string, number>;
   /** Index name shown in the tooltip, e.g. "SVI". Defaults to "WEI". */
   indexLabel?: string;
+  /** Map canvas height in px. Default 500. */
+  mapHeight?: number;
 }
 
 export function WorldMap({
@@ -94,6 +96,7 @@ export function WorldMap({
   onSelect,
   scoreOverride,
   indexLabel = "WEI",
+  mapHeight = 500,
 }: WorldMapProps) {
   const navigate = useNavigate();
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
@@ -200,7 +203,7 @@ export function WorldMap({
         <ComposableMap
           projection="geoMercator"
           projectionConfig={{ scale: 138, center: [10, 18] }}
-          height={500}
+          height={mapHeight}
           style={{ width: "100%", height: "auto" }}
         >
           <ZoomableGroup zoom={1} minZoom={0.7} maxZoom={8}>

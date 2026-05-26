@@ -113,6 +113,27 @@ const WEI_DIST_KEYS: Array<{ key: keyof CountryWEI; label: string }> = [
   { key: "safety_justice_score", label: "Safety" },
 ];
 
+/* ── Relative time helper ── */
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins  = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days  = Math.floor(diff / 86400000);
+  if (mins < 60)  return `${mins}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days === 1) return "yesterday";
+  if (days < 7)  return `${days} days ago`;
+  return `${Math.floor(days / 7)}w ago`;
+}
+
+/* ── Side-list item type ── */
+interface SideListItem {
+  iso: string;
+  country: string;
+  score: number;
+  weiData: CountryWEI | null;
+}
+
 /* ── Kernel density estimate (Gaussian, unnormalised) ── */
 function computeKDE(values: number[], bandwidth = 9): number[] {
   const n = values.length;
@@ -242,6 +263,27 @@ export default function Dashboard() {
     return scoreOverride?.get(selectedCountry.iso_code) ?? null;
   }, [selectedCountry, isWEI, scoreOverride]);
 
+  /* ── Side list for the map view (country ranked tiles) ── */
+  const sideListItems = useMemo<SideListItem[]>(() => {
+    if (isWEI) {
+      return [...countries]
+        .sort((a, b) => a.rank - b.rank)
+        .slice(0, 30)
+        .map((c) => ({ iso: c.iso_code, country: c.country, score: c.wei_score, weiData: c }));
+    }
+    if (!activeIndexData?.length) return [];
+    const weiMap = new Map(countries.map((c) => [c.iso_code, c]));
+    return [...activeIndexData]
+      .map((r) => {
+        const iso   = String(r.iso_code ?? "").toUpperCase();
+        const score = (r[idxConf.scoreField] as number | undefined) ?? (r.score as number | undefined) ?? 0;
+        return { iso, country: String(r.country ?? iso), score, weiData: weiMap.get(iso) ?? null };
+      })
+      .filter((r) => r.iso && r.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 30);
+  }, [isWEI, countries, activeIndexData, idxConf.scoreField]);
+
   /* ── Table filtering / sorting ── */
   const filtered = countries
     .filter(
@@ -295,11 +337,16 @@ export default function Dashboard() {
                 )}
                 <span className="text-muted-foreground font-normal text-xl ml-2">/ 100</span>
               </h1>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
                 Women's Empowerment Index ·{" "}
                 {new Date(summary?.last_updated ?? Date.now()).toLocaleDateString("en-US", {
                   month: "long", year: "numeric",
                 })}
+                {summary?.last_updated && (
+                  <span className="inline-flex items-center gap-1 bg-emerald-400/10 text-emerald-400 border border-emerald-400/20 px-2 py-0.5 rounded-full font-medium text-[10px]">
+                    ↻ data refreshed {timeAgo(summary.last_updated)}
+                  </span>
+                )}
               </p>
             </div>
 
@@ -450,14 +497,87 @@ export default function Dashboard() {
 
             /* ─────────── MAP VIEW ─────────── */
             <>
-              {/* Map — passes scoreOverride when a non-WEI index is active */}
-              <WorldMap
-                countries={countries}
-                selectedIso={selectedCountry?.iso_code}
-                onSelect={setSelectedCountry}
-                scoreOverride={scoreOverride}
-                indexLabel={isWEI ? "WEI" : selectedIndex}
-              />
+              {/* Map (left, 65%) + Country ranking tiles (right, 35%) */}
+              <div className="grid xl:grid-cols-12 gap-5 items-start">
+
+                {/* Map column */}
+                <div className="xl:col-span-8">
+                  <WorldMap
+                    countries={countries}
+                    selectedIso={selectedCountry?.iso_code}
+                    onSelect={setSelectedCountry}
+                    scoreOverride={scoreOverride}
+                    indexLabel={isWEI ? "WEI" : selectedIndex}
+                    mapHeight={420}
+                  />
+                </div>
+
+                {/* Country ranking side list */}
+                <div className="xl:col-span-4">
+                  <div className="bg-gradient-card border border-border/40 rounded-2xl overflow-hidden shadow-card">
+                    <div className="px-4 py-3 border-b border-border/20 flex items-center justify-between">
+                      <h3 className="text-sm font-semibold">
+                        {isWEI ? "Country Rankings" : `${selectedIndex} Rankings`}
+                      </h3>
+                      {loadingIndex && !isWEI && (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                      )}
+                      {!loadingIndex && (
+                        <span className="text-xs text-muted-foreground">{sideListItems.length} shown</span>
+                      )}
+                    </div>
+
+                    <div className="overflow-y-auto" style={{ maxHeight: "420px" }}>
+                      {sideListItems.length === 0 && !loadingIndex && (
+                        <div className="py-8 text-center text-xs text-muted-foreground">
+                          {isWEI ? "No data" : `No ${selectedIndex} data loaded`}
+                        </div>
+                      )}
+                      {sideListItems.map((item, i) => {
+                        const isSelected = item.iso === selectedCountry?.iso_code;
+                        const pct = Math.max(0, Math.min(100, item.score));
+                        const col = item.score >= 70 ? "#10b981" : item.score >= 45 ? "#eab308" : "#ef4444";
+                        return (
+                          <div
+                            key={item.iso}
+                            onClick={() => item.weiData && setSelectedCountry(item.weiData)}
+                            className={`flex items-center gap-2.5 px-4 py-2.5 border-b border-border/10 text-xs transition-smooth
+                              ${item.weiData ? "cursor-pointer hover:bg-card/60" : "cursor-default opacity-60"}
+                              ${isSelected ? "bg-amber-400/10" : ""}`}
+                          >
+                            <span className="w-5 text-right text-muted-foreground/60 shrink-0 tabular-nums">{i + 1}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium truncate leading-snug">{item.country}</div>
+                              <div className="h-1 bg-muted rounded-full mt-1 overflow-hidden">
+                                <div
+                                  className="h-full rounded-full transition-all duration-500"
+                                  style={{ width: `${pct}%`, backgroundColor: col }}
+                                />
+                              </div>
+                            </div>
+                            <span className="font-bold tabular-nums shrink-0 text-[11px]" style={{ color: col }}>
+                              {item.score.toFixed(1)}
+                            </span>
+                            {isSelected && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Compare CTA */}
+                    <div className="px-4 py-3 border-t border-border/20">
+                      <Link
+                        to="/compare"
+                        className="flex items-center justify-center gap-1.5 text-xs text-accent hover:text-accent/80 transition-smooth font-medium"
+                      >
+                        Compare countries side-by-side <ArrowRight className="h-3 w-3" />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               {/* ── Distribution + Selected country panel ── */}
               <div className="mt-6 grid md:grid-cols-5 gap-5">

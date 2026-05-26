@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { WorldMap } from "@/components/WorldMap";
 import {
-  LineChart, Line, BarChart, Bar, Cell, LabelList,
+  BarChart, Bar, Cell, LabelList,
   XAxis, YAxis, Tooltip as ReTooltip,
-  ResponsiveContainer, ReferenceLine,
+  ResponsiveContainer,
 } from "recharts";
 import {
   ArrowRight, ArrowUpDown, TrendingUp, TrendingDown,
@@ -576,34 +576,66 @@ export default function Dashboard() {
             <div className="flex gap-2 overflow-x-auto px-2 py-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {INDEX_CONFIGS.map((idx) => {
                 const isActive = selectedIndex === idx.label;
+                const isNative = idx.label === "WEI";
                 return (
-                  <button
-                    key={idx.label}
-                    onClick={() => setSelectedIndex(idx.label)}
-                    title={
-                      indexGlobalAvgs[idx.label] != null
-                        ? `${idx.desc} (${idx.label}) · global average: ${indexGlobalAvgs[idx.label]!.toFixed(1)}`
-                        : `${idx.desc} (${idx.label}) · global average loading…`
-                    }
-                    className={`flex-1 min-w-[105px] border rounded-xl px-3 py-2.5 text-xs text-left transition-all duration-200 ${idx.tailwind} ${
-                      isActive
-                        ? "ring-2 ring-current ring-offset-2 ring-offset-background shadow-lg opacity-100"
-                        : "opacity-55 hover:opacity-80 hover:scale-[1.01] cursor-pointer"
-                    }`}
-                  >
-                    <div className="font-bold text-base flex items-center gap-1.5">
-                      {idx.label}
-                      {isActive && !isWEI && loadingIndex && (
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                      )}
-                    </div>
-                    <div className="font-semibold text-lg leading-tight mt-0.5">
-                      {indexGlobalAvgs[idx.label] != null
-                        ? indexGlobalAvgs[idx.label]!.toFixed(1)
-                        : "—"}
-                    </div>
-                    <div className="opacity-80 whitespace-nowrap mt-0.5 text-[11px]">{idx.desc}</div>
-                  </button>
+                  <div key={idx.label} className="relative flex-1 min-w-[105px] group/idx">
+                    <button
+                      onClick={() => setSelectedIndex(idx.label)}
+                      className={`w-full border rounded-xl px-3 py-2.5 text-xs text-left transition-all duration-200 ${
+                        isNative
+                          ? "border-amber-400/60 bg-amber-400/8 text-amber-400"
+                          : idx.tailwind
+                      } ${
+                        isActive
+                          ? "ring-2 ring-current ring-offset-2 ring-offset-background shadow-lg opacity-100"
+                          : "opacity-55 hover:opacity-80 hover:scale-[1.01] cursor-pointer"
+                      }`}
+                    >
+                      <div className="font-bold text-base flex items-center gap-1.5">
+                        {idx.label}
+                        {isNative && (
+                          <span className="text-[9px] font-semibold px-1 py-0.5 rounded bg-amber-400/20 text-amber-400 leading-none tracking-wide">
+                            NATIVE
+                          </span>
+                        )}
+                        {isActive && !isWEI && loadingIndex && (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        )}
+                      </div>
+                      <div className="font-semibold text-lg leading-tight mt-0.5">
+                        {indexGlobalAvgs[idx.label] != null
+                          ? indexGlobalAvgs[idx.label]!.toFixed(1)
+                          : "—"}
+                      </div>
+                      <div className="opacity-80 whitespace-nowrap mt-0.5 text-[11px]">{idx.desc}</div>
+                    </button>
+
+                    {/* WEI methodology tooltip — shown on hover */}
+                    {isNative && (
+                      <div className="absolute left-0 top-full mt-2 z-50 w-72 hidden group-hover/idx:block">
+                        <div className="bg-card border border-amber-400/30 rounded-xl p-3.5 shadow-xl text-xs">
+                          <p className="font-bold text-amber-400 mb-2">WEI Formula</p>
+                          <div className="space-y-1 text-muted-foreground font-mono text-[10px] leading-relaxed">
+                            <div className="flex justify-between"><span>Empowerment</span><span className="text-amber-400">×15%</span></div>
+                            <div className="flex justify-between"><span>Bodily Autonomy</span><span className="text-amber-400">×15%</span></div>
+                            <div className="flex justify-between"><span>Safety &amp; Justice</span><span className="text-amber-400">×14%</span></div>
+                            <div className="flex justify-between"><span>Education</span><span className="text-amber-400">×12%</span></div>
+                            <div className="flex justify-between"><span>Economic</span><span className="text-amber-400">×12%</span></div>
+                            <div className="flex justify-between"><span>Health</span><span className="text-amber-400">×12%</span></div>
+                            <div className="flex justify-between"><span>Dignity &amp; Welfare</span><span className="text-amber-400">×10%</span></div>
+                            <div className="flex justify-between"><span>Digital &amp; Social</span><span className="text-amber-400">×10%</span></div>
+                            <div className="flex justify-between border-t border-border/30 pt-1 mt-1 text-red-400">
+                              <span>− Violence Penalty</span><span>×10%</span>
+                            </div>
+                          </div>
+                          <p className="text-muted-foreground/60 text-[9px] mt-2">
+                            All sub-scores normalised 0–100. WEI = SHEtoken's native index.
+                            The 7 cards to the right are external comparison indexes.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>
@@ -856,120 +888,67 @@ export default function Dashboard() {
                     )}
                   </p>
 
-                  <div className="flex-1 min-h-0" style={{ minHeight: 180 }}>
-                  {activeDistData.length === 0 ? (
-                    <div className="flex items-center justify-center h-full text-muted-foreground text-xs">
-                      {!isWEI && loadingIndex ? "Loading distribution…" : "No score data available"}
-                    </div>
-                  ) : (
-                  /* key forces full unmount+remount on index switch, avoiding Recharts
-                     animation interpolation crash when data shape changes (e.g. 8 curves → 1) */
-                  <ResponsiveContainer key={selectedIndex} width="100%" height="100%">
-                    <LineChart data={activeDistData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
-                      <XAxis
-                        dataKey="x"
-                        type="number"
-                        domain={[0, 100]}
-                        tick={{ fontSize: 10, fill: "hsl(260 15% 50%)" }}
-                        tickLine={false}
-                        axisLine={false}
-                        tickFormatter={(v) => `${v}`}
-                        label={{
-                          value: "Score (0 – 100) →",
-                          position: "insideBottomRight",
-                          offset: -4,
-                          fontSize: 9,
-                          fill: "hsl(260 15% 45%)",
-                        }}
-                      />
-                      <YAxis hide domain={[0, "auto"]} />
+                  {/* Pure SVG KDE chart — no Recharts, no internal scale crashes */}
+                  {(() => {
+                    if (activeDistData.length === 0) {
+                      return (
+                        <div className="flex items-center justify-center h-full text-muted-foreground text-xs" style={{ minHeight: 180 }}>
+                          {!isWEI && loadingIndex ? "Loading distribution…" : "No score data available"}
+                        </div>
+                      );
+                    }
+                    const VW = 500, VH = 160;
+                    const pad = { l: 4, r: 4, t: 8, b: 20 };
+                    const cw = VW - pad.l - pad.r;
+                    const ch = VH - pad.t - pad.b;
 
-                      {/* Selected country reference line */}
-                      {selectedCountry && selectedIndexScore != null && (
-                        <ReferenceLine
-                          x={Math.round(selectedIndexScore)}
-                          stroke="#f59e0b"
-                          strokeWidth={2}
-                          strokeDasharray="5 3"
-                          label={{
-                            value: selectedCountry.iso_code,
-                            position: "top",
-                            fill: "#f59e0b",
-                            fontSize: 10,
-                            fontWeight: 600,
-                          }}
-                        />
-                      )}
+                    const allVals = activeDistData.flatMap(pt =>
+                      activeDistPillars.map(p => (pt[p.label] as number) ?? 0)
+                    );
+                    const maxVal = Math.max(...allVals, 0.001);
 
-                      <ReTooltip
-                        content={({ active, payload, label }) => {
-                          if (!active || !payload?.length || label == null) return null;
-                          const score = Number(label);
+                    const sx = (score: number) => pad.l + (score / 100) * cw;
+                    const sy = (v: number)     => pad.t + ch - (v / maxVal) * ch;
 
-                          // Build a flat list of { name, iso, s } for the active index
-                          type CountryPoint = { name: string; iso: string; s: number };
-                          const pts: CountryPoint[] = isWEI
-                            ? countries.map((c) => ({ name: c.country, iso: c.iso_code, s: c.wei_score }))
-                            : (activeIndexData ?? [])
-                                .map((r) => ({
-                                  name: String(r.country ?? r.iso_code ?? ""),
-                                  iso: String(r.iso_code ?? ""),
-                                  s: ((r[idxConf.scoreField] as number | undefined) ??
-                                      (r.score as number | undefined) ?? 0),
-                                }))
-                                .filter((r) => r.s > 0);
+                    const toPolyline = (label: string) =>
+                      activeDistData
+                        .map(pt => `${sx(pt.x as number).toFixed(1)},${sy((pt[label] as number) ?? 0).toFixed(1)}`)
+                        .join(" ");
 
-                          // 5 nearest countries to the hovered score
-                          const near = [...pts]
-                            .sort((a, b) => Math.abs(a.s - score) - Math.abs(b.s - score))
-                            .slice(0, 5);
-
-                          return (
-                            <div style={{ background: "hsl(260 35% 9%)", border: "1px solid hsl(260 30% 20%)", borderRadius: 8, padding: "9px 13px", fontSize: 11, maxWidth: 230 }}>
-                              <p style={{ color: "hsl(40 30% 96%)", fontWeight: 700, marginBottom: 5 }}>
-                                Score ≈ {score}
-                              </p>
-                              {payload.map((p) => (
-                                <p key={String(p.dataKey)} style={{ color: String(p.stroke ?? p.color), marginBottom: 2 }}>
-                                  {String(p.name)}: {((Number(p.value)) * 100).toFixed(1)}% density
-                                </p>
-                              ))}
-                              {near.length > 0 && (
-                                <>
-                                  <div style={{ borderTop: "1px solid hsl(260 30% 22%)", margin: "6px 0 5px" }} />
-                                  <p style={{ color: "hsl(260 15% 55%)", fontSize: 10, marginBottom: 4 }}>
-                                    Countries near this score:
-                                  </p>
-                                  {near.map((c) => (
-                                    <p key={c.iso} style={{ color: "hsl(40 30% 85%)", marginBottom: 2 }}>
-                                      {c.name}{" "}
-                                      <span style={{ color: "hsl(260 15% 55%)" }}>({c.s.toFixed(1)})</span>
-                                    </p>
-                                  ))}
-                                </>
-                              )}
-                            </div>
-                          );
-                        }}
-                      />
-
-                      {activeDistPillars.map((p) => (
-                        <Line
-                          key={p.label}
-                          type="monotone"
-                          dataKey={p.label}
-                          stroke={p.color}
-                          strokeWidth={p.width}
-                          dot={false}
-                          isAnimationActive={false}
-                          strokeOpacity={isWEI && p.label !== "WEI" ? 0.55 : 1}
-                          name={p.label}
-                          activeDot={false}
-                        />
-                      ))}
-                    </LineChart>
-                  </ResponsiveContainer>
-                  )}
+                    return (
+                      <svg viewBox={`0 0 ${VW} ${VH}`} preserveAspectRatio="none"
+                           width="100%" style={{ minHeight: 180, display: "block" }}>
+                        {/* baseline */}
+                        <line x1={pad.l} y1={pad.t + ch} x2={VW - pad.r} y2={pad.t + ch}
+                              stroke="hsl(260 15% 22%)" strokeWidth={0.5} />
+                        {/* curves */}
+                        {activeDistPillars.map(p => (
+                          <polyline key={p.label} points={toPolyline(p.label)}
+                            stroke={p.color} strokeWidth={p.width * 0.7} fill="none"
+                            strokeOpacity={isWEI && p.label !== "WEI" ? 0.5 : 1} />
+                        ))}
+                        {/* selected country reference line */}
+                        {selectedCountry && selectedIndexScore != null && (
+                          <g>
+                            <line x1={sx(selectedIndexScore)} y1={pad.t}
+                                  x2={sx(selectedIndexScore)} y2={pad.t + ch}
+                                  stroke="#f59e0b" strokeWidth={1.5} strokeDasharray="5 3" />
+                            <text x={sx(selectedIndexScore)} y={pad.t - 2}
+                                  textAnchor="middle" fontSize={8} fontWeight={700} fill="#f59e0b">
+                              {selectedCountry.iso_code}
+                            </text>
+                          </g>
+                        )}
+                        {/* x-axis labels */}
+                        {[0, 25, 50, 75, 100].map(v => (
+                          <text key={v} x={sx(v)} y={VH - 4} textAnchor="middle"
+                                fontSize={8} fill="hsl(260 15% 48%)">{v}</text>
+                        ))}
+                        <text x={VW - pad.r} y={VH - 4} textAnchor="end"
+                              fontSize={7} fill="hsl(260 15% 38%)">Score →</text>
+                      </svg>
+                    );
+                  })()}
                   </div>
 
                   {/* Legend */}

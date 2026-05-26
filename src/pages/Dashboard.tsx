@@ -8,11 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { WorldMap } from "@/components/WorldMap";
 import {
-  BarChart, Bar, Cell, LabelList,
-  XAxis, YAxis, Tooltip as ReTooltip,
-  ResponsiveContainer,
-} from "recharts";
-import {
   ArrowRight, ArrowUpDown, TrendingUp, TrendingDown,
   Search, Globe2, Sparkles, AlertCircle, Map, List, X, Loader2,
   Activity, Zap,
@@ -975,51 +970,33 @@ export default function Dashboard() {
                     How countries are distributed across the four WEI investment tiers.
                   </p>
 
-                  <div className="flex-1 min-h-0" style={{ minHeight: 180 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={tierDistData}
-                      layout="vertical"
-                      margin={{ top: 4, right: 56, left: 4, bottom: 4 }}
-                    >
-                      <XAxis type="number" hide domain={[0, "dataMax + 8"]} />
-                      <YAxis
-                        type="category"
-                        dataKey="label"
-                        width={128}
-                        tick={{ fontSize: 11, fill: "hsl(260 15% 60%)" }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <ReTooltip
-                        cursor={{ fill: "hsl(260 30% 20% / 0.3)" }}
-                        content={({ active, payload }) => {
-                          if (!active || !payload?.length) return null;
-                          const d = payload[0].payload as { label: string; count: number; color: string };
-                          const total = tierDistData.reduce((s, t) => s + t.count, 0);
-                          const pct = total > 0 ? ((d.count / total) * 100).toFixed(1) : "0";
-                          return (
-                            <div style={{ background: "hsl(260 35% 9%)", border: "1px solid hsl(260 30% 20%)", borderRadius: 8, padding: "8px 12px", fontSize: 11 }}>
-                              <p style={{ color: d.color, fontWeight: 700, marginBottom: 4 }}>{d.label}</p>
-                              <p style={{ color: "hsl(40 30% 85%)" }}>{d.count} countries</p>
-                              <p style={{ color: "hsl(260 15% 60%)", marginTop: 2 }}>{pct}% of all scored countries</p>
+                  {/* Pure CSS horizontal bars — no Recharts, no crashes */}
+                  <div className="flex flex-col gap-4 flex-1 justify-center" style={{ minHeight: 180 }}>
+                    {(() => {
+                      const maxCount = Math.max(...tierDistData.map(t => t.count), 1);
+                      const total    = tierDistData.reduce((s, t) => s + t.count, 0);
+                      return tierDistData.map((tier) => {
+                        const barPct  = (tier.count / maxCount) * 100;
+                        const ofTotal = total > 0 ? ((tier.count / total) * 100).toFixed(1) : "0";
+                        return (
+                          <div key={tier.label}>
+                            <div className="flex items-center justify-between mb-1.5">
+                              <span className="text-xs text-muted-foreground">{tier.label}</span>
+                              <span className="text-xs font-bold tabular-nums" style={{ color: tier.color }}>
+                                {tier.count}
+                                <span className="text-muted-foreground font-normal ml-1">({ofTotal}%)</span>
+                              </span>
                             </div>
-                          );
-                        }}
-                      />
-                      <Bar dataKey="count" radius={[0, 6, 6, 0]} barSize={30}>
-                        {tierDistData.map((entry) => (
-                          <Cell key={entry.label} fill={entry.color} fillOpacity={0.85} />
-                        ))}
-                        <LabelList
-                          dataKey="count"
-                          position="right"
-                          formatter={(v: number) => `${v}`}
-                          style={{ fontSize: 12, fontWeight: 700, fill: "hsl(40 30% 80%)" }}
-                        />
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
+                            <div className="h-7 rounded-lg overflow-hidden" style={{ background: "hsl(260 15% 14%)" }}>
+                              <div
+                                className="h-full rounded-lg transition-all duration-700"
+                                style={{ width: `${barPct}%`, backgroundColor: tier.color, opacity: 0.85 }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
                   </div>
 
                   {/* Tier legend */}

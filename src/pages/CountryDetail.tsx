@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueries } from "@tanstack/react-query";
 import { api, CountryWEI } from "@/lib/api";
 import { Nav } from "@/components/Nav";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import { PerformanceSource } from "@/lib/api";
 /* ── Pillar definitions with global-average and improvement lever ── */
 const PILLAR_COLS: Array<{
   key: keyof CountryWEI;
+  code: string;          // short WEI sub-pillar code shown on the card
   label: string;
   description: string;
   color: string;
@@ -24,7 +25,7 @@ const PILLAR_COLS: Array<{
   improvement: string;
 }> = [
   {
-    key: "empowerment_score",
+    key: "empowerment_score", code: "EMP",
     label: "Empowerment",
     description: "Parliamentary seats, ministerial roles, legal rights",
     color: "text-purple-400",
@@ -32,7 +33,7 @@ const PILLAR_COLS: Array<{
     improvement: "Increasing women in parliament and cabinet, strengthening property and inheritance laws.",
   },
   {
-    key: "education_score",
+    key: "education_score", code: "EDU",
     label: "Education",
     description: "Literacy, enrollment, STEM, menstrual barriers",
     color: "text-blue-400",
@@ -40,7 +41,7 @@ const PILLAR_COLS: Array<{
     improvement: "Eliminating menstrual barriers to school attendance, expanding girls' STEM pathways.",
   },
   {
-    key: "economic_score",
+    key: "economic_score", code: "ECO",
     label: "Economic",
     description: "Pay gap, formal employment, banking access, property rights",
     color: "text-yellow-400",
@@ -48,7 +49,7 @@ const PILLAR_COLS: Array<{
     improvement: "Equal pay legislation, expanding women's banking access and formal employment.",
   },
   {
-    key: "health_score",
+    key: "health_score", code: "HLT",
     label: "Health & Survival",
     description: "Maternal mortality, life expectancy, anaemia",
     color: "text-pink-400",
@@ -56,7 +57,7 @@ const PILLAR_COLS: Array<{
     improvement: "Reducing maternal mortality through skilled birth attendance and pre-natal care.",
   },
   {
-    key: "safety_justice_score",
+    key: "safety_justice_score", code: "SAF",
     label: "Safety & Justice",
     description: "DV laws, femicide, honour-based violence, legal aid",
     color: "text-red-400",
@@ -64,7 +65,7 @@ const PILLAR_COLS: Array<{
     improvement: "Enforcing domestic violence legislation, improving reporting rates and prosecution.",
   },
   {
-    key: "bodily_autonomy_score",
+    key: "bodily_autonomy_score", code: "AUT",
     label: "Bodily Autonomy",
     description: "Reproductive rights, child marriage, FGM, period poverty",
     color: "text-orange-400",
@@ -72,7 +73,7 @@ const PILLAR_COLS: Array<{
     improvement: "Ending child marriage, expanding reproductive healthcare access, addressing FGM.",
   },
   {
-    key: "dignity_welfare_score",
+    key: "dignity_welfare_score", code: "DIG",
     label: "Dignity & Welfare",
     description: "Widow rights, caregiver burden, food insecurity, mental health",
     color: "text-emerald-400",
@@ -80,7 +81,7 @@ const PILLAR_COLS: Array<{
     improvement: "Protecting widow property rights, reducing unpaid caregiver burden on women.",
   },
   {
-    key: "digital_social_score",
+    key: "digital_social_score", code: "SOC",
     label: "Digital & Social",
     description: "Online harassment, internet & mobile gender gaps",
     color: "text-cyan-400",
@@ -88,6 +89,17 @@ const PILLAR_COLS: Array<{
     improvement: "Closing the mobile ownership gap, enforcing online harassment accountability.",
   },
 ];
+
+/* ── 8 external SheToken indexes (separate from WEI's internal pillars) ── */
+const INDEX_STRIP = [
+  { code: "GPI",        label: "Gender Poverty",       color: "text-purple-400", accent: "#a855f7", scoreField: "gpi_score",        queryFn: (iso: string) => import("@/lib/api").then(m => m.api.gpi.country(iso)) },
+  { code: "SVI",        label: "Sexual Violence",       color: "text-red-400",    accent: "#ef4444", scoreField: "svi_score",        queryFn: (iso: string) => import("@/lib/api").then(m => m.api.svi.country(iso)) },
+  { code: "WADI",       label: "AI Displacement",       color: "text-blue-400",   accent: "#3b82f6", scoreField: "wadi_score",       queryFn: (iso: string) => import("@/lib/api").then(m => m.api.wadi.country(iso)) },
+  { code: "WEVI",       label: "Widow Vulnerability",   color: "text-orange-400", accent: "#f97316", scoreField: "wevi_score",       queryFn: (iso: string) => import("@/lib/api").then(m => m.api.wevi.country(iso)) },
+  { code: "WHI",        label: "Women's Health",        color: "text-pink-400",   accent: "#ec4899", scoreField: "whi_score",        queryFn: (iso: string) => import("@/lib/api").then(m => m.api.whi.country(iso)) },
+  { code: "WVI",        label: "Women's Voice",         color: "text-cyan-400",   accent: "#06b6d4", scoreField: "wvi_score",        queryFn: (iso: string) => import("@/lib/api").then(m => m.api.wvi.country(iso)) },
+  { code: "Compliance", label: "Rights Compliance",     color: "text-emerald-400",accent: "#10b981", scoreField: "compliance_score", queryFn: (iso: string) => import("@/lib/api").then(m => m.api.compliance.country(iso)) },
+] as const;
 
 /* ── Violence penalty severity thresholds ── */
 function violenceSeverity(score: number): { label: string; color: string; context: string } {
@@ -155,8 +167,9 @@ function performanceBlurb(c: CountryWEI): string {
 
 /* ── Pillar card with inline hover-expand ── */
 function PillarCard({
-  label, description, score, color, globalAvg, improvement,
+  code, label, description, score, color, globalAvg, improvement,
 }: {
+  code: string;
   label: string;
   description: string;
   score: number;
@@ -176,7 +189,12 @@ function PillarCard({
       onMouseEnter={() => setExpanded(true)}
       onMouseLeave={() => setExpanded(false)}
     >
-      <div className={`text-xs font-semibold uppercase tracking-widest ${color} mb-1`}>{label}</div>
+      <div className="flex items-center justify-between mb-1">
+        <div className={`text-xs font-semibold uppercase tracking-widest ${color}`}>{label}</div>
+        <span className={`text-[10px] font-bold font-mono px-1.5 py-0.5 rounded border ${color} border-current bg-current/10`}>
+          {code}
+        </span>
+      </div>
       <div className="text-3xl font-bold mb-2">{score?.toFixed(1) ?? "—"}</div>
       <div className="h-2 bg-muted rounded-full overflow-hidden mb-3">
         <div className={`h-full ${barColor} rounded-full transition-all`} style={{ width: `${pct}%` }} />
@@ -260,6 +278,17 @@ export default function CountryDetail() {
     enabled: !!iso,
     staleTime: 10 * 60 * 1000,
     retry: false,
+  });
+
+  /* ── Fetch all 7 external index scores for this country ── */
+  const indexQueries = useQueries({
+    queries: INDEX_STRIP.map((idx) => ({
+      queryKey: ["index-country", idx.code, iso],
+      queryFn:  () => idx.queryFn(iso!),
+      enabled:  !!iso,
+      staleTime: 10 * 60 * 1000,
+      retry: false,
+    })),
   });
 
   const chartData = history?.history?.map((row) => ({
@@ -350,6 +379,51 @@ export default function CountryDetail() {
                   <span>{tierInfo.desc}</span>
                 </div>
               )}
+            </section>
+
+            {/* 8-INDEX SCORECARD */}
+            <section className="mb-10">
+              <h2 className="text-xl font-bold mb-1">8-Index Scorecard</h2>
+              <p className="text-xs text-muted-foreground mb-4 flex items-center gap-1">
+                <Info className="h-3 w-3" />
+                These are 8 separate SheToken indexes — not WEI sub-pillars. WEI is the composite score.
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+                {/* WEI tile */}
+                <div className="bg-gradient-card border border-amber-400/30 rounded-xl p-3 text-center shadow-card">
+                  <div className="text-[10px] font-bold font-mono text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded px-1.5 py-0.5 inline-block mb-2">WEI</div>
+                  <div className="text-2xl font-bold text-gradient leading-none mb-1">{country.wei_score?.toFixed(1)}</div>
+                  <div className="text-[10px] text-muted-foreground leading-tight">Women's<br />Empowerment</div>
+                </div>
+
+                {/* External index tiles */}
+                {INDEX_STRIP.map((idx, i) => {
+                  const q = indexQueries[i];
+                  const raw = q.data;
+                  const score = raw
+                    ? ((raw[idx.scoreField as keyof typeof raw] as number | undefined) ??
+                       (raw.score as number | undefined))
+                    : null;
+                  return (
+                    <div
+                      key={idx.code}
+                      className="bg-gradient-card border border-border/40 rounded-xl p-3 text-center shadow-card"
+                      style={{ borderColor: `${idx.accent}33` }}
+                    >
+                      <div
+                        className="text-[10px] font-bold font-mono rounded px-1.5 py-0.5 inline-block mb-2 border"
+                        style={{ color: idx.accent, backgroundColor: `${idx.accent}18`, borderColor: `${idx.accent}40` }}
+                      >
+                        {idx.code}
+                      </div>
+                      <div className="text-2xl font-bold leading-none mb-1" style={{ color: idx.accent }}>
+                        {q.isLoading ? "…" : score != null ? score.toFixed(1) : "—"}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground leading-tight">{idx.label}</div>
+                    </div>
+                  );
+                })}
+              </div>
             </section>
 
             {/* PERFORMANCE SUMMARY — SLM blurb when available, template fallback */}
@@ -507,6 +581,7 @@ export default function CountryDetail() {
                 {PILLAR_COLS.map((col) => (
                   <PillarCard
                     key={col.key}
+                    code={col.code}
                     label={col.label}
                     description={col.description}
                     score={(country[col.key] as number) ?? 0}

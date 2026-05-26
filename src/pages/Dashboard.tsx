@@ -94,25 +94,8 @@ const INDEX_CONFIGS: IndexConfig[] = [
 /* ── Distribution curve types ── */
 interface DistPillar { label: string; color: string; width: number; }
 
-// WEI multi-pillar curves (shown when WEI is active)
-const WEI_DIST_PILLARS: DistPillar[] = [
-  { label: "WEI",         color: "#f59e0b", width: 2.5 },
-  { label: "Empowerment", color: "#a855f7", width: 1.5 },
-  { label: "Education",   color: "#3b82f6", width: 1.5 },
-  { label: "Economic",    color: "#eab308", width: 1.5 },
-  { label: "Health",      color: "#ec4899", width: 1.5 },
-  { label: "Safety",      color: "#ef4444", width: 1.5 },
-];
-
-// Which CountryWEI fields drive the WEI KDE curves
-const WEI_DIST_KEYS: Array<{ key: keyof CountryWEI; label: string }> = [
-  { key: "wei_score",            label: "WEI" },
-  { key: "empowerment_score",    label: "Empowerment" },
-  { key: "education_score",      label: "Education" },
-  { key: "economic_score",       label: "Economic" },
-  { key: "health_score",         label: "Health" },
-  { key: "safety_justice_score", label: "Safety" },
-];
+// When WEI is active the KDE shows all 8 external index distributions —
+// one curve per index, derived live from INDEX_CONFIGS + allIndexQueries data.
 
 /* ── Relative time helper ── */
 function timeAgo(dateStr: string): string {
@@ -246,38 +229,76 @@ export default function Dashboard() {
     return map;
   }, [isWEI, selectedIndex, activeIndexData, idxConf.scoreField]);
 
-  /* ── Distribution pillars (what curves appear in the chart) ── */
+  /* ── Distribution pillars — one curve per index (WEI mode = all 8) ── */
   const activeDistPillars = useMemo<DistPillar[]>(() => {
-    if (isWEI) return WEI_DIST_PILLARS;
+    if (isWEI) {
+      // All 8 index curves; only include non-WEI ones whose data has arrived
+      const pillars: DistPillar[] = [
+        { label: "WEI", color: "#f59e0b", width: 2.5 },
+      ];
+      const extras = [
+        { label: "GPI",        q: allIndexQueries[0], color: "#a855f7" },
+        { label: "SVI",        q: allIndexQueries[1], color: "#ef4444" },
+        { label: "WADI",       q: allIndexQueries[2], color: "#3b82f6" },
+        { label: "WEVI",       q: allIndexQueries[3], color: "#f97316" },
+        { label: "WHI",        q: allIndexQueries[4], color: "#ec4899" },
+        { label: "WVI",        q: allIndexQueries[5], color: "#06b6d4" },
+        { label: "Compliance", q: allIndexQueries[6], color: "#10b981" },
+      ] as const;
+      for (const { label, q, color } of extras) {
+        if (q.data && (q.data as IndexScore[]).length > 0)
+          pillars.push({ label, color, width: 1.5 });
+      }
+      return pillars;
+    }
     return [{ label: selectedIndex, color: idxConf.accent, width: 2.5 }];
-  }, [isWEI, selectedIndex, idxConf.accent]);
+  }, [isWEI, selectedIndex, idxConf.accent, allIndexQueries]);
 
   /* ── KDE data for the distribution chart ── */
   const activeDistData = useMemo(() => {
     if (isWEI) {
       if (!countries.length) return [];
-      const kdes = WEI_DIST_KEYS.map(({ key }) =>
-        computeKDE(
-          countries
-            .map((c) => c[key] as number)
-            .filter((v): v is number => v != null && v > 0)
-        )
-      );
+
+      // Build a dataset per index (only those with loaded data)
+      type DS = { label: string; values: number[] };
+      const datasets: DS[] = [
+        { label: "WEI", values: countries.map(c => c.wei_score).filter(v => v > 0) },
+      ];
+
+      const extras = [
+        { label: "GPI",        q: allIndexQueries[0], field: "gpi_score" },
+        { label: "SVI",        q: allIndexQueries[1], field: "svi_score" },
+        { label: "WADI",       q: allIndexQueries[2], field: "wadi_score" },
+        { label: "WEVI",       q: allIndexQueries[3], field: "wevi_score" },
+        { label: "WHI",        q: allIndexQueries[4], field: "whi_score" },
+        { label: "WVI",        q: allIndexQueries[5], field: "wvi_score" },
+        { label: "Compliance", q: allIndexQueries[6], field: "compliance_score" },
+      ];
+      for (const { label, q, field } of extras) {
+        const data = q.data as IndexScore[] | undefined;
+        if (!data?.length) continue;
+        const values = data
+          .map(r => (r[field] as number | undefined) ?? (r.score as number | undefined) ?? 0)
+          .filter(v => v > 0);
+        if (values.length) datasets.push({ label, values });
+      }
+
+      const kdes = datasets.map(({ values }) => computeKDE(values));
       return Array.from({ length: 101 }, (_, i) => {
         const pt: Record<string, number> = { x: i };
-        WEI_DIST_KEYS.forEach(({ label }, j) => { pt[label] = kdes[j][i]; });
+        datasets.forEach(({ label }, j) => { pt[label] = kdes[j][i]; });
         return pt;
       });
     }
 
-    // Non-WEI: single curve from the index data
+    // Non-WEI: single curve from the active index data
     if (!activeIndexData?.length) return [];
     const values = activeIndexData
       .map((r) => (r[idxConf.scoreField] as number | undefined) ?? (r.score as number | undefined))
       .filter((v): v is number => v != null && !isNaN(v) && v > 0);
     const kde = computeKDE(values);
     return Array.from({ length: 101 }, (_, i) => ({ x: i, [selectedIndex]: kde[i] }));
-  }, [isWEI, selectedIndex, countries, activeIndexData, idxConf.scoreField]);
+  }, [isWEI, selectedIndex, countries, activeIndexData, idxConf.scoreField, allIndexQueries]);
 
   /* ── Selected country's score for the active index ── */
   const selectedIndexScore = useMemo<number | null>(() => {
@@ -692,16 +713,16 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between mb-1">
                     <h3 className="text-sm font-semibold">
                       {isWEI
-                        ? `Score Distribution — All ${countries.length} Countries`
+                        ? `8-Index Score Distributions — ${countries.length} Countries`
                         : `${selectedIndex} Distribution — ${activeCountryCount} Countries`}
                     </h3>
                     <span className="text-xs text-muted-foreground hidden sm:block">
-                      KDE curve · peak = most countries
+                      KDE · peak = most countries
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground mb-4">
                     {isWEI
-                      ? "Each curve shows how countries cluster on that measure."
+                      ? "Each curve is one of the 8 SheToken indexes — these are separate scoring systems, not WEI sub-pillars."
                       : `${idxConf.desc} scores (0–100). Higher score = better performance.`}
                     {selectedCountry && selectedIndexScore != null && (
                       <span className="text-amber-400 ml-1">

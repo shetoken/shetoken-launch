@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,13 +27,25 @@ const ORG_TYPES = [
 export default function Profile() {
   const { user, profile, loading } = useAuth();
 
-  const [fullName, setFullName] = useState(profile?.full_name ?? "");
-  const [orgType, setOrgType] = useState(profile?.org_type ?? "");
-  const [company, setCompany] = useState(profile?.company ?? "");
-  const [jobTitle, setJobTitle] = useState(profile?.job_title ?? "");
-  const [country, setCountry] = useState(profile?.country ?? "");
-  const [bio, setBio] = useState(profile?.bio ?? "");
-  const [saving, setSaving] = useState(false);
+  // Initialise form from profile once it loads
+  const [displayName, setDisplayName] = useState("");
+  const [region, setRegion]           = useState("");
+  const [orgType, setOrgType]         = useState("");
+  const [company, setCompany]         = useState("");
+  const [jobTitle, setJobTitle]       = useState("");
+  const [bio, setBio]                 = useState("");
+  const [saving, setSaving]           = useState(false);
+
+  useEffect(() => {
+    if (profile) {
+      setDisplayName(profile.display_name ?? "");
+      setRegion(profile.region ?? "");
+      setOrgType(profile.org_type ?? "");
+      setCompany(profile.company ?? "");
+      setJobTitle(profile.job_title ?? "");
+      setBio(profile.bio ?? "");
+    }
+  }, [profile]);
 
   // Redirect unauthenticated visitors
   if (!loading && !user) return <Navigate to="/" replace />;
@@ -53,24 +65,26 @@ export default function Profile() {
       .from("she_profiles")
       .upsert({
         id: user.id,
-        full_name: fullName,
+        display_name: displayName || null,
         email: user.email,
+        region: region || null,
         org_type: orgType || null,
         company: company || null,
         job_title: jobTitle || null,
-        country: country || null,
         bio: bio || null,
         updated_at: new Date().toISOString(),
       });
     setSaving(false);
     if (error) {
-      toast.error("Failed to save. Please try again.");
+      toast.error("Failed to save — " + error.message);
     } else {
       toast.success("Profile updated.");
     }
   }
 
   const savedCountries = profile?.saved_countries ?? [];
+  const initials = (displayName || user?.email || "U")
+    .split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
 
   return (
     <div className="min-h-screen bg-background">
@@ -80,13 +94,17 @@ export default function Profile() {
       <main className="pt-24 pb-20 container max-w-3xl">
         {/* Header */}
         <div className="flex items-center gap-4 mb-10">
-          <div className="h-16 w-16 rounded-full bg-gradient-primary flex items-center justify-center text-xl font-bold text-primary-foreground shadow-gold">
-            {(profile?.full_name ?? user?.email ?? "U")
-              .split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2)}
+          <div className="h-16 w-16 rounded-full bg-gradient-primary flex items-center justify-center text-xl font-bold text-primary-foreground shadow-gold shrink-0">
+            {initials}
           </div>
           <div>
-            <h1 className="text-2xl font-bold">{profile?.full_name ?? "My Profile"}</h1>
+            <h1 className="text-2xl font-bold">{displayName || "My Profile"}</h1>
             <p className="text-muted-foreground text-sm">{user?.email}</p>
+            {profile?.newsletter_tier && (
+              <span className="text-xs bg-accent/10 text-accent px-2 py-0.5 rounded mt-1 inline-block">
+                {profile.newsletter_tier}
+              </span>
+            )}
           </div>
         </div>
 
@@ -99,21 +117,33 @@ export default function Profile() {
               </h2>
               <form onSubmit={handleSave} className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label>Full name</Label>
-                  <Input value={fullName} onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Jane Smith" className="bg-background/60 border-border/60" />
+                  <Label>Display name</Label>
+                  <Input
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    placeholder="Jane Smith"
+                    className="bg-background/60 border-border/60"
+                  />
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <Label>Organisation</Label>
-                    <Input value={company} onChange={(e) => setCompany(e.target.value)}
-                      placeholder="Your org or institution" className="bg-background/60 border-border/60" />
+                    <Input
+                      value={company}
+                      onChange={(e) => setCompany(e.target.value)}
+                      placeholder="Your org or institution"
+                      className="bg-background/60 border-border/60"
+                    />
                   </div>
                   <div className="space-y-1.5">
                     <Label>Job title</Label>
-                    <Input value={jobTitle} onChange={(e) => setJobTitle(e.target.value)}
-                      placeholder="Your role" className="bg-background/60 border-border/60" />
+                    <Input
+                      value={jobTitle}
+                      onChange={(e) => setJobTitle(e.target.value)}
+                      placeholder="Your role"
+                      className="bg-background/60 border-border/60"
+                    />
                   </div>
                 </div>
 
@@ -132,29 +162,45 @@ export default function Profile() {
                     </Select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Country / Region</Label>
-                    <Input value={country} onChange={(e) => setCountry(e.target.value)}
-                      placeholder="e.g. India" className="bg-background/60 border-border/60" />
+                    <Label>Region / Country</Label>
+                    <Input
+                      value={region}
+                      onChange={(e) => setRegion(e.target.value)}
+                      placeholder="e.g. South Asia"
+                      className="bg-background/60 border-border/60"
+                    />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Brief bio <span className="text-muted-foreground text-xs">(optional — shown to focus group members)</span></Label>
-                  <Textarea value={bio} onChange={(e) => setBio(e.target.value)}
+                  <Label>
+                    Brief bio{" "}
+                    <span className="text-muted-foreground text-xs">(optional — shown to focus group members)</span>
+                  </Label>
+                  <Textarea
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
                     placeholder="What brings you to SHEtoken? What are you tracking?"
-                    className="bg-background/60 border-border/60 resize-none" rows={3} />
+                    className="bg-background/60 border-border/60 resize-none"
+                    rows={3}
+                  />
                 </div>
 
-                <Button type="submit" disabled={saving}
-                  className="bg-gradient-primary text-primary-foreground border-0 shadow-gold hover:opacity-90">
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                <Button
+                  type="submit"
+                  disabled={saving}
+                  className="bg-gradient-primary text-primary-foreground border-0 shadow-gold hover:opacity-90"
+                >
+                  {saving
+                    ? <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    : <Save className="h-4 w-4 mr-2" />}
                   Save profile
                 </Button>
               </form>
             </div>
           </div>
 
-          {/* RIGHT — Sidebar cards */}
+          {/* RIGHT — Sidebar */}
           <div className="space-y-4">
             {/* Saved countries */}
             <div className="bg-gradient-card border border-border/40 rounded-2xl p-5 shadow-card">

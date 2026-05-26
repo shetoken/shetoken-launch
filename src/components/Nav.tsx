@@ -73,18 +73,18 @@ export function Nav() {
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-2 hover:opacity-80 transition-smooth outline-none">
                   <UserAvatar
-                    name={profile?.full_name ?? user.user_metadata?.full_name ?? null}
+                    name={profile?.display_name ?? user.user_metadata?.display_name ?? null}
                     email={user.email ?? null}
                   />
                   <span className="hidden md:block text-sm text-muted-foreground max-w-[120px] truncate">
-                    {profile?.full_name ?? user.email}
+                    {profile?.display_name ?? user.email}
                   </span>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52 bg-card border-border/60">
                 <div className="px-3 py-2">
                   <p className="text-sm font-medium truncate">
-                    {profile?.full_name ?? "My account"}
+                    {profile?.display_name ?? "My account"}
                   </p>
                   <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                 </div>

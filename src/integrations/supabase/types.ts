@@ -19,42 +19,45 @@ export type Database = {
           id: string
           created_at: string
           updated_at: string | null
-          full_name: string | null
+          display_name: string | null
           email: string | null
-          org_type: string | null
-          country: string | null
-          job_title: string | null
-          company: string | null
+          region: string | null
           saved_countries: string[]
+          newsletter_opt_in: boolean | null
+          newsletter_tier: string | null
+          org_type: string | null
+          company: string | null
+          job_title: string | null
           bio: string | null
-          avatar_url: string | null
         }
         Insert: {
           id: string
           created_at?: string
           updated_at?: string | null
-          full_name?: string | null
+          display_name?: string | null
           email?: string | null
-          org_type?: string | null
-          country?: string | null
-          job_title?: string | null
-          company?: string | null
+          region?: string | null
           saved_countries?: string[]
+          newsletter_opt_in?: boolean | null
+          newsletter_tier?: string | null
+          org_type?: string | null
+          company?: string | null
+          job_title?: string | null
           bio?: string | null
-          avatar_url?: string | null
         }
         Update: {
           id?: string
           updated_at?: string | null
-          full_name?: string | null
+          display_name?: string | null
           email?: string | null
-          org_type?: string | null
-          country?: string | null
-          job_title?: string | null
-          company?: string | null
+          region?: string | null
           saved_countries?: string[]
+          newsletter_opt_in?: boolean | null
+          newsletter_tier?: string | null
+          org_type?: string | null
+          company?: string | null
+          job_title?: string | null
           bio?: string | null
-          avatar_url?: string | null
         }
         Relationships: []
       }

@@ -4,16 +4,18 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface SheProfile {
   id: string;
-  full_name: string | null;
+  display_name: string | null;
   email: string | null;
-  org_type: string | null;
-  country: string | null;
-  job_title: string | null;
-  company: string | null;
+  region: string | null;
   saved_countries: string[];
+  newsletter_opt_in: boolean | null;
+  newsletter_tier: string | null;
+  org_type: string | null;
+  company: string | null;
+  job_title: string | null;
   bio: string | null;
-  avatar_url: string | null;
   created_at: string;
+  updated_at: string | null;
 }
 
 interface AuthContextType {
@@ -88,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password,
       options: {
-        data: { full_name: fullName },
+        data: { display_name: fullName },
         emailRedirectTo: `${window.location.origin}/`,
       },
     });

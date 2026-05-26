@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import {
   ArrowRight, Sparkles, TrendingUp, Shield, GraduationCap, Heart, Scale,
-  Globe2, Coins, Flame, Lock, HandHeart, Wifi, Sprout, BarChart2, Users
+  Globe2, Coins, Flame, Lock, HandHeart, Wifi, Sprout, BarChart2, Users,
+  Star, Building2, Gem
 } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
 import logo from "@/assets/she-logo.jpg";
@@ -108,6 +109,7 @@ const Index = () => {
               <BarChart2 className="h-3.5 w-3.5" /> Live Data
             </Link>
             <Link to="/whitepaper" className="hover:text-foreground transition-smooth">Whitepaper</Link>
+            <a href="#join" className="hover:text-foreground transition-smooth">Work with us</a>
           </div>
           <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground border-0 shadow-gold hover:opacity-90">
             <a href="#subscribe">Join early access <ArrowRight className="ml-1 h-4 w-4" /></a>
@@ -316,6 +318,82 @@ const Index = () => {
         </div>
       </section>
 
+      {/* GET INVOLVED */}
+      <section id="join" className="py-28">
+        <div className="container max-w-5xl">
+          <div className="text-center mb-14">
+            <p className="text-accent text-sm uppercase tracking-widest mb-4">Work with us</p>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">
+              We're early. <span className="text-gradient">The right people matter.</span>
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              The index is live across 105 countries. The token is in development.
+              We're looking for advisors, strategic partners and early supporters who see what we're building.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Advisor */}
+            <div className="flex flex-col bg-gradient-card border border-purple-400/20 rounded-2xl p-8 shadow-card">
+              <div className="h-12 w-12 rounded-xl bg-purple-400/10 flex items-center justify-center mb-5">
+                <Star className="h-6 w-6 text-purple-400" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Advisor</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed flex-1">
+                Expertise in gender economics, impact investing, international development or blockchain?
+                We're building a formal advisory structure and want people who've done this before.
+              </p>
+              <a
+                href="mailto:contact@shetoken.org?subject=Advisor Interest — SHEtoken&body=Hi, I'm interested in exploring an advisory role with SHEtoken. My background is in..."
+                className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-purple-400 hover:text-purple-300 transition-smooth"
+              >
+                Express interest <ArrowRight className="h-4 w-4" />
+              </a>
+            </div>
+
+            {/* Strategic Partner */}
+            <div className="flex flex-col bg-gradient-card border border-blue-400/20 rounded-2xl p-8 shadow-card">
+              <div className="h-12 w-12 rounded-xl bg-blue-400/10 flex items-center justify-center mb-5">
+                <Building2 className="h-6 w-6 text-blue-400" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Strategic Partner</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed flex-1">
+                NGOs, research institutions, government bodies and media organisations —
+                co-brand research, access early WEI data and help shape the index methodology.
+              </p>
+              <a
+                href="mailto:contact@shetoken.org?subject=Partnership Interest — SHEtoken&body=Hi, we're interested in exploring a strategic partnership with SHEtoken. Our organisation is..."
+                className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-blue-400 hover:text-blue-300 transition-smooth"
+              >
+                Get in touch <ArrowRight className="h-4 w-4" />
+              </a>
+            </div>
+
+            {/* Early Supporter */}
+            <div className="flex flex-col bg-gradient-card border border-accent/20 rounded-2xl p-8 shadow-card">
+              <div className="h-12 w-12 rounded-xl bg-accent/10 flex items-center justify-center mb-5">
+                <Gem className="h-6 w-6 text-accent" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Early Supporter</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed flex-1">
+                Interested in early token allocation or pre-seed investment?
+                Join the waitlist — first in line when we open allocation rounds. No commitment required.
+              </p>
+              <a
+                href="mailto:contact@shetoken.org?subject=Early Supporter Interest — SHEtoken&body=Hi, I'm interested in joining the early supporter waitlist for SHEtoken. I'm an..."
+                className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-accent hover:text-accent/80 transition-smooth"
+              >
+                Join the waitlist <ArrowRight className="h-4 w-4" />
+              </a>
+            </div>
+          </div>
+
+          <p className="text-center text-xs text-muted-foreground/50 mt-10">
+            No commitments. We review every message and follow up personally.
+          </p>
+        </div>
+      </section>
+
       {/* NEWSLETTER */}
       <section id="subscribe" className="py-28 bg-gradient-hero relative overflow-hidden">
         <div className="absolute inset-0 bg-background/40" />
@@ -359,6 +437,7 @@ const Index = () => {
             <Link to="/community" className="hover:text-foreground transition-smooth">Community</Link>
             <Link to="/dashboard" className="hover:text-foreground transition-smooth">Live Data</Link>
             <Link to="/whitepaper" className="hover:text-foreground transition-smooth">Whitepaper</Link>
+            <a href="#join" className="hover:text-foreground transition-smooth">Work with us</a>
             <a href="mailto:contact@shetoken.org" className="hover:text-foreground transition-smooth">Contact</a>
             <a href="https://github.com/shetoken" className="hover:text-foreground transition-smooth">GitHub</a>
           </div>

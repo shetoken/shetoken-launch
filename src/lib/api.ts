@@ -6,6 +6,23 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json();
 }
 
+/** Weekly scan stats emitted by the SHEtoken data agent. */
+export interface ScanStats {
+  week: string;
+  scanned_at: string;
+  rss_count: number;
+  youtube_count: number;
+  reddit_count: number;
+  gdelt_count: number;
+  research_count: number;
+  social_count: number;
+  llm_scout_count: number;
+  total_fetched: number;
+  total_after_dedup: number;
+  signals_found: number;
+  crisis_signals: number;
+}
+
 export interface Summary {
   global_wei_score: number;
   countries_scored: number;
@@ -31,6 +48,8 @@ export interface Summary {
   whi_global_avg?: number;
   wvi_global_avg?: number;
   compliance_global_avg?: number;
+  /** Latest run scan stats — null until the agent has run at least once. */
+  scan_stats?: ScanStats | null;
 }
 
 export interface PerformanceSource {
@@ -156,6 +175,9 @@ export const api = {
     latest: (limit = 50) => apiFetch<IndexScore[]>(`/v1/signals/latest?limit=${limit}`),
     topMovers: () => apiFetch<IndexScore[]>('/v1/signals/top-movers?limit=5'),
   },
+
+  scanStats: (weeks = 12) =>
+    apiFetch<{ count: number; data: ScanStats[] }>(`/v1/scan-stats?weeks=${weeks}`),
 
   subscribe: (email: string, tier = 'subscriber') =>
     apiFetch<{ ok: boolean; message: string }>('/v1/subscribe', {

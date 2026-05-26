@@ -15,6 +15,7 @@ import {
 import {
   ArrowRight, ArrowUpDown, TrendingUp, TrendingDown,
   Search, Globe2, Sparkles, AlertCircle, Map, List, X, Loader2,
+  Activity, Zap,
 } from "lucide-react";
 
 /* ── Tier labels ── */
@@ -201,6 +202,14 @@ export default function Dashboard() {
     enabled:   !isWEI,
     staleTime: 10 * 60 * 1000,
   });
+
+  /* ── Scan stats history (last 12 weeks) ── */
+  const { data: scanStatsRes } = useQuery({
+    queryKey: ["scan-stats"],
+    queryFn:  () => api.scanStats(12),
+    staleTime: 10 * 60 * 1000,
+  });
+  const scanHistory = scanStatsRes?.data ?? [];
 
   /* ── Eager-load all non-WEI indexes for global average computation ── */
   const allIndexQueries = useQueries({
@@ -448,6 +457,113 @@ export default function Dashboard() {
             )}
           </div>
         </section>
+
+        {/* ── SIGNAL PULSE ── source breakdown from latest agent run ── */}
+        {(summary?.scan_stats || scanHistory.length > 0) && (() => {
+          const s = summary?.scan_stats ?? scanHistory[0];
+          if (!s) return null;
+          const total = s.total_fetched || 1;
+          const sources = [
+            { label: "RSS",      count: s.rss_count,       color: "#3b82f6",  bar: "bg-blue-500" },
+            { label: "GDELT",    count: s.gdelt_count,      color: "#a855f7",  bar: "bg-purple-500" },
+            { label: "Research", count: s.research_count,   color: "#10b981",  bar: "bg-emerald-500" },
+            { label: "Social",   count: s.social_count,     color: "#ec4899",  bar: "bg-pink-500" },
+            { label: "YouTube",  count: s.youtube_count,    color: "#ef4444",  bar: "bg-red-500" },
+            { label: "Reddit",   count: s.reddit_count,     color: "#f97316",  bar: "bg-orange-500" },
+            ...(s.llm_scout_count > 0
+              ? [{ label: "LLM Scout", count: s.llm_scout_count, color: "#f59e0b", bar: "bg-amber-500" }]
+              : []),
+          ].filter(x => x.count > 0);
+          return (
+            <section className="mb-6">
+              <div className="bg-card/30 border border-border/30 rounded-2xl px-4 py-3.5 shadow-card">
+                {/* Header row */}
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+                    <Activity className="h-3 w-3 text-accent" />
+                    Signal Pulse · {s.week}
+                  </p>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <span>{(s.total_after_dedup ?? s.total_fetched).toLocaleString()} articles processed</span>
+                    <span className="text-accent font-medium">
+                      {s.signals_found.toLocaleString()} signals
+                    </span>
+                    {s.crisis_signals > 0 && (
+                      <span className="inline-flex items-center gap-1 text-red-400 font-medium">
+                        <Zap className="h-3 w-3" />{s.crisis_signals} crisis
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Source chips */}
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {sources.map(({ label, count, color, bar }) => (
+                    <div
+                      key={label}
+                      className="flex items-center gap-1.5 bg-card/60 border border-border/20 rounded-lg px-2.5 py-1 text-xs"
+                    >
+                      <div className={`w-2 h-2 rounded-full ${bar} shrink-0`} />
+                      <span className="font-semibold tabular-nums" style={{ color }}>
+                        {count.toLocaleString()}
+                      </span>
+                      <span className="text-muted-foreground">{label}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Mini stacked bar showing source proportions */}
+                <div className="flex h-2 rounded-full overflow-hidden gap-px">
+                  {sources.map(({ label, count, bar }) => {
+                    const pct = (count / total) * 100;
+                    return pct > 0.5 ? (
+                      <div
+                        key={label}
+                        className={`${bar} h-full transition-all`}
+                        style={{ width: `${pct}%` }}
+                        title={`${label}: ${count}`}
+                      />
+                    ) : null;
+                  })}
+                </div>
+
+                {/* Weekly history sparkline (if we have multiple weeks) */}
+                {scanHistory.length > 1 && (
+                  <div className="mt-3 pt-3 border-t border-border/20">
+                    <p className="text-[10px] text-muted-foreground mb-1.5 uppercase tracking-wider">
+                      Articles processed · last {scanHistory.length} weeks
+                    </p>
+                    <div className="flex items-end gap-1 h-8">
+                      {[...scanHistory].reverse().map((w, i) => {
+                        const maxFetched = Math.max(...scanHistory.map(x => x.total_fetched || 0), 1);
+                        const h = Math.max(2, ((w.total_fetched || 0) / maxFetched) * 100);
+                        const isLatest = i === scanHistory.length - 1;
+                        return (
+                          <div
+                            key={w.week}
+                            className="relative flex-1 flex flex-col items-center justify-end group"
+                            title={`${w.week}: ${w.total_fetched} fetched → ${w.signals_found} signals`}
+                          >
+                            <div
+                              className={`w-full rounded-sm transition-all ${
+                                isLatest ? "bg-accent" : "bg-muted/50 group-hover:bg-muted"
+                              }`}
+                              style={{ height: `${h}%` }}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="flex justify-between text-[9px] text-muted-foreground/50 mt-0.5">
+                      <span>{[...scanHistory].reverse()[0]?.week}</span>
+                      <span>{scanHistory[0]?.week}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </section>
+          );
+        })()}
 
         {/* ── INDEX STRIP ── (interactive — click to filter map & chart) ── */}
         <section className="mb-8">
@@ -741,6 +857,11 @@ export default function Dashboard() {
                   </p>
 
                   <div className="flex-1 min-h-0" style={{ minHeight: 180 }}>
+                  {activeDistData.length === 0 ? (
+                    <div className="flex items-center justify-center h-full text-muted-foreground text-xs">
+                      {!isWEI && loadingIndex ? "Loading distribution…" : "No score data available"}
+                    </div>
+                  ) : (
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={activeDistData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
                       <XAxis
@@ -844,6 +965,7 @@ export default function Dashboard() {
                       ))}
                     </LineChart>
                   </ResponsiveContainer>
+                  )}
                   </div>
 
                   {/* Legend */}

@@ -40,7 +40,7 @@ const NUM_TO_ISO3: Record<string, string> = {
   "894": "ZMB", "51": "ARM",
 };
 
-function scoreToColor(score: number | undefined): string {
+function scoreToColor(score: number | undefined | null): string {
   if (score == null) return "#1e293b";
   if (score >= 75) return "#10b981";
   if (score >= 60) return "#22c55e";
@@ -66,7 +66,7 @@ const TIER_COLORS: Record<number, string> = {
 interface TooltipState {
   country: string;
   iso: string;
-  score: number;
+  score: number | null;     // null = country has no data in active index
   tier: number;
   x: number;
   y: number;
@@ -78,13 +78,27 @@ interface WorldMapProps {
   selectedIso?: string;
   /** If provided, clicking fires this instead of navigating to the country page */
   onSelect?: (country: CountryWEI) => void;
+  /**
+   * When a non-WEI index is active, supply a map of iso_code → score.
+   * Countries missing from this map are rendered grey (no data).
+   * When undefined, falls back to each country's wei_score.
+   */
+  scoreOverride?: Map<string, number>;
+  /** Index name shown in the tooltip, e.g. "SVI". Defaults to "WEI". */
+  indexLabel?: string;
 }
 
-export function WorldMap({ countries, selectedIso, onSelect }: WorldMapProps) {
+export function WorldMap({
+  countries,
+  selectedIso,
+  onSelect,
+  scoreOverride,
+  indexLabel = "WEI",
+}: WorldMapProps) {
   const navigate = useNavigate();
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
 
-  // Build lookup: iso_code → CountryWEI
+  // Build lookup: iso_code → CountryWEI (for click/hover labels)
   const scoreMap = useMemo(
     () => new Map(countries.map((c) => [c.iso_code, c])),
     [countries]
@@ -99,21 +113,34 @@ export function WorldMap({ countries, selectedIso, onSelect }: WorldMapProps) {
     [scoreMap]
   );
 
+  /** Resolve the display score: scoreOverride if provided, else WEI score */
+  const getDisplayScore = useCallback(
+    (iso3: string | undefined): number | null => {
+      if (!iso3) return null;
+      if (scoreOverride) {
+        return scoreOverride.get(iso3) ?? null;   // null = grey, not in index
+      }
+      return scoreMap.get(iso3)?.wei_score ?? null;
+    },
+    [scoreOverride, scoreMap]
+  );
+
   const handleEnter = useCallback(
     (geo: { id?: string | number }, evt: React.MouseEvent) => {
       const data = getDataForGeo(geo);
-      if (data) {
-        setTooltip({
-          country: data.country,
-          iso: data.iso_code,
-          score: data.wei_score,
-          tier: data.tier,
-          x: evt.clientX,
-          y: evt.clientY,
-        });
-      }
+      if (!data) return;
+      const numericId = String(geo.id ?? "");
+      const iso3 = NUM_TO_ISO3[numericId];
+      setTooltip({
+        country: data.country,
+        iso:     data.iso_code,
+        score:   getDisplayScore(iso3),
+        tier:    data.tier,
+        x:       evt.clientX,
+        y:       evt.clientY,
+      });
     },
-    [getDataForGeo]
+    [getDataForGeo, getDisplayScore]
   );
 
   const handleMove = useCallback((evt: React.MouseEvent) => {
@@ -144,14 +171,24 @@ export function WorldMap({ countries, selectedIso, onSelect }: WorldMapProps) {
           style={{ left: tooltip.x + 16, top: tooltip.y - 84 }}
         >
           <p className="font-semibold">{tooltip.country}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            WEI Score:{" "}
-            <span className="font-bold text-foreground">{tooltip.score.toFixed(1)}</span>
-            {" · "}
-            <span className={TIER_COLORS[tooltip.tier]}>
-              {TIER_LABELS[tooltip.tier]}
-            </span>
-          </p>
+          {tooltip.score != null ? (
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {indexLabel} Score:{" "}
+              <span className="font-bold text-foreground">{tooltip.score.toFixed(1)}</span>
+              {indexLabel === "WEI" && (
+                <>
+                  {" · "}
+                  <span className={TIER_COLORS[tooltip.tier]}>
+                    {TIER_LABELS[tooltip.tier]}
+                  </span>
+                </>
+              )}
+            </p>
+          ) : (
+            <p className="text-xs text-muted-foreground/60 mt-0.5">
+              No {indexLabel} data
+            </p>
+          )}
           <p className="text-xs text-accent mt-1">
             {onSelect ? "Click to select & compare →" : "Click to explore →"}
           </p>
@@ -170,10 +207,13 @@ export function WorldMap({ countries, selectedIso, onSelect }: WorldMapProps) {
             <Geographies geography={GEO_URL}>
               {({ geographies }) =>
                 geographies.map((geo) => {
-                  const data = getDataForGeo(geo);
-                  const isSelected = !!selectedIso && data?.iso_code === selectedIso;
-                  const fill = isSelected ? "#f59e0b" : scoreToColor(data?.wei_score);
-                  const hasData = !!data;
+                  const data        = getDataForGeo(geo);
+                  const numericId   = String(geo.id ?? "");
+                  const iso3        = NUM_TO_ISO3[numericId];
+                  const displayScore = getDisplayScore(iso3);
+                  const isSelected  = !!selectedIso && data?.iso_code === selectedIso;
+                  const fill        = isSelected ? "#f59e0b" : scoreToColor(displayScore);
+                  const hasData     = !!data;   // clickable if WEI record exists
 
                   return (
                     <Geography
@@ -211,10 +251,10 @@ export function WorldMap({ countries, selectedIso, onSelect }: WorldMapProps) {
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 justify-center mt-4 text-xs text-muted-foreground">
         {[
           { color: "#f59e0b", label: "Selected" },
-          { color: "#10b981", label: "75+  Preferred" },
+          { color: "#10b981", label: "75+  High" },
           { color: "#22c55e", label: "60–74  Good" },
           { color: "#eab308", label: "45–59  Moderate" },
-          { color: "#f97316", label: "30–44  At risk" },
+          { color: "#f97316", label: "30–44  Low" },
           { color: "#ef4444", label: "<30  Critical" },
           { color: "#1e293b", label: "No data" },
         ].map(({ color, label }) => (

@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { api, CountryWEI } from "@/lib/api";
+import { api, CountryWEI, IndexScore } from "@/lib/api";
 import { SEO } from "@/lib/seo";
 import { Nav } from "@/components/Nav";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import {
 } from "recharts";
 import {
   ArrowRight, ArrowUpDown, TrendingUp, TrendingDown,
-  Search, Globe2, Sparkles, AlertCircle, Map, List, X,
+  Search, Globe2, Sparkles, AlertCircle, Map, List, X, Loader2,
 } from "lucide-react";
 
 /* ── Tier labels ── */
@@ -36,22 +36,84 @@ const PILLAR_COLS: Array<{ key: keyof CountryWEI; label: string }> = [
   { key: "digital_social_score", label: "Digital" },
 ];
 
-/* ── Distribution chart pillars ── */
-const DIST_PILLARS: Array<{
-  key: keyof CountryWEI;
-  label: string;
-  color: string;
-  width: number;
-}> = [
-  { key: "wei_score",           label: "WEI",         color: "#f59e0b", width: 2.5 },
-  { key: "empowerment_score",   label: "Empowerment", color: "#a855f7", width: 1.5 },
-  { key: "education_score",     label: "Education",   color: "#3b82f6", width: 1.5 },
-  { key: "economic_score",      label: "Economic",    color: "#eab308", width: 1.5 },
-  { key: "health_score",        label: "Health",      color: "#ec4899", width: 1.5 },
-  { key: "safety_justice_score",label: "Safety",      color: "#ef4444", width: 1.5 },
+/* ── Index configuration ── */
+type IndexKey = "WEI" | "GPI" | "SVI" | "WADI" | "WEVI" | "WHI" | "WVI" | "Compliance";
+
+interface IndexConfig {
+  label: IndexKey;
+  desc: string;
+  tailwind: string;      // Tailwind classes: text + border + bg
+  accent: string;        // Hex colour for the KDE curve
+  scoreField: string;    // Field name in the IndexScore rows from the API
+}
+
+const INDEX_CONFIGS: IndexConfig[] = [
+  {
+    label: "WEI", desc: "Women's Empowerment",
+    tailwind: "text-amber-400  border-amber-400/30  bg-amber-400/5",
+    accent: "#f59e0b", scoreField: "wei_score",
+  },
+  {
+    label: "GPI", desc: "Gender Poverty",
+    tailwind: "text-purple-400 border-purple-400/30 bg-purple-400/5",
+    accent: "#a855f7", scoreField: "gpi_score",
+  },
+  {
+    label: "SVI", desc: "Sexual Violence",
+    tailwind: "text-red-400    border-red-400/30    bg-red-400/5",
+    accent: "#ef4444", scoreField: "svi_score",
+  },
+  {
+    label: "WADI", desc: "AI Displacement",
+    tailwind: "text-blue-400   border-blue-400/30   bg-blue-400/5",
+    accent: "#3b82f6", scoreField: "wadi_score",
+  },
+  {
+    label: "WEVI", desc: "Widow Vulnerability",
+    tailwind: "text-orange-400 border-orange-400/30 bg-orange-400/5",
+    accent: "#f97316", scoreField: "wevi_score",
+  },
+  {
+    label: "WHI", desc: "Women's Health",
+    tailwind: "text-pink-400   border-pink-400/30   bg-pink-400/5",
+    accent: "#ec4899", scoreField: "whi_score",
+  },
+  {
+    label: "WVI", desc: "Women's Voice",
+    tailwind: "text-cyan-400   border-cyan-400/30   bg-cyan-400/5",
+    accent: "#06b6d4", scoreField: "wvi_score",
+  },
+  {
+    label: "Compliance", desc: "Rights Compliance",
+    tailwind: "text-emerald-400 border-emerald-400/30 bg-emerald-400/5",
+    accent: "#10b981", scoreField: "compliance_score",
+  },
 ];
 
-/* ── Kernel density estimate ── */
+/* ── Distribution curve types ── */
+interface DistPillar { label: string; color: string; width: number; }
+
+// WEI multi-pillar curves (shown when WEI is active)
+const WEI_DIST_PILLARS: DistPillar[] = [
+  { label: "WEI",         color: "#f59e0b", width: 2.5 },
+  { label: "Empowerment", color: "#a855f7", width: 1.5 },
+  { label: "Education",   color: "#3b82f6", width: 1.5 },
+  { label: "Economic",    color: "#eab308", width: 1.5 },
+  { label: "Health",      color: "#ec4899", width: 1.5 },
+  { label: "Safety",      color: "#ef4444", width: 1.5 },
+];
+
+// Which CountryWEI fields drive the WEI KDE curves
+const WEI_DIST_KEYS: Array<{ key: keyof CountryWEI; label: string }> = [
+  { key: "wei_score",            label: "WEI" },
+  { key: "empowerment_score",    label: "Empowerment" },
+  { key: "education_score",      label: "Education" },
+  { key: "economic_score",       label: "Economic" },
+  { key: "health_score",         label: "Health" },
+  { key: "safety_justice_score", label: "Safety" },
+];
+
+/* ── Kernel density estimate (Gaussian, unnormalised) ── */
 function computeKDE(values: number[], bandwidth = 9): number[] {
   const n = values.length;
   if (n === 0) return Array(101).fill(0);
@@ -59,7 +121,7 @@ function computeKDE(values: number[], bandwidth = 9): number[] {
     values.reduce((sum, xi) => {
       const u = (x - xi) / bandwidth;
       return sum + Math.exp(-0.5 * u * u);
-    }, 0) / n                         // normalise by count so curves are on same scale
+    }, 0) / n
   );
 }
 
@@ -82,43 +144,103 @@ type ViewMode = "map" | "table";
 
 /* ════════════════════════════════════════════ */
 export default function Dashboard() {
-  const [search, setSearch]               = useState("");
-  const [sortKey, setSortKey]             = useState<SortKey>("rank");
-  const [sortAsc, setSortAsc]             = useState(true);
-  const [view, setView]                   = useState<ViewMode>("map");
+  const [search, setSearch]                   = useState("");
+  const [sortKey, setSortKey]                 = useState<SortKey>("rank");
+  const [sortAsc, setSortAsc]                 = useState(true);
+  const [view, setView]                       = useState<ViewMode>("map");
   const [selectedCountry, setSelectedCountry] = useState<CountryWEI | null>(null);
+  const [selectedIndex, setSelectedIndex]     = useState<IndexKey>("WEI");
 
-  /* ── Queries ── */
+  const isWEI    = selectedIndex === "WEI";
+  const idxConf  = INDEX_CONFIGS.find((c) => c.label === selectedIndex)!;
+
+  /* ── Core WEI data ── */
   const { data: summary, isLoading: loadingSummary } = useQuery({
     queryKey: ["summary"],
-    queryFn: api.summary,
+    queryFn:  api.summary,
     staleTime: 5 * 60 * 1000,
   });
 
   const { data: countriesRes, isLoading: loadingCountries } = useQuery({
     queryKey: ["wei-countries"],
-    queryFn: () => api.wei.countries(105),
+    queryFn:  () => api.wei.countries(105),
     staleTime: 5 * 60 * 1000,
   });
 
   const countries = countriesRes?.data ?? [];
 
-  /* ── Distribution KDE data ── */
-  const distData = useMemo(() => {
-    if (!countries.length) return [];
-    const kdes = DIST_PILLARS.map((p) =>
-      computeKDE(
-        countries
-          .map((c) => (c[p.key] as number) ?? null)
-          .filter((v): v is number => v != null && v > 0)
-      )
-    );
-    return Array.from({ length: 101 }, (_, i) => {
-      const pt: Record<string, number> = { x: i };
-      DIST_PILLARS.forEach((p, j) => { pt[p.label] = kdes[j][i]; });
-      return pt;
-    });
-  }, [countries]);
+  /* ── Lazy-loaded non-WEI index data ── */
+  const { data: activeIndexData, isLoading: loadingIndex } = useQuery({
+    queryKey: ["index-data", selectedIndex],
+    queryFn: async (): Promise<IndexScore[]> => {
+      switch (selectedIndex) {
+        case "GPI":        return api.gpi.all();
+        case "SVI":        return api.svi.all();
+        case "WADI":       return api.wadi.all();
+        case "WEVI":       return api.wevi.all();
+        case "WHI":        return api.whi.all();
+        case "WVI":        return api.wvi.all();
+        case "Compliance": return api.compliance.countries();
+        default:           return [];
+      }
+    },
+    enabled:   !isWEI,
+    staleTime: 10 * 60 * 1000,
+  });
+
+  /* ── Build scoreOverride map for the active non-WEI index ── */
+  const scoreOverride = useMemo<Map<string, number> | undefined>(() => {
+    if (isWEI || !activeIndexData?.length) return undefined;
+    const map = new Map<string, number>();
+    for (const row of activeIndexData) {
+      const iso   = String(row.iso_code ?? "").toUpperCase();
+      // Try specific score field, then fall back to generic "score"
+      const score = (row[idxConf.scoreField] as number | undefined)
+                 ?? (row.score as number | undefined);
+      if (iso && score != null && !isNaN(score)) map.set(iso, score);
+    }
+    return map;
+  }, [isWEI, selectedIndex, activeIndexData, idxConf.scoreField]);
+
+  /* ── Distribution pillars (what curves appear in the chart) ── */
+  const activeDistPillars = useMemo<DistPillar[]>(() => {
+    if (isWEI) return WEI_DIST_PILLARS;
+    return [{ label: selectedIndex, color: idxConf.accent, width: 2.5 }];
+  }, [isWEI, selectedIndex, idxConf.accent]);
+
+  /* ── KDE data for the distribution chart ── */
+  const activeDistData = useMemo(() => {
+    if (isWEI) {
+      if (!countries.length) return [];
+      const kdes = WEI_DIST_KEYS.map(({ key }) =>
+        computeKDE(
+          countries
+            .map((c) => c[key] as number)
+            .filter((v): v is number => v != null && v > 0)
+        )
+      );
+      return Array.from({ length: 101 }, (_, i) => {
+        const pt: Record<string, number> = { x: i };
+        WEI_DIST_KEYS.forEach(({ label }, j) => { pt[label] = kdes[j][i]; });
+        return pt;
+      });
+    }
+
+    // Non-WEI: single curve from the index data
+    if (!activeIndexData?.length) return [];
+    const values = activeIndexData
+      .map((r) => (r[idxConf.scoreField] as number | undefined) ?? (r.score as number | undefined))
+      .filter((v): v is number => v != null && !isNaN(v) && v > 0);
+    const kde = computeKDE(values);
+    return Array.from({ length: 101 }, (_, i) => ({ x: i, [selectedIndex]: kde[i] }));
+  }, [isWEI, selectedIndex, countries, activeIndexData, idxConf.scoreField]);
+
+  /* ── Selected country's score for the active index ── */
+  const selectedIndexScore = useMemo<number | null>(() => {
+    if (!selectedCountry) return null;
+    if (isWEI) return selectedCountry.wei_score;
+    return scoreOverride?.get(selectedCountry.iso_code) ?? null;
+  }, [selectedCountry, isWEI, scoreOverride]);
 
   /* ── Table filtering / sorting ── */
   const filtered = countries
@@ -140,6 +262,10 @@ export default function Dashboard() {
     if (sortKey === key) setSortAsc((v) => !v);
     else { setSortKey(key); setSortAsc(key === "rank"); }
   }
+
+  const activeCountryCount = isWEI
+    ? countries.length
+    : activeIndexData?.length ?? 0;
 
   /* ── Render ── */
   return (
@@ -198,34 +324,72 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* ── INDEX STRIP ── */}
+        {/* ── INDEX STRIP ── (interactive — click to filter map & chart) ── */}
         <section className="mb-8">
           <p className="text-xs text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-1.5">
-            <AlertCircle className="h-3 w-3" /> 8 indexes powering $SHE
+            <AlertCircle className="h-3 w-3" /> 8 indexes powering $SHE · click to filter map &amp; chart
           </p>
+
           <div className="flex gap-2.5 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {[
-              { label: "WEI",        score: summary?.global_wei_score ?? null, color: "text-amber-400  border-amber-400/30  bg-amber-400/5",   desc: "Women's Empowerment" },
-              { label: "GPI",        score: null,                               color: "text-purple-400 border-purple-400/30 bg-purple-400/5",  desc: "Gender Poverty" },
-              { label: "SVI",        score: null,                               color: "text-red-400    border-red-400/30    bg-red-400/5",      desc: "Sexual Violence" },
-              { label: "WADI",       score: null,                               color: "text-blue-400   border-blue-400/30   bg-blue-400/5",     desc: "AI Displacement" },
-              { label: "WEVI",       score: null,                               color: "text-orange-400 border-orange-400/30 bg-orange-400/5",  desc: "Widow Vulnerability" },
-              { label: "WHI",        score: null,                               color: "text-pink-400   border-pink-400/30   bg-pink-400/5",     desc: "Women's Health" },
-              { label: "WVI",        score: null,                               color: "text-cyan-400   border-cyan-400/30   bg-cyan-400/5",     desc: "Women's Voice" },
-              { label: "Compliance", score: null,                               color: "text-emerald-400 border-emerald-400/30 bg-emerald-400/5", desc: "Rights Compliance" },
-            ].map((idx) => (
-              <div
-                key={idx.label}
-                className={`shrink-0 border rounded-xl px-4 py-2.5 text-xs ${idx.color}`}
-              >
-                <div className="font-bold text-base">{idx.label}</div>
-                <div className="font-semibold text-lg leading-tight mt-0.5">
-                  {idx.score != null ? idx.score.toFixed(1) : "—"}
-                </div>
-                <div className="text-muted-foreground whitespace-nowrap mt-0.5">{idx.desc}</div>
-              </div>
-            ))}
+            {INDEX_CONFIGS.map((idx) => {
+              const isActive = selectedIndex === idx.label;
+              return (
+                <button
+                  key={idx.label}
+                  onClick={() => setSelectedIndex(idx.label)}
+                  title={
+                    idx.label === "WEI"
+                      ? `Women's Empowerment Index · global average: ${summary?.global_wei_score ?? "loading"}`
+                      : `Click to view ${idx.desc} (${idx.label}) on the map and chart. Global average not computed — explore by country.`
+                  }
+                  className={`shrink-0 border rounded-xl px-4 py-2.5 text-xs text-left transition-all duration-200 ${idx.tailwind} ${
+                    isActive
+                      ? "ring-2 ring-current ring-offset-1 ring-offset-background shadow-lg opacity-100 scale-[1.03]"
+                      : "opacity-55 hover:opacity-85 hover:scale-[1.01] cursor-pointer"
+                  }`}
+                >
+                  <div className="font-bold text-base flex items-center gap-1.5">
+                    {idx.label}
+                    {isActive && !isWEI && loadingIndex && (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    )}
+                  </div>
+                  <div className="font-semibold text-lg leading-tight mt-0.5">
+                    {idx.label === "WEI" && summary?.global_wei_score != null
+                      ? summary.global_wei_score.toFixed(1)
+                      : isActive && !isWEI && !loadingIndex && activeIndexData?.length
+                        ? `${activeIndexData.length} ctys`   // show country count when loaded
+                        : "—"}
+                  </div>
+                  <div className="opacity-80 whitespace-nowrap mt-0.5 text-[11px]">{idx.desc}</div>
+                </button>
+              );
+            })}
           </div>
+
+          {/* Sub-label when a non-WEI index is active */}
+          {!isWEI && (
+            <p className="text-xs text-muted-foreground mt-2.5 flex items-center gap-2 flex-wrap">
+              {loadingIndex ? (
+                <>
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Loading {selectedIndex} country scores…
+                </>
+              ) : (
+                <>
+                  <span className="font-medium" style={{ color: idxConf.accent }}>{selectedIndex}</span>
+                  <span>· {idxConf.desc} · {activeCountryCount} countries · global avg not computed</span>
+                  <span className="text-border/60">·</span>
+                  <button
+                    onClick={() => setSelectedIndex("WEI")}
+                    className="text-accent hover:underline"
+                  >
+                    ← back to WEI
+                  </button>
+                </>
+              )}
+            </p>
+          )}
         </section>
 
         {/* ── COUNTRY EXPLORER ── */}
@@ -233,9 +397,13 @@ export default function Dashboard() {
           {/* Header row */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
             <h2 className="text-xl font-bold">
-              Country Explorer{" "}
+              {isWEI ? "Country Explorer" : `${idxConf.desc} (${selectedIndex})`}{" "}
               <span className="text-muted-foreground font-normal text-sm ml-2">
-                {countries.length} countries
+                {isWEI
+                  ? `${countries.length} countries`
+                  : loadingIndex
+                    ? "loading…"
+                    : `${activeCountryCount} countries`}
               </span>
             </h2>
             <div className="flex items-center gap-3">
@@ -282,10 +450,13 @@ export default function Dashboard() {
 
             /* ─────────── MAP VIEW ─────────── */
             <>
+              {/* Map — passes scoreOverride when a non-WEI index is active */}
               <WorldMap
                 countries={countries}
                 selectedIso={selectedCountry?.iso_code}
                 onSelect={setSelectedCountry}
+                scoreOverride={scoreOverride}
+                indexLabel={isWEI ? "WEI" : selectedIndex}
               />
 
               {/* ── Distribution + Selected country panel ── */}
@@ -294,20 +465,33 @@ export default function Dashboard() {
                 {/* Distribution KDE chart */}
                 <div className="md:col-span-3 bg-gradient-card border border-border/40 rounded-2xl p-5 shadow-card">
                   <div className="flex items-center justify-between mb-1">
-                    <h3 className="text-sm font-semibold">Score Distribution — All {countries.length} Countries</h3>
-                    <span className="text-xs text-muted-foreground hidden sm:block">overlapping KDE curves · lower = fewer countries</span>
+                    <h3 className="text-sm font-semibold">
+                      {isWEI
+                        ? `Score Distribution — All ${countries.length} Countries`
+                        : `${selectedIndex} Distribution — ${activeCountryCount} Countries`}
+                    </h3>
+                    <span className="text-xs text-muted-foreground hidden sm:block">
+                      KDE curve · peak = most countries
+                    </span>
                   </div>
                   <p className="text-xs text-muted-foreground mb-4">
-                    Each curve shows how countries cluster on that measure.
-                    {selectedCountry && (
+                    {isWEI
+                      ? "Each curve shows how countries cluster on that measure."
+                      : `${idxConf.desc} scores (0–100). Higher score = better performance.`}
+                    {selectedCountry && selectedIndexScore != null && (
                       <span className="text-amber-400 ml-1">
-                        Gold line = {selectedCountry.country} ({selectedCountry.wei_score.toFixed(1)})
+                        Gold line = {selectedCountry.country} ({selectedIndexScore.toFixed(1)})
+                      </span>
+                    )}
+                    {selectedCountry && !isWEI && selectedIndexScore == null && (
+                      <span className="text-muted-foreground/50 ml-1">
+                        ({selectedCountry.country} not in this dataset)
                       </span>
                     )}
                   </p>
 
                   <ResponsiveContainer width="100%" height={200}>
-                    <LineChart data={distData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
+                    <LineChart data={activeDistData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
                       <XAxis
                         dataKey="x"
                         domain={[0, 100]}
@@ -326,9 +510,9 @@ export default function Dashboard() {
                       <YAxis hide domain={["auto", "auto"]} />
 
                       {/* Selected country reference line */}
-                      {selectedCountry && (
+                      {selectedCountry && selectedIndexScore != null && (
                         <ReferenceLine
-                          x={Math.round(selectedCountry.wei_score)}
+                          x={Math.round(selectedIndexScore)}
                           stroke="#f59e0b"
                           strokeWidth={2}
                           strokeDasharray="5 3"
@@ -359,7 +543,7 @@ export default function Dashboard() {
                         itemStyle={{ padding: "1px 0" }}
                       />
 
-                      {DIST_PILLARS.map((p) => (
+                      {activeDistPillars.map((p) => (
                         <Line
                           key={p.label}
                           type="monotone"
@@ -367,7 +551,7 @@ export default function Dashboard() {
                           stroke={p.color}
                           strokeWidth={p.width}
                           dot={false}
-                          strokeOpacity={p.label === "WEI" ? 1 : 0.55}
+                          strokeOpacity={isWEI && p.label !== "WEI" ? 0.55 : 1}
                           name={p.label}
                           activeDot={false}
                         />
@@ -377,11 +561,11 @@ export default function Dashboard() {
 
                   {/* Legend */}
                   <div className="flex flex-wrap gap-3 mt-3">
-                    {DIST_PILLARS.map((p) => (
+                    {activeDistPillars.map((p) => (
                       <span key={p.label} className="flex items-center gap-1.5 text-xs text-muted-foreground">
                         <span
                           className="w-5 h-0.5 rounded-full inline-block"
-                          style={{ backgroundColor: p.color, opacity: p.label === "WEI" ? 1 : 0.6 }}
+                          style={{ backgroundColor: p.color }}
                         />
                         {p.label}
                       </span>
@@ -404,15 +588,41 @@ export default function Dashboard() {
                       <div className="text-xs text-muted-foreground mb-0.5">
                         {selectedCountry.region} · Rank #{selectedCountry.rank} of {countries.length}
                       </div>
-                      <div className="text-2xl font-bold mb-1 leading-tight pr-6">
+                      <div className="text-2xl font-bold mb-2 leading-tight pr-6">
                         {selectedCountry.country}
                       </div>
+
+                      {/* Active index score — shown prominently when non-WEI */}
+                      {!isWEI && (
+                        <div className="mb-3 pb-3 border-b border-border/30">
+                          <div className="text-xs text-muted-foreground mb-0.5">{selectedIndex} Score</div>
+                          <div className="flex items-baseline gap-2">
+                            <span
+                              className="text-4xl font-bold leading-none"
+                              style={{ color: idxConf.accent }}
+                            >
+                              {selectedIndexScore != null ? selectedIndexScore.toFixed(1) : "—"}
+                            </span>
+                            <span className="text-muted-foreground text-sm">/ 100</span>
+                          </div>
+                          {selectedIndexScore == null && (
+                            <p className="text-xs text-muted-foreground/60 mt-1">
+                              Not included in this dataset
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* WEI score */}
                       <div className="flex items-baseline gap-2 mb-1">
-                        <span className="text-5xl font-bold text-gradient leading-none">
+                        <span className={`font-bold text-gradient leading-none ${!isWEI ? "text-3xl" : "text-5xl"}`}>
                           {selectedCountry.wei_score.toFixed(1)}
                         </span>
-                        <span className="text-muted-foreground text-sm">/ 100</span>
+                        <span className="text-muted-foreground text-sm">
+                          {!isWEI ? "WEI" : ""} / 100
+                        </span>
                       </div>
+
                       <div className="flex items-center gap-2 mb-4">
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${
                           selectedCountry.tier === 1 ? "text-emerald-400 border-emerald-400/30 bg-emerald-400/10" :
@@ -427,7 +637,7 @@ export default function Dashboard() {
                         </span>
                       </div>
 
-                      {/* Pillar mini-bars */}
+                      {/* WEI pillar mini-bars */}
                       <div className="space-y-2 flex-1">
                         {[
                           { key: "empowerment_score",    label: "Empowerment", bar: "bg-purple-500" },
@@ -467,7 +677,8 @@ export default function Dashboard() {
                     <div className="bg-gradient-card border border-dashed border-border/40 rounded-2xl p-6 h-full flex flex-col items-center justify-center text-center gap-3">
                       <Globe2 className="h-10 w-10 text-muted-foreground/30" />
                       <p className="text-sm text-muted-foreground leading-relaxed max-w-[200px]">
-                        Click any country on the map to see its scores and position on the distribution curve
+                        Click any country on the map to see its{" "}
+                        {isWEI ? "WEI scores" : `${selectedIndex} score`} and position on the distribution curve
                       </p>
                     </div>
                   )}

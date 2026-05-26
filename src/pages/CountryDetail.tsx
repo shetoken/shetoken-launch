@@ -8,7 +8,7 @@ import {
   ResponsiveContainer, ReferenceLine
 } from "recharts";
 import {
-  ArrowLeft, ArrowRight, TrendingUp, TrendingDown,
+  ArrowLeft, ArrowRight, BarChart2, TrendingUp, TrendingDown,
   Info, AlertCircle, Users
 } from "lucide-react";
 

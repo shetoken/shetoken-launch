@@ -1,0 +1,227 @@
+import { Link } from "react-router-dom";
+import { SEO } from "@/lib/seo";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, ArrowLeft, TrendingUp, Shield, Globe2, Coins, AlertCircle, CheckCircle, XCircle } from "lucide-react";
+import logo from "@/assets/she-logo.jpg";
+
+function Stat({ value, label, source }: { value: string; label: string; source: string }) {
+  return (
+    <div className="text-center p-6 bg-gradient-card border border-border/40 rounded-2xl shadow-card">
+      <div className="text-4xl md:text-5xl font-bold text-gradient mb-3">{value}</div>
+      <div className="text-sm font-medium mb-1">{label}</div>
+      <div className="text-xs text-muted-foreground">{source}</div>
+    </div>
+  );
+}
+
+function ProCon({ type, title, desc }: { type: "pro" | "con"; title: string; desc: string }) {
+  return (
+    <div className="flex gap-3 items-start">
+      {type === "pro"
+        ? <CheckCircle className="h-5 w-5 text-emerald-400 shrink-0 mt-0.5" />
+        : <XCircle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />}
+      <div>
+        <div className="text-sm font-medium">{title}</div>
+        <div className="text-sm text-muted-foreground">{desc}</div>
+      </div>
+    </div>
+  );
+}
+
+export default function Why() {
+  return (
+    <div className="min-h-screen bg-background">
+      <SEO
+        title="Why the World Needs Impact Tokens — $SHE"
+        description="Aid doesn't scale. ESG scores aren't transparent. Traditional crypto has no mission. SHEtoken is the third way — a token whose value is mathematically tied to real-world women's empowerment outcomes."
+        url="https://www.shetoken.org/why"
+      />
+
+      {/* NAV */}
+      <header className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl bg-background/60 border-b border-border/40">
+        <nav className="container flex items-center justify-between h-16">
+          <Link to="/" className="flex items-center gap-2 font-bold text-lg">
+            <img src={logo} alt="SheToken logo" className="h-8 w-8 rounded-full object-cover" />
+            <span className="text-gradient">SheToken</span>
+          </Link>
+          <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
+            <Link to="/" className="hover:text-foreground transition-smooth flex items-center gap-1"><ArrowLeft className="h-3.5 w-3.5" /> Home</Link>
+            <Link to="/community" className="hover:text-foreground transition-smooth">Community</Link>
+            <Link to="/dashboard" className="hover:text-foreground transition-smooth">Live Data</Link>
+            <Link to="/whitepaper" className="hover:text-foreground transition-smooth">Whitepaper</Link>
+          </div>
+          <Button asChild size="sm" className="bg-gradient-primary text-primary-foreground border-0 shadow-gold hover:opacity-90">
+            <a href="/#subscribe">Get early access <ArrowRight className="ml-1 h-4 w-4" /></a>
+          </Button>
+        </nav>
+      </header>
+
+      <main className="pt-24 pb-20">
+
+        {/* HERO */}
+        <section className="container max-w-4xl text-center py-16">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/30 bg-accent/10 text-accent text-xs mb-8">
+            <AlertCircle className="h-3 w-3" /> The case for financial accountability
+          </div>
+          <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
+            The world has measured<br />women's suffering for decades.<br />
+            <span className="text-gradient">Nobody priced it.</span>
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Aid is charity. ESG is self-reporting. Traditional crypto is speculation.
+            SHEtoken is a third way — a financial instrument mathematically tied to real outcomes,
+            auditable by anyone, on-chain forever.
+          </p>
+        </section>
+
+        {/* THE NUMBERS */}
+        <section className="py-16 bg-card/30 border-y border-border/40">
+          <div className="container max-w-5xl">
+            <p className="text-center text-xs uppercase tracking-widest text-muted-foreground mb-10">The scale of the problem</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Stat value="$360B" label="Annual cost of gender inequality to global GDP" source="McKinsey Global Institute" />
+              <Stat value="1 in 3" label="Women experience physical or sexual violence in their lifetime" source="WHO 2021" />
+              <Stat value="135 yrs" label="Time to close the global gender gap at current pace" source="World Economic Forum 2023" />
+              <Stat value="$0" label="Amount of capital directly priced against measurable gender outcomes" source="SHEtoken research" />
+            </div>
+          </div>
+        </section>
+
+        {/* THREE SYSTEMS THAT FAILED */}
+        <section className="py-20 container max-w-5xl">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Three systems that <span className="text-gradient">aren't enough</span></h2>
+            <p className="text-muted-foreground">Each approach has moved the needle. None has created financial accountability at scale.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                title: "Foreign Aid & Philanthropy",
+                icon: Globe2,
+                pros: [
+                  { type: "pro" as const, title: "Funds real programs", desc: "Kanyashree, JEEViKA, Kudumbashree — proven at scale" },
+                ],
+                cons: [
+                  { type: "con" as const, title: "Doesn't scale with outcomes", desc: "Disbursement tied to politics, not results" },
+                  { type: "con" as const, title: "No market signal", desc: "When programs succeed, capital doesn't automatically flow to more" },
+                ],
+              },
+              {
+                title: "ESG Funds & Ratings",
+                icon: TrendingUp,
+                pros: [
+                  { type: "pro" as const, title: "$35 trillion in assets", desc: "Enormous capital base already aligned with ESG mandates" },
+                ],
+                cons: [
+                  { type: "con" as const, title: "Self-reported data", desc: "Companies score themselves. No independent audit trail." },
+                  { type: "con" as const, title: "No direct accountability", desc: "A high ESG score doesn't mean women in your supply chain are safe" },
+                ],
+              },
+              {
+                title: "Traditional Crypto",
+                icon: Coins,
+                pros: [
+                  { type: "pro" as const, title: "Transparent & borderless", desc: "On-chain transactions are public, permanent, global" },
+                ],
+                cons: [
+                  { type: "con" as const, title: "No real-world grounding", desc: "Most tokens have no connection to measurable outcomes" },
+                  { type: "con" as const, title: "Speculative by design", desc: "Value driven by sentiment, not impact" },
+                ],
+              },
+            ].map((system) => (
+              <div key={system.title} className="bg-gradient-card border border-border/40 rounded-2xl p-6 shadow-card">
+                <system.icon className="h-7 w-7 text-accent mb-4" />
+                <h3 className="text-lg font-bold mb-5">{system.title}</h3>
+                <div className="space-y-4">
+                  {system.pros.map((p, i) => <ProCon key={i} {...p} />)}
+                  {system.cons.map((c, i) => <ProCon key={i} {...c} />)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* THE THIRD WAY */}
+        <section className="py-20 bg-card/30 border-y border-border/40">
+          <div className="container max-w-4xl text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              The third way: <span className="text-gradient">outcome-priced capital</span>
+            </h2>
+            <p className="text-muted-foreground text-lg mb-12 max-w-2xl mx-auto">
+              What if the financial return on your investment was mathematically tied to whether
+              women's lives actually improved? Not a promise. Not a report. A formula. On-chain. Auditable.
+            </p>
+            <div className="grid md:grid-cols-3 gap-6 text-left mb-12">
+              {[
+                { icon: Shield, title: "Real data. Independent sources.", desc: "WEI scores are built from UN Women, WHO, World Bank, UNESCO and UNODC — the same databases governments and researchers rely on. Not self-reported. Not curated by issuers." },
+                { icon: TrendingUp, title: "Price moves with outcomes.", desc: "When the global WEI score rises — measurably, verifiably — $SHE tokens are minted. When it falls, tokens are burned. Progress is rewarded. Regression has a price." },
+                { icon: Globe2, title: "Blockchain accountability.", desc: "Every supply change is executed by a smart contract responding to oracle data. No intermediary. No board vote. No PR spin. The chain doesn't lie." },
+              ].map((item) => (
+                <div key={item.title} className="bg-background/40 border border-border/40 rounded-xl p-5">
+                  <item.icon className="h-6 w-6 text-accent mb-3" />
+                  <h3 className="font-semibold mb-2">{item.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* WHY NOW */}
+        <section className="py-20 container max-w-4xl">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why now</h2>
+            <p className="text-muted-foreground">Three forces converging that make 2026 the right moment.</p>
+          </div>
+          <div className="space-y-4">
+            {[
+              { num: "01", title: "Institutional ESG is under pressure to prove impact", desc: "Regulators in the EU, UK and US are demanding ESG funds show measurable outcomes — not just policies. SHEtoken provides the measurement layer that institutional funds currently lack." },
+              { num: "02", title: "Web3 infrastructure is mature enough", desc: "Chainlink oracles can reliably connect real-world data to on-chain contracts. Layer 2 networks make transactions affordable. The infrastructure that didn't exist in 2017 exists now." },
+              { num: "03", title: "The data has never been better", desc: "WHO, UN Women, World Bank and UNODC now publish granular, country-level gender data annually. The WEI can be calculated rigorously across 105 countries. Five years ago this wasn't possible." },
+            ].map((item) => (
+              <div key={item.num} className="flex gap-5 p-6 bg-gradient-card border border-border/40 rounded-2xl shadow-card">
+                <div className="text-4xl font-bold text-accent/30 shrink-0 w-12">{item.num}</div>
+                <div>
+                  <h3 className="font-semibold mb-2">{item.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="py-20 bg-gradient-hero relative overflow-hidden">
+          <div className="absolute inset-0 bg-background/50" />
+          <div className="container max-w-2xl text-center relative z-10">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Hold $SHE. <span className="text-gradient">Hold governments accountable.</span>
+            </h2>
+            <p className="text-muted-foreground mb-8">
+              Join the investors, researchers, NGOs and advocates who are making women's empowerment financially measurable.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90 h-12 px-8">
+                <Link to="/community">Join the community <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="h-12 px-8 border-border/60 bg-card/40 backdrop-blur">
+                <Link to="/dashboard">Explore the data</Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="border-t border-border/40 py-8">
+        <div className="container flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
+          <span>© 2026 SHE Foundation · shetoken.org</span>
+          <div className="flex gap-6">
+            <Link to="/whitepaper" className="hover:text-foreground">Whitepaper</Link>
+            <Link to="/dashboard" className="hover:text-foreground">Live Data</Link>
+            <Link to="/community" className="hover:text-foreground">Community</Link>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}

@@ -862,10 +862,13 @@ export default function Dashboard() {
                       {!isWEI && loadingIndex ? "Loading distribution…" : "No score data available"}
                     </div>
                   ) : (
-                  <ResponsiveContainer width="100%" height="100%">
+                  /* key forces full unmount+remount on index switch, avoiding Recharts
+                     animation interpolation crash when data shape changes (e.g. 8 curves → 1) */
+                  <ResponsiveContainer key={selectedIndex} width="100%" height="100%">
                     <LineChart data={activeDistData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
                       <XAxis
                         dataKey="x"
+                        type="number"
                         domain={[0, 100]}
                         tick={{ fontSize: 10, fill: "hsl(260 15% 50%)" }}
                         tickLine={false}
@@ -879,7 +882,7 @@ export default function Dashboard() {
                           fill: "hsl(260 15% 45%)",
                         }}
                       />
-                      <YAxis hide domain={["auto", "auto"]} />
+                      <YAxis hide domain={[0, "auto"]} />
 
                       {/* Selected country reference line */}
                       {selectedCountry && selectedIndexScore != null && (
@@ -958,6 +961,7 @@ export default function Dashboard() {
                           stroke={p.color}
                           strokeWidth={p.width}
                           dot={false}
+                          isAnimationActive={false}
                           strokeOpacity={isWEI && p.label !== "WEI" ? 0.55 : 1}
                           name={p.label}
                           activeDot={false}

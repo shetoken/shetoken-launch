@@ -333,20 +333,24 @@ export default function Dashboard() {
     if (countries.length > 0) setSelectedCountry((prev) => prev ?? countries[0]);
   }, [countries.length]); // fires once when data arrives; respects subsequent user selections
 
-  /* ── Global averages for each index chip ── */
+  /* ── Global averages for each index chip ──
+   * Prefers pre-computed values from /v1/summary (zero extra requests).
+   * Falls back to client-side mean of the already-loaded index arrays
+   * so the chips populate immediately even before the backend ships the fields.
+   */
   const indexGlobalAvgs = useMemo<Record<IndexKey, number | null>>(() => {
     const [gpiD, sviD, wadiD, weviD, whiD, wviD, compD] = allIndexQueries.map(
       (q) => q.data as IndexScore[] | undefined
     );
     return {
-      WEI:        summary?.global_wei_score ?? null,
-      GPI:        avgScore(gpiD, "gpi_score"),
-      SVI:        avgScore(sviD, "svi_score"),
-      WADI:       avgScore(wadiD, "wadi_score"),
-      WEVI:       avgScore(weviD, "wevi_score"),
-      WHI:        avgScore(whiD, "whi_score"),
-      WVI:        avgScore(wviD, "wvi_score"),
-      Compliance: avgScore(compD, "compliance_score"),
+      WEI:        summary?.global_wei_score          ?? null,
+      GPI:        summary?.gpi_global_avg            ?? avgScore(gpiD,  "gpi_score"),
+      SVI:        summary?.svi_global_avg            ?? avgScore(sviD,  "svi_score"),
+      WADI:       summary?.wadi_global_avg           ?? avgScore(wadiD, "wadi_score"),
+      WEVI:       summary?.wevi_global_avg           ?? avgScore(weviD, "wevi_score"),
+      WHI:        summary?.whi_global_avg            ?? avgScore(whiD,  "whi_score"),
+      WVI:        summary?.wvi_global_avg            ?? avgScore(wviD,  "wvi_score"),
+      Compliance: summary?.compliance_global_avg     ?? avgScore(compD, "compliance_score"),
     };
   }, [summary, allIndexQueries]);
 

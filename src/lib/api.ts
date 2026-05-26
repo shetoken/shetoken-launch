@@ -19,6 +19,18 @@ export interface Summary {
   lowest_country: string;
   lowest_score: number;
   last_updated: string;
+  /**
+   * Pre-computed global averages for the 7 non-WEI indexes.
+   * Added to GET /v1/summary by the data-engine pipeline.
+   * Frontend falls back to client-side averaging until these fields are present.
+   */
+  gpi_global_avg?: number;
+  svi_global_avg?: number;
+  wadi_global_avg?: number;
+  wevi_global_avg?: number;
+  whi_global_avg?: number;
+  wvi_global_avg?: number;
+  compliance_global_avg?: number;
 }
 
 export interface PerformanceSource {

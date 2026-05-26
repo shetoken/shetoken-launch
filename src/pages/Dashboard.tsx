@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { api, CountryWEI, IndexScore } from "@/lib/api";
@@ -306,6 +306,11 @@ export default function Dashboard() {
       .slice(0, 30);
   }, [isWEI, countries, activeIndexData, idxConf.scoreField]);
 
+  /* ── Auto-select the #1 country on initial load ── */
+  useEffect(() => {
+    if (countries.length > 0) setSelectedCountry((prev) => prev ?? countries[0]);
+  }, [countries.length]); // fires once when data arrives; respects subsequent user selections
+
   /* ── Global averages for each index chip ── */
   const indexGlobalAvgs = useMemo<Record<IndexKey, number | null>>(() => {
     const [gpiD, sviD, wadiD, weviD, whiD, wviD, compD] = allIndexQueries.map(
@@ -539,8 +544,9 @@ export default function Dashboard() {
 
             /* ─────────── MAP VIEW ─────────── */
             <div className="flex flex-col gap-5">
-              {/* Map (left, 65%) + Country ranking tiles (right, 35%) */}
-              <div className="order-2 grid xl:grid-cols-12 gap-5 items-start">
+
+              {/* ── Row 1: Map (left) + Selected country panel (right) ── */}
+              <div className="grid xl:grid-cols-12 gap-5 items-start">
 
                 {/* Map column */}
                 <div className="xl:col-span-8">
@@ -550,82 +556,127 @@ export default function Dashboard() {
                     onSelect={setSelectedCountry}
                     scoreOverride={scoreOverride}
                     indexLabel={isWEI ? "WEI" : selectedIndex}
-                    mapHeight={420}
+                    mapHeight={380}
                   />
                 </div>
 
-                {/* Country ranking side list */}
+                {/* Selected country panel */}
                 <div className="xl:col-span-4">
-                  <div className="bg-gradient-card border border-border/40 rounded-2xl overflow-hidden shadow-card">
-                    <div className="px-4 py-3 border-b border-border/20 flex items-center justify-between">
-                      <h3 className="text-sm font-semibold">
-                        {isWEI ? "Country Rankings" : `${selectedIndex} Rankings`}
-                      </h3>
-                      {loadingIndex && !isWEI && (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
-                      )}
-                      {!loadingIndex && (
-                        <span className="text-xs text-muted-foreground">{sideListItems.length} shown</span>
-                      )}
-                    </div>
+                  {selectedCountry ? (
+                    <div className="bg-gradient-card border border-amber-400/30 rounded-2xl p-5 shadow-card relative h-full flex flex-col">
+                      <button
+                        onClick={() => setSelectedCountry(null)}
+                        className="absolute top-3 right-3 p-1 rounded-md hover:bg-muted/20 text-muted-foreground transition-smooth"
+                        aria-label="Deselect country"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
 
-                    <div className="overflow-y-auto" style={{ maxHeight: "420px" }}>
-                      {sideListItems.length === 0 && !loadingIndex && (
-                        <div className="py-8 text-center text-xs text-muted-foreground">
-                          {isWEI ? "No data" : `No ${selectedIndex} data loaded`}
+                      <div className="text-xs text-muted-foreground mb-0.5">
+                        {selectedCountry.region} · Rank #{selectedCountry.rank} of {countries.length}
+                      </div>
+                      <div className="text-2xl font-bold mb-2 leading-tight pr-6">
+                        {selectedCountry.country}
+                      </div>
+
+                      {/* Active index score — shown prominently when non-WEI */}
+                      {!isWEI && (
+                        <div className="mb-3 pb-3 border-b border-border/30">
+                          <div className="text-xs text-muted-foreground mb-0.5">{selectedIndex} Score</div>
+                          <div className="flex items-baseline gap-2">
+                            <span
+                              className="text-4xl font-bold leading-none"
+                              style={{ color: idxConf.accent }}
+                            >
+                              {selectedIndexScore != null ? selectedIndexScore.toFixed(1) : "—"}
+                            </span>
+                            <span className="text-muted-foreground text-sm">/ 100</span>
+                          </div>
+                          {selectedIndexScore == null && (
+                            <p className="text-xs text-muted-foreground/60 mt-1">
+                              Not included in this dataset
+                            </p>
+                          )}
                         </div>
                       )}
-                      {sideListItems.map((item, i) => {
-                        const isSelected = item.iso === selectedCountry?.iso_code;
-                        const pct = Math.max(0, Math.min(100, item.score));
-                        const col = item.score >= 70 ? "#10b981" : item.score >= 45 ? "#eab308" : "#ef4444";
-                        return (
-                          <div
-                            key={item.iso}
-                            onClick={() => item.weiData && setSelectedCountry(item.weiData)}
-                            className={`flex items-center gap-2.5 px-4 py-2.5 border-b border-border/10 text-xs transition-smooth
-                              ${item.weiData ? "cursor-pointer hover:bg-card/60" : "cursor-default opacity-60"}
-                              ${isSelected ? "bg-amber-400/10" : ""}`}
-                          >
-                            <span className="w-5 text-right text-muted-foreground/60 shrink-0 tabular-nums">{i + 1}</span>
-                            <div className="flex-1 min-w-0">
-                              <div className="font-medium truncate leading-snug">{item.country}</div>
-                              <div className="h-1 bg-muted rounded-full mt-1 overflow-hidden">
+
+                      {/* WEI score */}
+                      <div className="flex items-baseline gap-2 mb-1">
+                        <span className={`font-bold text-gradient leading-none ${!isWEI ? "text-3xl" : "text-5xl"}`}>
+                          {selectedCountry.wei_score.toFixed(1)}
+                        </span>
+                        <span className="text-muted-foreground text-sm">
+                          {!isWEI ? "WEI" : ""} / 100
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${
+                          selectedCountry.tier === 1 ? "text-emerald-400 border-emerald-400/30 bg-emerald-400/10" :
+                          selectedCountry.tier === 2 ? "text-yellow-400 border-yellow-400/30 bg-yellow-400/10" :
+                          selectedCountry.tier === 3 ? "text-orange-400 border-orange-400/30 bg-orange-400/10" :
+                                                       "text-red-400 border-red-400/30 bg-red-400/10"
+                        }`}>
+                          Tier {selectedCountry.tier} · {TIER_LABELS[selectedCountry.tier]?.label}
+                        </span>
+                        <span className="text-xs font-mono text-accent bg-accent/10 px-2 py-0.5 rounded">
+                          {selectedCountry.ticker}
+                        </span>
+                      </div>
+
+                      {/* WEI pillar mini-bars */}
+                      <div className="space-y-2 flex-1">
+                        {[
+                          { key: "empowerment_score",    label: "Empowerment", bar: "bg-purple-500" },
+                          { key: "education_score",      label: "Education",   bar: "bg-blue-500" },
+                          { key: "economic_score",       label: "Economic",    bar: "bg-yellow-500" },
+                          { key: "health_score",         label: "Health",      bar: "bg-pink-500" },
+                          { key: "safety_justice_score", label: "Safety",      bar: "bg-red-500" },
+                        ].map((p) => {
+                          const v = (selectedCountry[p.key as keyof CountryWEI] as number) ?? 0;
+                          return (
+                            <div key={p.key}>
+                              <div className="flex justify-between text-xs mb-0.5">
+                                <span className="text-muted-foreground">{p.label}</span>
+                                <span className="font-medium tabular-nums">{v.toFixed(1)}</span>
+                              </div>
+                              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                                 <div
-                                  className="h-full rounded-full transition-all duration-500"
-                                  style={{ width: `${pct}%`, backgroundColor: col }}
+                                  className={`h-full ${p.bar} rounded-full transition-all duration-500`}
+                                  style={{ width: `${Math.min(100, v)}%` }}
                                 />
                               </div>
                             </div>
-                            <span className="font-bold tabular-nums shrink-0 text-[11px]" style={{ color: col }}>
-                              {item.score.toFixed(1)}
-                            </span>
-                            {isSelected && (
-                              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
+                          );
+                        })}
+                      </div>
 
-                    {/* Compare CTA */}
-                    <div className="px-4 py-3 border-t border-border/20">
-                      <Link
-                        to="/compare"
-                        className="flex items-center justify-center gap-1.5 text-xs text-accent hover:text-accent/80 transition-smooth font-medium"
-                      >
-                        Compare countries side-by-side <ArrowRight className="h-3 w-3" />
+                      <Link to={`/country/${selectedCountry.iso_code}`} className="mt-5 block">
+                        <Button
+                          size="sm"
+                          className="w-full bg-gradient-primary text-primary-foreground border-0 shadow-gold hover:opacity-90"
+                        >
+                          Full country profile <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                        </Button>
                       </Link>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="bg-gradient-card border border-dashed border-border/40 rounded-2xl p-6 h-full flex flex-col items-center justify-center text-center gap-3">
+                      <Globe2 className="h-10 w-10 text-muted-foreground/30" />
+                      <p className="text-sm text-muted-foreground leading-relaxed max-w-[200px]">
+                        Click any country on the map to see its{" "}
+                        {isWEI ? "WEI scores" : `${selectedIndex} score`} and pillar breakdown
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* ── Distribution + Selected country panel ── */}
-              <div className="order-1 grid md:grid-cols-5 gap-5">
+              {/* ── Row 2: KDE distribution (left) + Country rankings (right) ── */}
+              <div className="grid xl:grid-cols-12 gap-5 items-start">
 
                 {/* Distribution KDE chart */}
-                <div className="md:col-span-3 bg-gradient-card border border-border/40 rounded-2xl p-5 shadow-card">
+                <div className="xl:col-span-8 bg-gradient-card border border-border/40 rounded-2xl p-5 shadow-card">
                   <div className="flex items-center justify-between mb-1">
                     <h3 className="text-sm font-semibold">
                       {isWEI
@@ -735,115 +786,70 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Selected country panel */}
-                <div className="md:col-span-2">
-                  {selectedCountry ? (
-                    <div className="bg-gradient-card border border-amber-400/30 rounded-2xl p-5 shadow-card relative h-full flex flex-col">
-                      <button
-                        onClick={() => setSelectedCountry(null)}
-                        className="absolute top-3 right-3 p-1 rounded-md hover:bg-muted/20 text-muted-foreground transition-smooth"
-                        aria-label="Deselect country"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
+                {/* Country ranking side list */}
+                <div className="xl:col-span-4">
+                  <div className="bg-gradient-card border border-border/40 rounded-2xl overflow-hidden shadow-card">
+                    <div className="px-4 py-3 border-b border-border/20 flex items-center justify-between">
+                      <h3 className="text-sm font-semibold">
+                        {isWEI ? "Country Rankings" : `${selectedIndex} Rankings`}
+                      </h3>
+                      {loadingIndex && !isWEI && (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                      )}
+                      {!loadingIndex && (
+                        <span className="text-xs text-muted-foreground">{sideListItems.length} shown</span>
+                      )}
+                    </div>
 
-                      <div className="text-xs text-muted-foreground mb-0.5">
-                        {selectedCountry.region} · Rank #{selectedCountry.rank} of {countries.length}
-                      </div>
-                      <div className="text-2xl font-bold mb-2 leading-tight pr-6">
-                        {selectedCountry.country}
-                      </div>
-
-                      {/* Active index score — shown prominently when non-WEI */}
-                      {!isWEI && (
-                        <div className="mb-3 pb-3 border-b border-border/30">
-                          <div className="text-xs text-muted-foreground mb-0.5">{selectedIndex} Score</div>
-                          <div className="flex items-baseline gap-2">
-                            <span
-                              className="text-4xl font-bold leading-none"
-                              style={{ color: idxConf.accent }}
-                            >
-                              {selectedIndexScore != null ? selectedIndexScore.toFixed(1) : "—"}
-                            </span>
-                            <span className="text-muted-foreground text-sm">/ 100</span>
-                          </div>
-                          {selectedIndexScore == null && (
-                            <p className="text-xs text-muted-foreground/60 mt-1">
-                              Not included in this dataset
-                            </p>
-                          )}
+                    <div className="overflow-y-auto" style={{ maxHeight: "380px" }}>
+                      {sideListItems.length === 0 && !loadingIndex && (
+                        <div className="py-8 text-center text-xs text-muted-foreground">
+                          {isWEI ? "No data" : `No ${selectedIndex} data loaded`}
                         </div>
                       )}
-
-                      {/* WEI score */}
-                      <div className="flex items-baseline gap-2 mb-1">
-                        <span className={`font-bold text-gradient leading-none ${!isWEI ? "text-3xl" : "text-5xl"}`}>
-                          {selectedCountry.wei_score.toFixed(1)}
-                        </span>
-                        <span className="text-muted-foreground text-sm">
-                          {!isWEI ? "WEI" : ""} / 100
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2 mb-4">
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${
-                          selectedCountry.tier === 1 ? "text-emerald-400 border-emerald-400/30 bg-emerald-400/10" :
-                          selectedCountry.tier === 2 ? "text-yellow-400 border-yellow-400/30 bg-yellow-400/10" :
-                          selectedCountry.tier === 3 ? "text-orange-400 border-orange-400/30 bg-orange-400/10" :
-                                                       "text-red-400 border-red-400/30 bg-red-400/10"
-                        }`}>
-                          Tier {selectedCountry.tier} · {TIER_LABELS[selectedCountry.tier]?.label}
-                        </span>
-                        <span className="text-xs font-mono text-accent bg-accent/10 px-2 py-0.5 rounded">
-                          {selectedCountry.ticker}
-                        </span>
-                      </div>
-
-                      {/* WEI pillar mini-bars */}
-                      <div className="space-y-2 flex-1">
-                        {[
-                          { key: "empowerment_score",    label: "Empowerment", bar: "bg-purple-500" },
-                          { key: "education_score",      label: "Education",   bar: "bg-blue-500" },
-                          { key: "economic_score",       label: "Economic",    bar: "bg-yellow-500" },
-                          { key: "health_score",         label: "Health",      bar: "bg-pink-500" },
-                          { key: "safety_justice_score", label: "Safety",      bar: "bg-red-500" },
-                        ].map((p) => {
-                          const v = (selectedCountry[p.key as keyof CountryWEI] as number) ?? 0;
-                          return (
-                            <div key={p.key}>
-                              <div className="flex justify-between text-xs mb-0.5">
-                                <span className="text-muted-foreground">{p.label}</span>
-                                <span className="font-medium tabular-nums">{v.toFixed(1)}</span>
-                              </div>
-                              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                      {sideListItems.map((item, i) => {
+                        const isSelected = item.iso === selectedCountry?.iso_code;
+                        const pct = Math.max(0, Math.min(100, item.score));
+                        const col = item.score >= 70 ? "#10b981" : item.score >= 45 ? "#eab308" : "#ef4444";
+                        return (
+                          <div
+                            key={item.iso}
+                            onClick={() => item.weiData && setSelectedCountry(item.weiData)}
+                            className={`flex items-center gap-2.5 px-4 py-2.5 border-b border-border/10 text-xs transition-smooth
+                              ${item.weiData ? "cursor-pointer hover:bg-card/60" : "cursor-default opacity-60"}
+                              ${isSelected ? "bg-amber-400/10" : ""}`}
+                          >
+                            <span className="w-5 text-right text-muted-foreground/60 shrink-0 tabular-nums">{i + 1}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium truncate leading-snug">{item.country}</div>
+                              <div className="h-1 bg-muted rounded-full mt-1 overflow-hidden">
                                 <div
-                                  className={`h-full ${p.bar} rounded-full transition-all duration-500`}
-                                  style={{ width: `${Math.min(100, v)}%` }}
+                                  className="h-full rounded-full transition-all duration-500"
+                                  style={{ width: `${pct}%`, backgroundColor: col }}
                                 />
                               </div>
                             </div>
-                          );
-                        })}
-                      </div>
+                            <span className="font-bold tabular-nums shrink-0 text-[11px]" style={{ color: col }}>
+                              {item.score.toFixed(1)}
+                            </span>
+                            {isSelected && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
 
-                      <Link to={`/country/${selectedCountry.iso_code}`} className="mt-5 block">
-                        <Button
-                          size="sm"
-                          className="w-full bg-gradient-primary text-primary-foreground border-0 shadow-gold hover:opacity-90"
-                        >
-                          Full country profile <ArrowRight className="h-3.5 w-3.5 ml-1" />
-                        </Button>
+                    {/* Compare CTA */}
+                    <div className="px-4 py-3 border-t border-border/20">
+                      <Link
+                        to="/compare"
+                        className="flex items-center justify-center gap-1.5 text-xs text-accent hover:text-accent/80 transition-smooth font-medium"
+                      >
+                        Compare countries side-by-side <ArrowRight className="h-3 w-3" />
                       </Link>
                     </div>
-                  ) : (
-                    <div className="bg-gradient-card border border-dashed border-border/40 rounded-2xl p-6 h-full flex flex-col items-center justify-center text-center gap-3">
-                      <Globe2 className="h-10 w-10 text-muted-foreground/30" />
-                      <p className="text-sm text-muted-foreground leading-relaxed max-w-[200px]">
-                        Click any country on the map to see its{" "}
-                        {isWEI ? "WEI scores" : `${selectedIndex} score`} and position on the distribution curve
-                      </p>
-                    </div>
-                  )}
+                  </div>
                 </div>
               </div>
             </div>

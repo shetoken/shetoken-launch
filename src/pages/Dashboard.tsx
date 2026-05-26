@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueries } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { api, CountryWEI, IndexScore } from "@/lib/api";
 import { SEO } from "@/lib/seo";
@@ -163,6 +163,15 @@ function ScoreBar({ value, color = "" }: { value: number; color?: string }) {
 type SortKey = "rank" | "wei_score" | "country";
 type ViewMode = "map" | "table";
 
+/* ── Global average helper ── */
+function avgScore(data: IndexScore[] | undefined, field: string): number | null {
+  if (!data?.length) return null;
+  const vals = data
+    .map((r) => (r[field] as number | undefined) ?? (r.score as number | undefined))
+    .filter((v): v is number => v != null && !isNaN(v));
+  return vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : null;
+}
+
 /* ════════════════════════════════════════════ */
 export default function Dashboard() {
   const [search, setSearch]                   = useState("");
@@ -207,6 +216,19 @@ export default function Dashboard() {
     },
     enabled:   !isWEI,
     staleTime: 10 * 60 * 1000,
+  });
+
+  /* ── Eager-load all non-WEI indexes for global average computation ── */
+  const allIndexQueries = useQueries({
+    queries: [
+      { queryKey: ["index-data", "GPI"],        queryFn: () => api.gpi.all(),              staleTime: 10 * 60 * 1000 },
+      { queryKey: ["index-data", "SVI"],        queryFn: () => api.svi.all(),              staleTime: 10 * 60 * 1000 },
+      { queryKey: ["index-data", "WADI"],       queryFn: () => api.wadi.all(),             staleTime: 10 * 60 * 1000 },
+      { queryKey: ["index-data", "WEVI"],       queryFn: () => api.wevi.all(),             staleTime: 10 * 60 * 1000 },
+      { queryKey: ["index-data", "WHI"],        queryFn: () => api.whi.all(),              staleTime: 10 * 60 * 1000 },
+      { queryKey: ["index-data", "WVI"],        queryFn: () => api.wvi.all(),              staleTime: 10 * 60 * 1000 },
+      { queryKey: ["index-data", "Compliance"], queryFn: () => api.compliance.countries(), staleTime: 10 * 60 * 1000 },
+    ],
   });
 
   /* ── Build scoreOverride map for the active non-WEI index ── */
@@ -283,6 +305,23 @@ export default function Dashboard() {
       .sort((a, b) => b.score - a.score)
       .slice(0, 30);
   }, [isWEI, countries, activeIndexData, idxConf.scoreField]);
+
+  /* ── Global averages for each index chip ── */
+  const indexGlobalAvgs = useMemo<Record<IndexKey, number | null>>(() => {
+    const [gpiD, sviD, wadiD, weviD, whiD, wviD, compD] = allIndexQueries.map(
+      (q) => q.data as IndexScore[] | undefined
+    );
+    return {
+      WEI:        summary?.global_wei_score ?? null,
+      GPI:        avgScore(gpiD, "gpi_score"),
+      SVI:        avgScore(sviD, "svi_score"),
+      WADI:       avgScore(wadiD, "wadi_score"),
+      WEVI:       avgScore(weviD, "wevi_score"),
+      WHI:        avgScore(whiD, "whi_score"),
+      WVI:        avgScore(wviD, "wvi_score"),
+      Compliance: avgScore(compD, "compliance_score"),
+    };
+  }, [summary, allIndexQueries]);
 
   /* ── Table filtering / sorting ── */
   const filtered = countries
@@ -385,9 +424,9 @@ export default function Dashboard() {
                   key={idx.label}
                   onClick={() => setSelectedIndex(idx.label)}
                   title={
-                    idx.label === "WEI"
-                      ? `Women's Empowerment Index · global average: ${summary?.global_wei_score ?? "loading"}`
-                      : `Click to view ${idx.desc} (${idx.label}) on the map and chart. Global average not computed — explore by country.`
+                    indexGlobalAvgs[idx.label] != null
+                      ? `${idx.desc} (${idx.label}) · global average: ${indexGlobalAvgs[idx.label]!.toFixed(1)}`
+                      : `${idx.desc} (${idx.label}) · global average loading…`
                   }
                   className={`shrink-0 border rounded-xl px-4 py-2.5 text-xs text-left transition-all duration-200 ${idx.tailwind} ${
                     isActive
@@ -402,11 +441,9 @@ export default function Dashboard() {
                     )}
                   </div>
                   <div className="font-semibold text-lg leading-tight mt-0.5">
-                    {idx.label === "WEI" && summary?.global_wei_score != null
-                      ? summary.global_wei_score.toFixed(1)
-                      : isActive && !isWEI && !loadingIndex && activeIndexData?.length
-                        ? `${activeIndexData.length} ctys`   // show country count when loaded
-                        : "—"}
+                    {indexGlobalAvgs[idx.label] != null
+                      ? indexGlobalAvgs[idx.label]!.toFixed(1)
+                      : "—"}
                   </div>
                   <div className="opacity-80 whitespace-nowrap mt-0.5 text-[11px]">{idx.desc}</div>
                 </button>
@@ -425,7 +462,12 @@ export default function Dashboard() {
               ) : (
                 <>
                   <span className="font-medium" style={{ color: idxConf.accent }}>{selectedIndex}</span>
-                  <span>· {idxConf.desc} · {activeCountryCount} countries · global avg not computed</span>
+                  <span>
+                    · {idxConf.desc} · {activeCountryCount} countries
+                    {indexGlobalAvgs[selectedIndex] != null
+                      ? ` · global avg ${indexGlobalAvgs[selectedIndex]!.toFixed(1)}`
+                      : " · global avg computing…"}
+                  </span>
                   <span className="text-border/60">·</span>
                   <button
                     onClick={() => setSelectedIndex("WEI")}
@@ -496,9 +538,9 @@ export default function Dashboard() {
           ) : view === "map" ? (
 
             /* ─────────── MAP VIEW ─────────── */
-            <>
+            <div className="flex flex-col gap-5">
               {/* Map (left, 65%) + Country ranking tiles (right, 35%) */}
-              <div className="grid xl:grid-cols-12 gap-5 items-start">
+              <div className="order-2 grid xl:grid-cols-12 gap-5 items-start">
 
                 {/* Map column */}
                 <div className="xl:col-span-8">
@@ -580,7 +622,7 @@ export default function Dashboard() {
               </div>
 
               {/* ── Distribution + Selected country panel ── */}
-              <div className="mt-6 grid md:grid-cols-5 gap-5">
+              <div className="order-1 grid md:grid-cols-5 gap-5">
 
                 {/* Distribution KDE chart */}
                 <div className="md:col-span-3 bg-gradient-card border border-border/40 rounded-2xl p-5 shadow-card">
@@ -804,7 +846,7 @@ export default function Dashboard() {
                   )}
                 </div>
               </div>
-            </>
+            </div>
 
           ) : (
 

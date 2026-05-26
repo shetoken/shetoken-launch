@@ -753,20 +753,55 @@ export default function Dashboard() {
                       )}
 
                       <ReTooltip
-                        contentStyle={{
-                          background: "hsl(260 35% 9%)",
-                          border: "1px solid hsl(260 30% 20%)",
-                          borderRadius: 8,
-                          fontSize: 11,
-                          padding: "6px 10px",
+                        content={({ active, payload, label }) => {
+                          if (!active || !payload?.length || label == null) return null;
+                          const score = Number(label);
+
+                          // Build a flat list of { name, iso, s } for the active index
+                          type CountryPoint = { name: string; iso: string; s: number };
+                          const pts: CountryPoint[] = isWEI
+                            ? countries.map((c) => ({ name: c.country, iso: c.iso_code, s: c.wei_score }))
+                            : (activeIndexData ?? [])
+                                .map((r) => ({
+                                  name: String(r.country ?? r.iso_code ?? ""),
+                                  iso: String(r.iso_code ?? ""),
+                                  s: ((r[idxConf.scoreField] as number | undefined) ??
+                                      (r.score as number | undefined) ?? 0),
+                                }))
+                                .filter((r) => r.s > 0);
+
+                          // 5 nearest countries to the hovered score
+                          const near = [...pts]
+                            .sort((a, b) => Math.abs(a.s - score) - Math.abs(b.s - score))
+                            .slice(0, 5);
+
+                          return (
+                            <div style={{ background: "hsl(260 35% 9%)", border: "1px solid hsl(260 30% 20%)", borderRadius: 8, padding: "9px 13px", fontSize: 11, maxWidth: 230 }}>
+                              <p style={{ color: "hsl(40 30% 96%)", fontWeight: 700, marginBottom: 5 }}>
+                                Score ≈ {score}
+                              </p>
+                              {payload.map((p) => (
+                                <p key={String(p.dataKey)} style={{ color: String(p.stroke ?? p.color), marginBottom: 2 }}>
+                                  {String(p.name)}: {((Number(p.value)) * 100).toFixed(1)}% density
+                                </p>
+                              ))}
+                              {near.length > 0 && (
+                                <>
+                                  <div style={{ borderTop: "1px solid hsl(260 30% 22%)", margin: "6px 0 5px" }} />
+                                  <p style={{ color: "hsl(260 15% 55%)", fontSize: 10, marginBottom: 4 }}>
+                                    Countries near this score:
+                                  </p>
+                                  {near.map((c) => (
+                                    <p key={c.iso} style={{ color: "hsl(40 30% 85%)", marginBottom: 2 }}>
+                                      {c.name}{" "}
+                                      <span style={{ color: "hsl(260 15% 55%)" }}>({c.s.toFixed(1)})</span>
+                                    </p>
+                                  ))}
+                                </>
+                              )}
+                            </div>
+                          );
                         }}
-                        labelStyle={{ color: "hsl(40 30% 96%)", fontWeight: 600 }}
-                        labelFormatter={(x) => `Score: ${x}`}
-                        formatter={(v: number, name: string) => [
-                          `${(v * 100).toFixed(1)}%`,
-                          name,
-                        ]}
-                        itemStyle={{ padding: "1px 0" }}
                       />
 
                       {activeDistPillars.map((p) => (

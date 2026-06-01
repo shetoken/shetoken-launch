@@ -58,6 +58,7 @@ const SRC = {
   rsf:       { name: "RSF Press Freedom",   url: "https://rsf.org/en/index" },
   unicef:    { name: "UNICEF Data",         url: "https://data.unicef.org" },
   nfhs:      { name: "NFHS-5 (India)",      url: "http://rchiips.org/nfhs/" },
+  ncrb:      { name: "NCRB Crime in India", url: "https://www.ncrb.gov.in/crime-in-india" },
 } as const;
 
 export const METHODOLOGY: Record<string, IndexMethodology> = {
@@ -169,7 +170,7 @@ export const METHODOLOGY: Record<string, IndexMethodology> = {
     formula: "Prevalence, legal protection & support services → normalised 0–100 (higher = safer)",
     components: [
       { label: "WHO lifetime prevalence", field: "who_lifetime_prevalence_pct",   unit: "%",     source: SRC.who.name },
-      { label: "Reported rate",           field: "unodc_reported_rate_per_100k",   unit: "/100k", source: SRC.unodc.name },
+      { label: "Reported rate",           field: "unodc_reported_rate_per_100k",   unit: "/100k", source: "UNODC / NCRB" },
       { label: "Reporting gap",           field: "reporting_gap_pct",              unit: "%",     source: SRC.unodc.name },
       { label: "Est. actual rate",        field: "estimated_actual_rate_per_100k", unit: "/100k", source: SRC.who.name },
       { label: "Marital rape criminalised", field: "marital_rape_criminalised",    unit: "0/1",   source: SRC.unwomen.name },
@@ -177,8 +178,8 @@ export const METHODOLOGY: Record<string, IndexMethodology> = {
       { label: "Legal framework",         field: "legal_framework_score",          unit: "/10",   source: SRC.unwomen.name },
       { label: "Support services",        field: "support_services_score",         unit: "/10",   source: SRC.who.name },
     ],
-    sources: [SRC.who, SRC.unodc, SRC.unwomen],
-    note: "Higher score = safer. Combines prevalence surveys, reporting gaps, legal protection and survivor support. Exact sub-weights in methodology v3.0.",
+    sources: [SRC.who, SRC.unodc, SRC.unwomen, SRC.ncrb],
+    note: "Higher score = safer. Combines prevalence surveys, reporting gaps, legal protection and survivor support. India's reported-crime figures are anchored to NCRB 'Crime in India'. Exact sub-weights in methodology v3.0.",
     vintage: "2025 edition · WHO / UNODC releases 2018–2024",
   },
 

@@ -13,6 +13,7 @@ import {
   Info, AlertCircle, Users, ShieldAlert, ExternalLink, Cpu
 } from "lucide-react";
 import { PerformanceSource } from "@/lib/api";
+import { MethodologyPanel } from "@/components/MethodologyPanel";
 
 /* ── Pillar definitions with global-average and improvement lever ── */
 const PILLAR_COLS: Array<{
@@ -250,6 +251,7 @@ const TIER_INFO: Record<number, { label: string; color: string; desc: string }> 
 export default function CountryDetail() {
   const { iso } = useParams<{ iso: string }>();
   const navigate = useNavigate();
+  const [openMethod, setOpenMethod] = useState<string | null>(null);
 
   const { data: country, isLoading: loadingCountry, error: countryError } = useQuery({
     queryKey: ["country", iso],
@@ -386,15 +388,20 @@ export default function CountryDetail() {
               <h2 className="text-xl font-bold mb-1">8-Index Scorecard</h2>
               <p className="text-xs text-muted-foreground mb-4 flex items-center gap-1">
                 <Info className="h-3 w-3" />
-                These are 8 separate SheToken indexes — not WEI sub-pillars. WEI is the composite score.
+                These are 8 separate SheToken indexes — not WEI sub-pillars. Click any tile to see how its score is calculated and the data sources.
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
                 {/* WEI tile */}
-                <div className="bg-gradient-card border border-amber-400/30 rounded-xl p-3 text-center shadow-card">
+                <button
+                  onClick={() => setOpenMethod(openMethod === "WEI" ? null : "WEI")}
+                  className={`bg-gradient-card border rounded-xl p-3 text-center shadow-card transition-all hover:scale-[1.03] cursor-pointer ${
+                    openMethod === "WEI" ? "ring-2 ring-amber-400 border-amber-400/60" : "border-amber-400/30"
+                  }`}
+                >
                   <div className="text-[10px] font-bold font-mono text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded px-1.5 py-0.5 inline-block mb-2">WEI</div>
                   <div className="text-2xl font-bold text-gradient leading-none mb-1">{country.wei_score?.toFixed(1)}</div>
                   <div className="text-[10px] text-muted-foreground leading-tight">Women's<br />Empowerment</div>
-                </div>
+                </button>
 
                 {/* External index tiles */}
                 {INDEX_STRIP.map((idx, i) => {
@@ -404,11 +411,13 @@ export default function CountryDetail() {
                     ? ((raw[idx.scoreField as keyof typeof raw] as number | undefined) ??
                        (raw.score as number | undefined))
                     : null;
+                  const isOpen = openMethod === idx.code;
                   return (
-                    <div
+                    <button
                       key={idx.code}
-                      className="bg-gradient-card border border-border/40 rounded-xl p-3 text-center shadow-card"
-                      style={{ borderColor: `${idx.accent}33` }}
+                      onClick={() => setOpenMethod(isOpen ? null : idx.code)}
+                      className={`bg-gradient-card border rounded-xl p-3 text-center shadow-card transition-all hover:scale-[1.03] cursor-pointer ${isOpen ? "ring-2" : ""}`}
+                      style={{ borderColor: `${idx.accent}${isOpen ? "99" : "33"}`, ...(isOpen ? { boxShadow: `0 0 0 2px ${idx.accent}` } : {}) }}
                     >
                       <div
                         className="text-[10px] font-bold font-mono rounded px-1.5 py-0.5 inline-block mb-2 border"
@@ -420,10 +429,24 @@ export default function CountryDetail() {
                         {q.isLoading ? "…" : score != null ? score.toFixed(1) : "—"}
                       </div>
                       <div className="text-[10px] text-muted-foreground leading-tight">{idx.label}</div>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
+
+              {/* Methodology breakdown for the clicked index */}
+              {openMethod && (
+                <MethodologyPanel
+                  code={openMethod}
+                  country={country.country}
+                  row={
+                    openMethod === "WEI"
+                      ? (country as unknown as Record<string, unknown>)
+                      : (indexQueries[INDEX_STRIP.findIndex((x) => x.code === openMethod)]?.data as Record<string, unknown> | undefined)
+                  }
+                  onClose={() => setOpenMethod(null)}
+                />
+              )}
             </section>
 
             {/* PERFORMANCE SUMMARY — SLM blurb when available, template fallback */}

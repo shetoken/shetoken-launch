@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { WorldMap } from "@/components/WorldMap";
 import {
   ArrowRight, ArrowUpDown, TrendingUp, TrendingDown,
-  Search, Globe2, Sparkles, AlertCircle, Map, List, X, Loader2,
+  Search, Globe2, Sparkles, AlertCircle, Map as MapIcon, List, X, Loader2,
   Activity, Zap,
 } from "lucide-react";
 
@@ -42,6 +42,9 @@ interface IndexConfig {
   tailwind: string;      // Tailwind classes: text + border + bg
   accent: string;        // Hex colour for the KDE curve
   scoreField: string;    // Field name in the IndexScore rows from the API
+  title: string;         // Full index name for the tooltip header
+  formula: { label: string; weight?: string }[];  // Methodology components
+  note: string;          // Footer note explaining how the index is built
 }
 
 const INDEX_CONFIGS: IndexConfig[] = [
@@ -49,41 +52,125 @@ const INDEX_CONFIGS: IndexConfig[] = [
     label: "WEI", desc: "Women's Empowerment",
     tailwind: "text-amber-400  border-amber-400/30  bg-amber-400/5",
     accent: "#f59e0b", scoreField: "wei_score",
+    title: "Women's Empowerment Index",
+    formula: [
+      { label: "Empowerment",      weight: "×15%" },
+      { label: "Bodily Autonomy",  weight: "×15%" },
+      { label: "Safety & Justice", weight: "×14%" },
+      { label: "Education",        weight: "×12%" },
+      { label: "Economic",         weight: "×12%" },
+      { label: "Health",           weight: "×12%" },
+      { label: "Dignity & Welfare",weight: "×10%" },
+      { label: "Digital & Social", weight: "×10%" },
+      { label: "− Violence Penalty",weight: "×10%" },
+    ],
+    note: "SHEtoken's native index. 8 weighted pillars minus a violence penalty, all sub-scores normalised 0–100. The 7 cards to the right are external comparison indexes.",
   },
   {
     label: "GPI", desc: "Gender Poverty",
     tailwind: "text-purple-400 border-purple-400/30 bg-purple-400/5",
     accent: "#a855f7", scoreField: "gpi_score",
+    title: "Gender Poverty Index",
+    formula: [
+      { label: "Income poverty (F:M)" },
+      { label: "Wealth gap" },
+      { label: "Wage gap" },
+      { label: "Labour participation" },
+      { label: "Financial inclusion" },
+      { label: "Food security" },
+      { label: "Time poverty (unpaid care)" },
+      { label: "Land ownership" },
+      { label: "Social protection" },
+    ],
+    note: "Measures female economic deprivation relative to men across 9 indicators. Sources: World Bank, ILO, OECD.",
   },
   {
     label: "SVI", desc: "Sexual Violence",
     tailwind: "text-red-400    border-red-400/30    bg-red-400/5",
     accent: "#ef4444", scoreField: "svi_score",
+    title: "Sexual Violence Index",
+    formula: [
+      { label: "WHO lifetime prevalence" },
+      { label: "UNODC reported rate" },
+      { label: "Reporting gap" },
+      { label: "Marital rape criminalised" },
+      { label: "Conflict-related SV risk" },
+      { label: "Digital sexual violence" },
+      { label: "Legal framework" },
+      { label: "Support services" },
+    ],
+    note: "Higher score = safer. Combines prevalence, legal protection and support services. Sources: WHO, UNODC.",
   },
   {
     label: "WADI", desc: "AI Displacement",
     tailwind: "text-blue-400   border-blue-400/30   bg-blue-400/5",
     accent: "#3b82f6", scoreField: "wadi_score",
+    title: "Women & AI Displacement Index",
+    formula: [
+      { label: "Automation exposure" },
+      { label: "Female sector concentration" },
+      { label: "Reskilling access" },
+      { label: "Digital skills gap" },
+      { label: "AI-policy inclusion" },
+    ],
+    note: "Higher score = more resilient. Estimates how exposed women's jobs are to AI automation and the capacity to adapt. Sources: ILO, OECD, WEF.",
   },
   {
     label: "WEVI", desc: "Widow Vulnerability",
     tailwind: "text-orange-400 border-orange-400/30 bg-orange-400/5",
     accent: "#f97316", scoreField: "wevi_score",
+    title: "Widow Vulnerability Index",
+    formula: [
+      { label: "Inheritance rights" },
+      { label: "Remarriage freedom" },
+      { label: "Property rights" },
+      { label: "Economic support" },
+      { label: "Social protection" },
+    ],
+    note: "Higher score = better protected. Legal and economic status of widows. Sources: UN Women, national law.",
   },
   {
     label: "WHI", desc: "Women's Health",
     tailwind: "text-pink-400   border-pink-400/30   bg-pink-400/5",
     accent: "#ec4899", scoreField: "whi_score",
+    title: "Women's Health Index",
+    formula: [
+      { label: "Depression prevalence" },
+      { label: "Suicide rate" },
+      { label: "Anaemia" },
+      { label: "Menstrual access" },
+      { label: "Contraceptive unmet need" },
+      { label: "Maternal mental-health support" },
+    ],
+    note: "Higher score = healthier. Focus on reproductive and mental health. Sources: WHO, UNICEF.",
   },
   {
     label: "WVI", desc: "Women's Voice",
     tailwind: "text-cyan-400   border-cyan-400/30   bg-cyan-400/5",
     accent: "#06b6d4", scoreField: "wvi_score",
+    title: "Women's Voice Index",
+    formula: [
+      { label: "Parliamentary seats" },
+      { label: "Ministerial roles" },
+      { label: "Local government" },
+      { label: "Civic participation" },
+      { label: "Press & protest freedom" },
+    ],
+    note: "Higher score = louder voice. Political representation and civic freedom. Sources: IPU, V-Dem.",
   },
   {
     label: "Compliance", desc: "Rights Compliance",
     tailwind: "text-emerald-400 border-emerald-400/30 bg-emerald-400/5",
     accent: "#10b981", scoreField: "compliance_score",
+    title: "Rights Compliance Index",
+    formula: [
+      { label: "CEDAW ratification" },
+      { label: "SDG 5 progress" },
+      { label: "Legal frameworks" },
+      { label: "Labour conventions" },
+      { label: "Treaty adherence" },
+    ],
+    note: "Higher score = stronger compliance. Adherence to international women's-rights treaties. Sources: UN, ILO.",
   },
 ];
 
@@ -605,31 +692,38 @@ export default function Dashboard() {
                       <div className="opacity-80 whitespace-nowrap mt-0.5 text-[11px]">{idx.desc}</div>
                     </button>
 
-                    {/* WEI methodology tooltip — shown on hover */}
-                    {isNative && (
-                      <div className="absolute left-0 top-full mt-2 z-50 w-72 hidden group-hover/idx:block">
-                        <div className="bg-card border border-amber-400/30 rounded-xl p-3.5 shadow-xl text-xs">
-                          <p className="font-bold text-amber-400 mb-2">WEI Formula</p>
-                          <div className="space-y-1 text-muted-foreground font-mono text-[10px] leading-relaxed">
-                            <div className="flex justify-between"><span>Empowerment</span><span className="text-amber-400">×15%</span></div>
-                            <div className="flex justify-between"><span>Bodily Autonomy</span><span className="text-amber-400">×15%</span></div>
-                            <div className="flex justify-between"><span>Safety &amp; Justice</span><span className="text-amber-400">×14%</span></div>
-                            <div className="flex justify-between"><span>Education</span><span className="text-amber-400">×12%</span></div>
-                            <div className="flex justify-between"><span>Economic</span><span className="text-amber-400">×12%</span></div>
-                            <div className="flex justify-between"><span>Health</span><span className="text-amber-400">×12%</span></div>
-                            <div className="flex justify-between"><span>Dignity &amp; Welfare</span><span className="text-amber-400">×10%</span></div>
-                            <div className="flex justify-between"><span>Digital &amp; Social</span><span className="text-amber-400">×10%</span></div>
-                            <div className="flex justify-between border-t border-border/30 pt-1 mt-1 text-red-400">
-                              <span>− Violence Penalty</span><span>×10%</span>
-                            </div>
-                          </div>
-                          <p className="text-muted-foreground/60 text-[9px] mt-2">
-                            All sub-scores normalised 0–100. WEI = SHEtoken's native index.
-                            The 7 cards to the right are external comparison indexes.
-                          </p>
+                    {/* Methodology tooltip — shown on hover for every index */}
+                    <div className="absolute left-0 top-full mt-2 z-50 w-72 hidden group-hover/idx:block">
+                      <div
+                        className="bg-card rounded-xl p-3.5 shadow-xl text-xs border"
+                        style={{ borderColor: `${idx.accent}4D` }}
+                      >
+                        <p className="font-bold mb-2" style={{ color: idx.accent }}>
+                          {idx.title}
+                        </p>
+                        <div className="space-y-1 text-muted-foreground font-mono text-[10px] leading-relaxed">
+                          {idx.formula.map((f) => {
+                            const isPenalty = f.label.trim().startsWith("−");
+                            return (
+                              <div
+                                key={f.label}
+                                className={`flex justify-between ${
+                                  isPenalty ? "border-t border-border/30 pt-1 mt-1 text-red-400" : ""
+                                }`}
+                              >
+                                <span>{f.label}</span>
+                                {f.weight && (
+                                  <span style={isPenalty ? undefined : { color: idx.accent }}>
+                                    {f.weight}
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
+                        <p className="text-muted-foreground/60 text-[9px] mt-2">{idx.note}</p>
                       </div>
-                    )}
+                    </div>
                   </div>
                 );
               })}
@@ -691,7 +785,7 @@ export default function Dashboard() {
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  <Map className="h-3.5 w-3.5" /> Map
+                  <MapIcon className="h-3.5 w-3.5" /> Map
                 </button>
                 <button
                   onClick={() => setView("table")}

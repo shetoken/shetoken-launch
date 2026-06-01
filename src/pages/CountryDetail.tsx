@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { api, CountryWEI } from "@/lib/api";
 import { Nav } from "@/components/Nav";
+import { CountrySEO } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -366,6 +367,14 @@ export default function CountryDetail() {
 
   return (
     <div className="min-h-screen bg-background">
+      {country && (
+        <CountrySEO
+          country={country.country}
+          iso={country.iso_code}
+          score={Number(country.wei_score?.toFixed(1) ?? 0)}
+          region={country.region}
+        />
+      )}
       <Nav />
 
       <main className="pt-24 pb-20 container max-w-6xl">

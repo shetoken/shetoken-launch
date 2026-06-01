@@ -42,16 +42,37 @@ export function SEO({
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={image} />
 
-      {/* JSON-LD */}
+      {/* JSON-LD — Organization + the WEI as a citable Dataset */}
       <script type="application/ld+json">{JSON.stringify({
         "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "SHEtoken",
-        "url": BASE_URL,
-        "description": description,
-        "sameAs": [
-          "https://twitter.com/ShetokenDAO",
-          "https://github.com/shetoken",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "name": "SHEtoken",
+            "url": BASE_URL,
+            "description": description,
+            "sameAs": [
+              "https://twitter.com/ShetokenDAO",
+              "https://github.com/shetoken",
+            ],
+          },
+          {
+            "@type": "Dataset",
+            "name": "Women's Empowerment Index (WEI)",
+            "alternateName": "WEI",
+            "description":
+              "Data-backed Women's Empowerment Index scoring 105 countries 0–100 across 8 weighted pillars (empowerment, bodily autonomy, safety & justice, education, economic, health, dignity & welfare, digital & social) minus a violence penalty. Updated weekly from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data.",
+            "url": `${BASE_URL}/dashboard`,
+            "keywords": ["women's empowerment", "gender equality index", "WEI", "gender data", "femicide", "maternal mortality"],
+            "creator": { "@type": "Organization", "name": "SHEtoken" },
+            "license": "https://creativecommons.org/licenses/by/4.0/",
+            "isAccessibleForFree": true,
+            "distribution": [{
+              "@type": "DataDownload",
+              "encodingFormat": "application/json",
+              "contentUrl": "https://api.shetoken.org/v1/wei/countries",
+            }],
+          },
         ],
       })}</script>
     </Helmet>
@@ -61,12 +82,41 @@ export function SEO({
 export function CountrySEO({ country, iso, score, region }: {
   country: string; iso: string; score: number; region: string;
 }) {
+  const url = `${BASE_URL}/country/${iso}`;
+  const title = `${country} Women's Empowerment Index Score 2026 — WEI ${score}`;
+  const description = `${country}'s Women's Empowerment Index (WEI) score is ${score}/100 in 2026. Explore all 8 pillar scores, the 2015–2024 trend, and the Life Path for 100 girls in ${country}. Part of SHEtoken's global gender accountability index covering 105 countries.`;
   return (
-    <SEO
-      title={`${country} Women's Empowerment Index Score 2026 — WEI ${score}`}
-      description={`${country}'s WEI score is ${score}/100 in 2026. Explore all 8 pillar scores, historical trends, and the Life Path for women in ${country}. Part of SHEtoken's global gender accountability index covering 105 countries.`}
-      url={`${BASE_URL}/country/${iso}`}
-      type="article"
-    />
+    <>
+      <SEO title={title} description={description} url={url} type="article" />
+      <Helmet>
+        {/* Per-country Dataset + breadcrumb so the score is citable by AI/search */}
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Dataset",
+              "name": `${country} — Women's Empowerment Index ${new Date().getFullYear()}`,
+              "description": `${country} (${region}) scores ${score}/100 on the SHEtoken Women's Empowerment Index.`,
+              "url": url,
+              "variableMeasured": "Women's Empowerment Index (WEI), 0–100",
+              "creator": { "@type": "Organization", "name": "SHEtoken" },
+              "isAccessibleForFree": true,
+              "distribution": [{
+                "@type": "DataDownload",
+                "encodingFormat": "application/json",
+                "contentUrl": `https://api.shetoken.org/v1/wei/countries/${iso}`,
+              }],
+            },
+            {
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                { "@type": "ListItem", "position": 1, "name": "Dashboard", "item": `${BASE_URL}/dashboard` },
+                { "@type": "ListItem", "position": 2, "name": country, "item": url },
+              ],
+            },
+          ],
+        })}</script>
+      </Helmet>
+    </>
   );
 }

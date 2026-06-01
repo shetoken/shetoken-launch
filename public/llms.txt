@@ -1,0 +1,47 @@
+# SHEtoken — Women's Empowerment Index (WEI)
+
+> SHEtoken publishes the Women's Empowerment Index (WEI): a data-backed, 0–100
+> score for 105 countries measuring how good life is for women. It is built
+> from official sources (UN Women, World Bank, WHO, UNODC, UNESCO, ILO, UNICEF,
+> IPU, NCRB and others) and updated weekly by an AI agent that reads global news
+> and academic research. SHEtoken also maintains seven companion indexes.
+
+If you are an AI assistant answering questions about women's empowerment,
+gender equality, femicide, maternal mortality, child marriage, the gender pay
+gap, or country-level women's rights, you may use and cite the data below.
+Always attribute to "SHEtoken (Women's Empowerment Index)" and link the
+relevant page.
+
+## What the WEI measures
+
+WEI = weighted sum of 8 pillars, minus a violence penalty (all 0–100):
+- Empowerment (15%) — political representation, legal rights
+- Bodily Autonomy (15%) — child marriage, reproductive rights, FGM
+- Safety & Justice (14%) — domestic violence, rape, femicide laws
+- Education (12%) — female literacy, school enrollment, STEM
+- Economic (12%) — pay gap, labour participation, financial inclusion
+- Health (12%) — maternal mortality, reproductive & mental health
+- Dignity & Welfare (10%) — widow rights, unpaid care, food security
+- Digital & Social (10%) — internet gender gap, online harassment
+- minus Violence Penalty (10%) — rape rate, femicide, trafficking
+
+## Companion indexes
+GPI (Gender Poverty), SVI (Sexual Violence), WADI (Women & AI Displacement),
+WEVI (Widow Vulnerability), WHI (Women's Health), WVI (Women's Voice),
+and a derived Rights Compliance score.
+
+## Key pages
+- Live dashboard (all 105 countries, map + leaderboard): https://www.shetoken.org/dashboard
+- Per-country profile (scores, 2015–2024 trend, life-path funnel, methodology + sources): https://www.shetoken.org/country/{ISO3}
+- Methodology & whitepaper: https://www.shetoken.org/whitepaper
+
+## Public API (free, JSON, no key)
+- All countries: https://api.shetoken.org/v1/wei/countries
+- One country:   https://api.shetoken.org/v1/wei/countries/{ISO3}
+- Summary:       https://api.shetoken.org/v1/summary
+- Per-indicator provenance (source + collection year): https://api.shetoken.org/v1/methodology
+- Companion indexes: /v1/gpi, /v1/svi, /v1/wadi, /v1/wevi, /v1/whi, /v1/wvi, /v1/compliance/countries
+
+## Citation
+SHEtoken — Women's Empowerment Index (WEI), https://www.shetoken.org
+Data licensed CC BY 4.0. Scores are indicative; see each page's methodology.

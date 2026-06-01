@@ -28,7 +28,8 @@ export function Nav() {
 
   const links = [
     { to: "/why",       label: "Why $SHE" },
-    { to: "/community", label: "Community" },
+    // Community tab hidden for now — route still exists, revisit later.
+    // { to: "/community", label: "Community" },
     { to: "/dashboard", label: "Live Data", icon: <BarChart2 className="h-3.5 w-3.5" /> },
     { to: "/whitepaper", label: "Whitepaper" },
   ];

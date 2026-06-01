@@ -10,10 +10,11 @@ import {
 } from "recharts";
 import {
   ArrowLeft, BarChart2, TrendingUp, TrendingDown,
-  Info, AlertCircle, Users, ShieldAlert, ExternalLink, Cpu
+  Info, AlertCircle, Users, ShieldAlert, ExternalLink, Cpu, Download
 } from "lucide-react";
 import { PerformanceSource } from "@/lib/api";
 import { MethodologyPanel } from "@/components/MethodologyPanel";
+import { downloadCountryReport } from "@/lib/countryReport";
 
 /* ── Pillar definitions with global-average and improvement lever ── */
 const PILLAR_COLS: Array<{
@@ -308,6 +309,29 @@ export default function CountryDetail() {
   const tierInfo = country ? TIER_INFO[country.tier] : null;
   const vSeverity = country ? violenceSeverity(country.violence_penalty_score ?? 0) : null;
 
+  function handleDownloadPdf() {
+    if (!country) return;
+    const indexes = [
+      { code: "WEI", label: "Women's Empowerment", accent: "#f59e0b", score: country.wei_score ?? null },
+      ...INDEX_STRIP.map((idx, i) => {
+        const raw = indexQueries[i].data as Record<string, unknown> | undefined;
+        const score = raw
+          ? ((raw[idx.scoreField] as number | undefined) ?? (raw.score as number | undefined) ?? null)
+          : null;
+        return { code: idx.code, label: idx.label, accent: idx.accent, score };
+      }),
+    ];
+    downloadCountryReport({
+      country,
+      indexes,
+      trend: chartData.filter((d): d is { year: number; score: number } =>
+        typeof d.year === "number" && typeof d.score === "number"),
+      lifepath: (lifepath?.stages ?? []).map((s) => ({
+        age_band: s.age_band, headline: s.headline, cohort: s.cohort,
+      })),
+    });
+  }
+
   if (countryError) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
@@ -334,12 +358,21 @@ export default function CountryDetail() {
           >
             <ArrowLeft className="h-4 w-4" /> Back
           </button>
-          <Link
-            to={`/compare?countries=${iso}`}
-            className="flex items-center gap-1.5 text-xs text-accent hover:text-accent/80 border border-accent/30 hover:border-accent/60 bg-accent/5 hover:bg-accent/10 rounded-lg px-3 py-1.5 transition-smooth"
-          >
-            <BarChart2 className="h-3.5 w-3.5" /> Compare with another country
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDownloadPdf}
+              disabled={!country}
+              className="flex items-center gap-1.5 text-xs text-accent hover:text-accent/80 border border-accent/30 hover:border-accent/60 bg-accent/5 hover:bg-accent/10 rounded-lg px-3 py-1.5 transition-smooth disabled:opacity-40"
+            >
+              <Download className="h-3.5 w-3.5" /> Download PDF
+            </button>
+            <Link
+              to={`/compare?countries=${iso}`}
+              className="flex items-center gap-1.5 text-xs text-accent hover:text-accent/80 border border-accent/30 hover:border-accent/60 bg-accent/5 hover:bg-accent/10 rounded-lg px-3 py-1.5 transition-smooth"
+            >
+              <BarChart2 className="h-3.5 w-3.5" /> Compare with another country
+            </Link>
+          </div>
         </div>
 
         {loadingCountry ? (

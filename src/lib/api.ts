@@ -90,6 +90,22 @@ export interface CountryListResponse {
   data: CountryWEI[];
 }
 
+export interface StateScore {
+  rank: number;
+  state: string;
+  state_code: string;
+  region?: string;
+  wei_score: number;
+  safety_justice_score?: number;
+  [key: string]: unknown;
+}
+
+export interface StateListResponse {
+  country: string;
+  count: number;
+  data: StateScore[];
+}
+
 export interface CountryHistory {
   iso_code: string;
   country: string;
@@ -187,6 +203,8 @@ export const api = {
       apiFetch<AllCountryHistory>('/v1/wei/history/all-countries'),
     leaderboard: (limit = 10) =>
       apiFetch<CountryWEI[]>(`/v1/wei/leaderboard?limit=${limit}`),
+    states: (country: string) =>
+      apiFetch<StateListResponse>(`/v1/wei/states/${country}`),
   },
 
   gpi: {

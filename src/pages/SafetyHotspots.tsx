@@ -43,6 +43,11 @@ const TIPS = [
   "Trust your instinct — leave any situation that feels unsafe.",
 ];
 
+/* Countries with sub-national (state) safety data: ISO → API name */
+const SUBNATIONAL: Record<string, string> = {
+  IND: "india", USA: "usa", BRA: "brazil", NGA: "nigeria", MEX: "mexico", PAK: "pakistan",
+};
+
 export default function SafetyHotspots() {
   const [search, setSearch] = useState("");
   const [selIso, setSelIso] = useState("IND");
@@ -79,6 +84,18 @@ export default function SafetyHotspots() {
   const adv = sel ? advisoryFor(sel.safety_justice_score ?? 0) : null;
   const helpline = sel ? HELPLINES[sel.iso_code] : undefined;
   const svi = sel ? sviMap.get(sel.iso_code) : undefined;
+
+  // Sub-national (state) drill-down for supported countries
+  const subName = sel ? SUBNATIONAL[sel.iso_code] : undefined;
+  const { data: statesRes, isLoading: loadingStates } = useQuery({
+    queryKey: ["wei-states", subName],
+    queryFn: () => api.wei.states(subName!),
+    enabled: !!subName,
+    staleTime: 30 * 60 * 1000,
+  });
+  const states = useMemo(() =>
+    [...(statesRes?.data ?? [])].sort((a, b) => (a.safety_justice_score ?? 0) - (b.safety_justice_score ?? 0)),
+    [statesRes]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -175,6 +192,35 @@ export default function SafetyHotspots() {
               )}
             </div>
           </div>
+        )}
+
+        {/* Sub-national drill-down — states for supported countries */}
+        {subName && (
+          <section className="mt-8">
+            <h2 className="text-xl font-bold mb-1">Inside {sel?.country} — state advisories</h2>
+            <p className="text-xs text-muted-foreground mb-4">
+              Safety varies hugely within a country. {sel?.country}'s states ranked least safe first.
+            </p>
+            {loadingStates ? (
+              <div className="py-8 text-center text-muted-foreground text-sm">Loading state data…</div>
+            ) : (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {states.map((st) => {
+                  const a = advisoryFor(st.safety_justice_score ?? 0);
+                  return (
+                    <div key={st.state_code} className="rounded-xl border border-border/40 bg-gradient-card p-3 shadow-card">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-semibold text-sm">{st.state}</span>
+                        <span className="w-2.5 h-2.5 rounded-full" style={{ background: a.color }} />
+                      </div>
+                      <div className="text-xs leading-tight" style={{ color: a.color }}>{a.label}</div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5">Safety {Number(st.safety_justice_score ?? 0).toFixed(0)}/100</div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
         )}
 
         {/* Ranked list — least safe first */}

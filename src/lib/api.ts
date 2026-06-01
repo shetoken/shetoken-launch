@@ -131,6 +131,22 @@ export interface AllCountryHistory {
   countries: { iso_code: string; country: string; scores: (number | null)[] }[];
 }
 
+/** Per-country women's vital statistics + weekly estimates (for the She-Clock). */
+export interface VitalStats {
+  country: string;
+  iso_code: string;
+  region: string;
+  life_expectancy_female?: number;
+  maternal_mortality_per_100k?: number;
+  women_killed_by_partner_per_100k?: number;
+  girls_born_per_week_est?: number;
+  maternal_deaths_per_week_est?: number;
+  girls_drop_out_school_per_week_est?: number;
+  girls_married_under18_per_week_est?: number;
+  women_killed_by_partner_per_week_est?: number;
+  [key: string]: unknown;
+}
+
 export interface IndexScore {
   iso_code?: string;
   country?: string;
@@ -207,6 +223,10 @@ export const api = {
   },
 
   lifepath: (iso: string) => apiFetch<Lifepath>(`/v1/lifepath/${iso}`),
+
+  vital: {
+    country: (iso: string) => apiFetch<VitalStats>(`/v1/vital/countries/${iso}`),
+  },
 
   signals: {
     latest: (limit = 50) => apiFetch<IndexScore[]>(`/v1/signals/latest?limit=${limit}`),

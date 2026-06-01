@@ -118,6 +118,20 @@ export interface IndexScore {
   [key: string]: unknown;
 }
 
+/** Per-indicator data provenance from GET /v1/methodology. */
+export interface IndicatorProvenance {
+  source: string;
+  year: string;
+  status: "verified" | "modeled" | "derived";
+}
+export interface MethodologyProvenance {
+  version: string;
+  generated: string;
+  note?: string;
+  /** indexes[indexCode][fieldOrLabel] = provenance */
+  indexes: Record<string, Record<string, IndicatorProvenance>>;
+}
+
 export const api = {
   summary: () => apiFetch<Summary>('/v1/summary'),
 
@@ -178,6 +192,8 @@ export const api = {
 
   scanStats: (weeks = 12) =>
     apiFetch<{ count: number; data: ScanStats[] }>(`/v1/scan-stats?weeks=${weeks}`),
+
+  methodology: () => apiFetch<MethodologyProvenance>('/v1/methodology'),
 
   subscribe: (email: string, tier = 'subscriber') =>
     apiFetch<{ ok: boolean; message: string }>('/v1/subscribe', {

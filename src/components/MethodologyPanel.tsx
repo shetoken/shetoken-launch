@@ -1,11 +1,14 @@
 import { useState, Fragment } from "react";
 import { METHODOLOGY, computeScore } from "@/lib/methodology";
+import type { IndicatorProvenance } from "@/lib/api";
 import { ExternalLink, X, ChevronRight, ChevronDown, Layers, CalendarClock } from "lucide-react";
 
 interface Props {
   code: string;
   row: Record<string, unknown> | null | undefined;
   country: string;
+  /** provenance.indexes[code] — per-indicator source + year, keyed by field name or indicator label */
+  provenance?: Record<string, IndicatorProvenance>;
   onClose: () => void;
 }
 
@@ -14,10 +17,22 @@ interface Props {
  * Shows the formula, that country's actual sub-component inputs, the reproduced
  * total (for weighted/average indexes), and the source documents.
  */
-export function MethodologyPanel({ code, row, country, onClose }: Props) {
+export function MethodologyPanel({ code, row, country, provenance, onClose }: Props) {
   const m = METHODOLOGY[code];
   const [expandedPillar, setExpandedPillar] = useState<string | null>(null);
   if (!m) return null;
+
+  // Provenance lookups by field name (indicator/average kinds) or indicator label (WEI).
+  const prov = (key: string): IndicatorProvenance | undefined => provenance?.[key];
+  const yearOf = (key: string) => prov(key)?.year;
+  // Computed vintage range from this index's indicator years.
+  const years = provenance
+    ? Object.values(provenance).map((p) => parseInt(p.year, 10)).filter((y) => !isNaN(y))
+    : [];
+  const minY = years.length ? Math.min(...years) : null;
+  const maxY = years.length ? Math.max(...years) : null;
+  const nVerified = provenance ? Object.values(provenance).filter((p) => p.status === "verified").length : 0;
+  const nModeled  = provenance ? Object.values(provenance).filter((p) => p.status === "modeled").length : 0;
 
   if (!row) {
     return (
@@ -62,19 +77,20 @@ export function MethodologyPanel({ code, row, country, onClose }: Props) {
         </div>
         <p className="text-xs text-muted-foreground font-mono">{m.formula}</p>
 
-        {/* Data vintage — when the underlying data is from */}
+        {/* Data vintage — computed from per-indicator collection years when available */}
         {(() => {
-          const rowYear = (row.year ?? row.data_year) as number | string | undefined;
-          const rowSrc  = row.data_source as string | undefined;
-          const extra: string[] = [];
-          if (rowSrc && rowSrc !== "modeled_estimate") extra.push(rowSrc.replace(/^anchor:/, "anchor "));
-          if (rowSrc === "modeled_estimate") extra.push("modelled estimate");
+          const range = minY != null && maxY != null
+            ? (minY === maxY ? `${minY}` : `${minY}–${maxY}`)
+            : null;
+          const mix = (nVerified || nModeled)
+            ? ` · ${nVerified} verified · ${nModeled} modelled`
+            : "";
           return (
             <p className="text-[11px] text-muted-foreground/80 mt-1.5 flex items-center gap-1.5">
               <CalendarClock className="h-3 w-3 shrink-0" style={{ color: m.accent }} />
-              <span><span className="text-muted-foreground/60">Data vintage:</span> {m.vintage}
-                {rowYear ? ` · ${country} record: ${rowYear}` : ""}
-                {extra.length ? ` · ${extra.join(", ")}` : ""}
+              <span>
+                <span className="text-muted-foreground/60">Data as of:</span>{" "}
+                {range ? <>collection years {range}{mix}</> : m.vintage}
               </span>
             </p>
           );
@@ -143,7 +159,12 @@ export function MethodologyPanel({ code, row, country, onClose }: Props) {
                       </td>
                     )}
                     {(m.kind === "indicators" || m.kind === "average") && (
-                      <td className="px-3 py-1.5 text-right text-muted-foreground/70">{comp.source}</td>
+                      <td className="px-3 py-1.5 text-right text-muted-foreground/70 whitespace-nowrap">
+                        {comp.source}
+                        {yearOf(comp.field) && (
+                          <span className="ml-1" style={{ color: m.accent }}>· {yearOf(comp.field)}</span>
+                        )}
+                      </td>
                     )}
                   </tr>
                   {hasDrill && isExp && (
@@ -159,7 +180,12 @@ export function MethodologyPanel({ code, row, country, onClose }: Props) {
                                 <tr key={ind.label} className="border-t border-border/20 first:border-t-0">
                                   <td className="px-2.5 py-1 text-muted-foreground">{ind.label}</td>
                                   <td className="px-2.5 py-1 text-right tabular-nums" style={{ color: m.accent }}>{ind.weight}</td>
-                                  <td className="px-2.5 py-1 text-right text-muted-foreground/60 whitespace-nowrap">{ind.source}</td>
+                                  <td className="px-2.5 py-1 text-right text-muted-foreground/60 whitespace-nowrap">
+                                    {ind.source}
+                                    {yearOf(ind.label) && (
+                                      <span className="ml-1" style={{ color: m.accent }}>· {yearOf(ind.label)}</span>
+                                    )}
+                                  </td>
                                 </tr>
                               ))}
                             </tbody>

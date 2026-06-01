@@ -282,6 +282,13 @@ export default function CountryDetail() {
     retry: false,
   });
 
+  /* ── Per-indicator data provenance (source + collection year) ── */
+  const { data: provenance } = useQuery({
+    queryKey: ["methodology"],
+    queryFn:  api.methodology,
+    staleTime: 60 * 60 * 1000,
+  });
+
   /* ── Fetch all 7 external index scores for this country ── */
   const indexQueries = useQueries({
     queries: INDEX_STRIP.map((idx) => ({
@@ -449,6 +456,7 @@ export default function CountryDetail() {
                       ? (country as unknown as Record<string, unknown>)
                       : (indexQueries[INDEX_STRIP.findIndex((x) => x.code === openMethod)]?.data as Record<string, unknown> | undefined)
                   }
+                  provenance={provenance?.indexes?.[openMethod]}
                   onClose={() => setOpenMethod(null)}
                 />
               )}

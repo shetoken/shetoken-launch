@@ -1,6 +1,6 @@
 import { useState, Fragment } from "react";
 import { METHODOLOGY, computeScore } from "@/lib/methodology";
-import { ExternalLink, X, ChevronRight, ChevronDown, Layers } from "lucide-react";
+import { ExternalLink, X, ChevronRight, ChevronDown, Layers, CalendarClock } from "lucide-react";
 
 interface Props {
   code: string;
@@ -61,6 +61,25 @@ export function MethodologyPanel({ code, row, country, onClose }: Props) {
           )}
         </div>
         <p className="text-xs text-muted-foreground font-mono">{m.formula}</p>
+
+        {/* Data vintage — when the underlying data is from */}
+        {(() => {
+          const rowYear = (row.year ?? row.data_year) as number | string | undefined;
+          const rowSrc  = row.data_source as string | undefined;
+          const extra: string[] = [];
+          if (rowSrc && rowSrc !== "modeled_estimate") extra.push(rowSrc.replace(/^anchor:/, "anchor "));
+          if (rowSrc === "modeled_estimate") extra.push("modelled estimate");
+          return (
+            <p className="text-[11px] text-muted-foreground/80 mt-1.5 flex items-center gap-1.5">
+              <CalendarClock className="h-3 w-3 shrink-0" style={{ color: m.accent }} />
+              <span><span className="text-muted-foreground/60">Data vintage:</span> {m.vintage}
+                {rowYear ? ` · ${country} record: ${rowYear}` : ""}
+                {extra.length ? ` · ${extra.join(", ")}` : ""}
+              </span>
+            </p>
+          );
+        })()}
+
         {m.derived && (
           <p className="text-[11px] mt-1.5 rounded-lg px-2.5 py-1.5"
              style={{ color: m.accent, backgroundColor: `${m.accent}12`, border: `1px solid ${m.accent}30` }}>
@@ -80,7 +99,7 @@ export function MethodologyPanel({ code, row, country, onClose }: Props) {
               <th className="text-right px-3 py-2 font-medium">{country}</th>
               {m.kind === "weighted" && <th className="text-right px-3 py-2 font-medium">Weight</th>}
               {m.kind === "weighted" && <th className="text-right px-3 py-2 font-medium">Contribution</th>}
-              {m.kind === "indicators" && <th className="text-right px-3 py-2 font-medium">Source</th>}
+              {(m.kind === "indicators" || m.kind === "average") && <th className="text-right px-3 py-2 font-medium">Source</th>}
             </tr>
           </thead>
           <tbody>
@@ -123,7 +142,7 @@ export function MethodologyPanel({ code, row, country, onClose }: Props) {
                         {c.contribution != null ? (c.contribution >= 0 ? "+" : "") + c.contribution.toFixed(2) : "—"}
                       </td>
                     )}
-                    {m.kind === "indicators" && (
+                    {(m.kind === "indicators" || m.kind === "average") && (
                       <td className="px-3 py-1.5 text-right text-muted-foreground/70">{comp.source}</td>
                     )}
                   </tr>
@@ -159,7 +178,7 @@ export function MethodologyPanel({ code, row, country, onClose }: Props) {
                 <td className="px-3 py-2">
                   {m.kind === "average" ? "Average" : "Total"} = {m.code} score
                 </td>
-                <td className="px-3 py-2 text-right tabular-nums" colSpan={m.kind === "weighted" ? 3 : 1}
+                <td className="px-3 py-2 text-right tabular-nums" colSpan={m.kind === "weighted" ? 3 : 2}
                     style={{ color: m.accent }}>
                   {fmt(total)}
                   {!isNaN(finalScore) && Math.abs(total - finalScore) > 0.2 && (

@@ -40,6 +40,7 @@ export interface IndexMethodology {
   components: MethodComponent[];
   sources: { name: string; url: string }[];
   note: string;
+  vintage: string;    // data vintage / "as of" — when the underlying data is from
   derived?: boolean;  // true = composite of OTHER SheToken indexes, not raw data
 }
 
@@ -133,6 +134,7 @@ export const METHODOLOGY: Record<string, IndexMethodology> = {
     ],
     sources: [SRC.unwomen, SRC.wbgender, SRC.unesco, SRC.who, SRC.unodc, SRC.ilo, SRC.ipu, SRC.oecd],
     note: "SHEtoken's native composite. 8 pillars (each a weighted blend of primary-source indicators, normalised 0–100) minus a violence penalty. Click any pillar below to see its indicators and sources. Inverted indicators (e.g. maternal mortality, pay gap, rape rate) are flipped so higher always = better. The penalty is subtracted — a higher penalty lowers the WEI; where WHO survey data exists it is weighted 70% vs 30% UNODC to correct underreporting.",
+    vintage: "2025 baseline · primary-source releases 2023–2025",
   },
 
   GPI: {
@@ -155,6 +157,7 @@ export const METHODOLOGY: Record<string, IndexMethodology> = {
     ],
     sources: [SRC.wbgender, SRC.ilo, SRC.oecd, SRC.who],
     note: "Female economic deprivation relative to men. Each sub-score is normalised 0–100 (higher = better) then averaged.",
+    vintage: "2025 edition · World Bank / ILO / OECD releases 2022–2024",
   },
 
   SVI: {
@@ -176,6 +179,7 @@ export const METHODOLOGY: Record<string, IndexMethodology> = {
     ],
     sources: [SRC.who, SRC.unodc, SRC.unwomen],
     note: "Higher score = safer. Combines prevalence surveys, reporting gaps, legal protection and survivor support. Exact sub-weights in methodology v3.0.",
+    vintage: "2025 edition · WHO / UNODC releases 2018–2024",
   },
 
   WADI: {
@@ -197,6 +201,7 @@ export const METHODOLOGY: Record<string, IndexMethodology> = {
     ],
     sources: [SRC.ilo, SRC.oecd, SRC.wef],
     note: "Estimates how exposed women's jobs are to AI automation and the capacity to adapt. Exact sub-weights in methodology v3.0.",
+    vintage: "2025 edition · ILO / OECD / WEF releases 2023–2025",
   },
 
   WEVI: {
@@ -219,6 +224,7 @@ export const METHODOLOGY: Record<string, IndexMethodology> = {
     ],
     sources: [SRC.unwomen, SRC.wbgender, SRC.ilo, SRC.who],
     note: "Higher score = widows better protected. Combines inheritance law, poverty, social stigma and elder-care access. Exact sub-weights in methodology v3.0.",
+    vintage: "2025 edition · UN Women / World Bank releases 2021–2024",
   },
 
   WHI: {
@@ -238,6 +244,7 @@ export const METHODOLOGY: Record<string, IndexMethodology> = {
     ],
     sources: [SRC.who, SRC.unicef, SRC.nfhs],
     note: "Higher score = healthier. Focus on reproductive and mental health. Exact sub-weights in methodology v3.0.",
+    vintage: "2025 edition · WHO / UNICEF / NFHS-5 releases 2019–2024",
   },
 
   WVI: {
@@ -257,6 +264,7 @@ export const METHODOLOGY: Record<string, IndexMethodology> = {
     ],
     sources: [SRC.ipu, SRC.vdem, SRC.rsf, SRC.wef],
     note: "Higher score = louder voice. Combines representation, media presence and press/protest freedom. Exact sub-weights in methodology v3.0.",
+    vintage: "2025 edition · IPU / V-Dem / RSF releases 2023–2024",
   },
 
   Compliance: {
@@ -274,6 +282,7 @@ export const METHODOLOGY: Record<string, IndexMethodology> = {
     ],
     sources: [SRC.unwomen, SRC.wbgender, SRC.who, SRC.unodc, SRC.ilo],
     note: "A DERIVED index — unlike the others it uses no new primary data. It is a weighted re-mix of WEI, SVI, GPI and WADI to give corporations a single outsourcing-risk number. WADI is inverted (100−WADI) because higher AI-displacement risk worsens compliance. Its true data sources are whatever feed those four upstream indexes.",
+    vintage: "2025 · recomputed from current WEI / SVI / GPI / WADI",
     derived: true,
   },
 };

@@ -144,6 +144,8 @@ export interface VitalStats {
   girls_drop_out_school_per_week_est?: number;
   girls_married_under18_per_week_est?: number;
   women_killed_by_partner_per_week_est?: number;
+  women_facing_sexual_violence_per_week_est?: number;
+  girls_not_born_per_week_est?: number;
   [key: string]: unknown;
 }
 

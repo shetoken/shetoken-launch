@@ -300,7 +300,7 @@ export default function CountryDetail() {
     })),
   });
 
-  const chartData = history?.history?.map((row) => ({
+  const chartData = history?.data?.map((row) => ({
     year: row.year,
     score: row.wei_score ?? row.score,
   })).filter((r) => r.score != null) ?? [];
@@ -647,13 +647,18 @@ export default function CountryDetail() {
                   </p>
                   <div className="space-y-3">
                     {lifepath.stages?.slice(0, 5).map((stage) => (
-                      <div key={stage.age} className="flex items-start gap-3">
-                        <div className="shrink-0 w-14 text-xs font-mono text-accent">{stage.age}</div>
-                        <div>
-                          <div className="text-sm font-medium">{stage.title}</div>
-                          <div className="text-xs text-muted-foreground">{stage.description}</div>
+                      <div key={stage.stage} className="flex items-start gap-3 border-l-2 border-accent/30 pl-3">
+                        <div className="shrink-0 w-16 text-[11px] font-mono text-accent leading-tight pt-0.5">
+                          {stage.age_band}
+                          <div className="text-[9px] text-muted-foreground/60 mt-0.5">{stage.stage}</div>
                         </div>
-                        <div className="ml-auto shrink-0 text-sm font-bold text-gradient">{stage.girls_affected}</div>
+                        <div className="min-w-0">
+                          <div className="text-sm font-medium leading-snug">{stage.headline}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{stage.cohort}</div>
+                          {stage.detail && (
+                            <div className="text-[11px] text-muted-foreground/60 mt-1">{stage.detail}</div>
+                          )}
+                        </div>
                       </div>
                     ))}
                     {(lifepath.stages?.length ?? 0) > 5 && (

@@ -93,20 +93,27 @@ export interface CountryListResponse {
 export interface CountryHistory {
   iso_code: string;
   country: string;
-  history: Array<Record<string, number | string>>;
+  years?: number;
+  from_year?: number;
+  to_year?: number;
+  data: Array<Record<string, number | string>>;
 }
 
 export interface LifepathStage {
-  age: string;
-  title: string;
-  girls_affected: number;
-  description: string;
+  stage: string;
+  age_band: string;
+  headline: string;
+  cohort: string;
+  detail: string;
+  note?: string;
+  source?: string;
 }
 
 export interface Lifepath {
   country: string;
   iso_code: string;
-  wei_score: number;
+  cohort_size?: number;
+  disclaimer?: string;
   stages: LifepathStage[];
 }
 

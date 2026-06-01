@@ -15,6 +15,7 @@ import {
 import { PerformanceSource } from "@/lib/api";
 import { MethodologyPanel } from "@/components/MethodologyPanel";
 import { LifePathModal } from "@/components/LifePathModal";
+import { WeiTrendChart } from "@/components/WeiTrendChart";
 import { downloadCountryReport } from "@/lib/countryReport";
 
 /* ── Pillar definitions with global-average and improvement lever ── */
@@ -648,7 +649,7 @@ export default function CountryDetail() {
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1.5"><span className="w-5 h-0.5 rounded" style={{ background: "#f59e0b" }} />{country.country}</span>
                   <span className="flex items-center gap-1.5"><span className="w-5 h-0.5 rounded border-t border-dashed" style={{ borderColor: "hsl(260 15% 65%)", height: 0 }} />Global avg</span>
-                  <span className="flex items-center gap-1.5"><span className="w-5 h-0.5 rounded" style={{ background: "hsl(260 15% 45%)", opacity: 0.4 }} />All 105 countries</span>
+                  <span className="flex items-center gap-1.5"><span className="w-5 h-0.5 rounded" style={{ background: "hsl(260 15% 45%)", opacity: 0.4 }} />All countries</span>
                 </div>
               </div>
               <div className="bg-gradient-card border border-border/40 rounded-2xl p-6 shadow-card">
@@ -659,55 +660,24 @@ export default function CountryDetail() {
                     <BarChart2 className="h-8 w-8 opacity-40" />
                     <span className="text-sm">Trend data accumulating — check back next cycle.</span>
                   </div>
-                ) : (() => {
-                  const years = allHistory?.years ?? chartData.map(d => d.year as number);
-                  const n = years.length;
-                  const VW = 720, VH = 300, pad = { l: 28, r: 14, t: 12, b: 26 };
-                  const cw = VW - pad.l - pad.r, ch = VH - pad.t - pad.b;
-                  const sx = (i: number) => pad.l + (n > 1 ? (i / (n - 1)) * cw : 0);
-                  const sy = (s: number) => pad.t + ch - (Math.max(0, Math.min(100, s)) / 100) * ch;
-                  const poly = (scores: (number | null)[]) =>
-                    scores.map((s, i) => (s == null ? null : `${sx(i).toFixed(1)},${sy(s).toFixed(1)}`))
-                          .filter(Boolean).join(" ");
-                  const selScores: (number | null)[] =
-                    allHistory?.countries.find(c => c.iso_code === country.iso_code)?.scores
-                    ?? chartData.map(d => (d.score as number) ?? null);
-                  return (
-                    <svg viewBox={`0 0 ${VW} ${VH}`} width="100%" style={{ display: "block" }}>
-                      {/* y gridlines + labels */}
-                      {[0, 25, 50, 75, 100].map(v => (
-                        <g key={v}>
-                          <line x1={pad.l} y1={sy(v)} x2={VW - pad.r} y2={sy(v)}
-                                stroke="hsl(260 25% 22%)" strokeWidth={v === 50 ? 0.8 : 0.4}
-                                strokeDasharray={v === 50 ? "4 4" : undefined} />
-                          <text x={pad.l - 4} y={sy(v) + 3} textAnchor="end" fontSize={9} fill="hsl(260 15% 55%)">{v}</text>
-                        </g>
-                      ))}
-                      {/* all countries — faint backdrop */}
-                      {allHistory?.countries
-                        .filter(c => c.iso_code !== country.iso_code)
-                        .map(c => (
-                          <polyline key={c.iso_code} points={poly(c.scores)} fill="none"
-                                    stroke="hsl(260 15% 50%)" strokeWidth={0.7} strokeOpacity={0.12} />
-                        ))}
-                      {/* global average — dashed */}
-                      {allHistory?.global_avg && (
-                        <polyline points={poly(allHistory.global_avg)} fill="none"
-                                  stroke="hsl(260 15% 72%)" strokeWidth={1.4} strokeDasharray="5 4" strokeOpacity={0.8} />
-                      )}
-                      {/* selected country — bold gold + dots */}
-                      <polyline points={poly(selScores)} fill="none"
-                                stroke="#f59e0b" strokeWidth={2.6} strokeLinejoin="round" />
-                      {selScores.map((s, i) => s == null ? null : (
-                        <circle key={i} cx={sx(i)} cy={sy(s)} r={2.8} fill="#f59e0b" />
-                      ))}
-                      {/* x-axis year labels */}
-                      {years.map((yr, i) => (i % 2 === 0 || i === n - 1) && (
-                        <text key={yr} x={sx(i)} y={VH - 8} textAnchor="middle" fontSize={9} fill="hsl(260 15% 55%)">{yr}</text>
-                      ))}
-                    </svg>
-                  );
-                })()}
+                ) : (
+                  <>
+                    <WeiTrendChart
+                      years={allHistory?.years ?? chartData.map(d => d.year as number)}
+                      countries={allHistory?.countries ?? []}
+                      globalAvg={allHistory?.global_avg ?? []}
+                      selectedIso={country.iso_code}
+                      selectedName={country.country}
+                      selectedScores={
+                        allHistory?.countries.find(c => c.iso_code === country.iso_code)?.scores
+                        ?? chartData.map(d => (d.score as number) ?? null)
+                      }
+                    />
+                    <p className="text-[11px] text-muted-foreground/60 mt-2 text-center">
+                      Hover any line to identify the country.
+                    </p>
+                  </>
+                )}
               </div>
             </section>
 

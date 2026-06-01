@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowRight, BarChart2, LogOut, User } from "lucide-react";
+import { ArrowRight, BarChart2, Coins, LogOut, User } from "lucide-react";
 import logo from "@/assets/she-logo.jpg";
 
 function UserAvatar({ name, email }: { name: string | null; email: string | null }) {
@@ -31,6 +31,7 @@ export function Nav() {
     // Community tab hidden for now — route still exists, revisit later.
     // { to: "/community", label: "Community" },
     { to: "/dashboard", label: "Live Data", icon: <BarChart2 className="h-3.5 w-3.5" /> },
+    { to: "/sheconomy", label: "SHEconomy", icon: <Coins className="h-3.5 w-3.5" /> },
     { to: "/whitepaper", label: "Whitepaper" },
   ];
 

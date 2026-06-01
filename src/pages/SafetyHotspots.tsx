@@ -250,6 +250,7 @@ export default function SafetyHotspots() {
               <div className="py-8 text-center text-muted-foreground text-sm">Loading state data…</div>
             ) : sel && CHOROPLETH[sel.iso_code] ? (
               <StateChoroplethMap
+                key={sel.iso_code}
                 geoUrl={CHOROPLETH[sel.iso_code].geoUrl}
                 nameKey={CHOROPLETH[sel.iso_code].nameKey}
                 projection={CHOROPLETH[sel.iso_code].projection}

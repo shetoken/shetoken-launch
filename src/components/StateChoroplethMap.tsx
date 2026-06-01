@@ -43,9 +43,9 @@ export function StateChoroplethMap({
 
   return (
     <div ref={wrapRef} className="relative bg-gradient-card border border-border/40 rounded-2xl p-1 shadow-card" onMouseMove={onMove}>
-      <ComposableMap projection={projection} projectionConfig={projectionConfig}
+      <ComposableMap key={geoUrl} projection={projection} projectionConfig={projectionConfig}
                      width={800} height={height} style={{ width: "100%", height: "auto" }}>
-        <Geographies geography={geoUrl}>
+        <Geographies key={geoUrl} geography={geoUrl}>
           {({ geographies }) =>
             geographies.map((geo) => {
               const gname = (geo.properties?.[nameKey] as string) ?? "";
@@ -74,10 +74,12 @@ export function StateChoroplethMap({
         </Geographies>
 
         {cities?.map((c) => (
-          <Marker key={c.city} coordinates={c.coords}>
-            <circle r={2.4} fill="hsl(40 30% 92%)" stroke="hsl(260 35% 9%)" strokeWidth={0.6} />
-            <text x={4} y={3} fontSize={9} fill="hsl(40 30% 92%)" style={{ pointerEvents: "none", paintOrder: "stroke" }}
-                  stroke="hsl(260 35% 9%)" strokeWidth={2}>{c.city}</text>
+          <Marker key={c.city} coordinates={c.coords} style={{ default: { pointerEvents: "none" } }}>
+            <g style={{ pointerEvents: "none" }}>
+              <circle r={2.4} fill="hsl(40 30% 92%)" stroke="hsl(260 35% 9%)" strokeWidth={0.6} />
+              <text x={4} y={3} fontSize={9} fill="hsl(40 30% 92%)" style={{ paintOrder: "stroke" }}
+                    stroke="hsl(260 35% 9%)" strokeWidth={2}>{c.city}</text>
+            </g>
           </Marker>
         ))}
       </ComposableMap>

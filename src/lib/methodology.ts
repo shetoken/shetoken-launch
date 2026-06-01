@@ -13,6 +13,13 @@
 
 export type MethodKind = "weighted" | "average" | "indicators";
 
+/** A primary-source indicator that composes a WEI pillar. */
+export interface SubIndicator {
+  label: string;
+  weight: string;     // intra-pillar weight, e.g. "30%"
+  source: string;     // source-body name (see SRC)
+}
+
 export interface MethodComponent {
   label: string;
   field: string;      // API field on the index row
@@ -20,6 +27,7 @@ export interface MethodComponent {
   invert?: boolean;   // value used = 100 − raw (e.g. WADI inside Compliance)
   unit?: string;      // "%", "/100k", "/10", "/6", "yrs"
   source?: string;    // short per-indicator source tag
+  indicators?: SubIndicator[];  // pillar sub-indicators (WEI only) — drill-down
 }
 
 export interface IndexMethodology {
@@ -32,6 +40,7 @@ export interface IndexMethodology {
   components: MethodComponent[];
   sources: { name: string; url: string }[];
   note: string;
+  derived?: boolean;  // true = composite of OTHER SheToken indexes, not raw data
 }
 
 const SRC = {
@@ -59,18 +68,71 @@ export const METHODOLOGY: Record<string, IndexMethodology> = {
     scoreField: "wei_score",
     formula: "WEI = Σ(pillar × weight) − (Violence Penalty × 0.10)",
     components: [
-      { label: "Empowerment",       field: "empowerment_score",     weight: 0.15 },
-      { label: "Bodily Autonomy",   field: "bodily_autonomy_score", weight: 0.15 },
-      { label: "Safety & Justice",  field: "safety_justice_score",  weight: 0.14 },
-      { label: "Education",         field: "education_score",       weight: 0.12 },
-      { label: "Economic",          field: "economic_score",        weight: 0.12 },
-      { label: "Health",            field: "health_score",          weight: 0.12 },
-      { label: "Dignity & Welfare", field: "dignity_welfare_score", weight: 0.10 },
-      { label: "Digital & Social",  field: "digital_social_score",  weight: 0.10 },
-      { label: "− Violence Penalty",field: "violence_penalty_score",weight: -0.10 },
+      { label: "Empowerment", field: "empowerment_score", weight: 0.15, indicators: [
+        { label: "% parliamentary seats held by women", weight: "30%", source: "IPU Parline" },
+        { label: "% ministerial positions held by women", weight: "20%", source: "UN Women" },
+        { label: "Women's legal rights index", weight: "25%", source: "World Bank WBL" },
+        { label: "Freedom of movement", weight: "15%", source: "OECD SIGI" },
+        { label: "% women in senior management", weight: "10%", source: "ILO" },
+      ]},
+      { label: "Bodily Autonomy", field: "bodily_autonomy_score", weight: 0.15, indicators: [
+        { label: "Child marriage rate (under 18)", weight: "30%", source: "UNICEF MICS" },
+        { label: "Reproductive rights legal score", weight: "25%", source: "Guttmacher / HRW" },
+        { label: "FGM prevalence", weight: "20%", source: "UNICEF / WHO" },
+        { label: "Access to contraception", weight: "15%", source: "WHO / UNFPA" },
+        { label: "Menstrual health / product access", weight: "10%", source: "UNICEF / Plan Intl" },
+      ]},
+      { label: "Safety & Justice", field: "safety_justice_score", weight: 0.14, indicators: [
+        { label: "DV law strength & enforcement", weight: "30%", source: "UN Women" },
+        { label: "% female police officers", weight: "20%", source: "UNODC" },
+        { label: "Free legal-aid access", weight: "20%", source: "World Bank Justice" },
+        { label: "Rape reporting rate", weight: "15%", source: "UNODC / WHO" },
+        { label: "DV shelter coverage", weight: "15%", source: "UN Women" },
+      ]},
+      { label: "Education", field: "education_score", weight: 0.12, indicators: [
+        { label: "Female adult literacy (15+)", weight: "35%", source: "UNESCO UIS" },
+        { label: "Female primary enrollment", weight: "20%", source: "UNESCO" },
+        { label: "Female secondary enrollment", weight: "20%", source: "UNESCO" },
+        { label: "Female tertiary enrollment", weight: "15%", source: "UNESCO" },
+        { label: "Female STEM participation", weight: "10%", source: "UNESCO / OECD" },
+      ]},
+      { label: "Economic", field: "economic_score", weight: 0.12, indicators: [
+        { label: "Gender pay gap", weight: "30%", source: "ILO Global Wage Report" },
+        { label: "Female labour-force participation", weight: "25%", source: "ILO" },
+        { label: "% women with a bank account", weight: "20%", source: "World Bank Findex" },
+        { label: "Women's property-ownership rights", weight: "15%", source: "World Bank WBL" },
+        { label: "% women-owned businesses", weight: "10%", source: "IFC / World Bank" },
+      ]},
+      { label: "Health", field: "health_score", weight: 0.12, indicators: [
+        { label: "Maternal mortality ratio (per 100k)", weight: "35%", source: "WHO GHO" },
+        { label: "Female life expectancy", weight: "25%", source: "WHO / World Bank" },
+        { label: "Adolescent birth rate", weight: "20%", source: "WHO" },
+        { label: "Skilled-birth-attendant access", weight: "10%", source: "WHO" },
+        { label: "Female-to-male survival ratio", weight: "10%", source: "World Bank" },
+      ]},
+      { label: "Dignity & Welfare", field: "dignity_welfare_score", weight: 0.10, indicators: [
+        { label: "Widow property-rights enforcement", weight: "25%", source: "World Bank / HRW" },
+        { label: "Food-insecurity gender gap", weight: "25%", source: "FAO SOFI" },
+        { label: "Unpaid care-work hours ratio", weight: "25%", source: "ILO / OECD" },
+        { label: "Women's housing security", weight: "15%", source: "UN Habitat" },
+        { label: "Elder-care access", weight: "10%", source: "HelpAge International" },
+      ]},
+      { label: "Digital & Social", field: "digital_social_score", weight: 0.10, indicators: [
+        { label: "Internet gender gap", weight: "30%", source: "GSMA / ITU" },
+        { label: "Online-harassment law strength", weight: "25%", source: "APC / ITU" },
+        { label: "% women in tech workforce", weight: "25%", source: "ILO / UNESCO" },
+        { label: "Mobile-phone ownership gap", weight: "20%", source: "GSMA" },
+      ]},
+      { label: "− Violence Penalty", field: "violence_penalty_score", weight: -0.10, indicators: [
+        { label: "Rape rate per 100k women", weight: "30%", source: "UNODC (+ WHO adj.)" },
+        { label: "Domestic-violence prevalence", weight: "25%", source: "WHO / UN Women" },
+        { label: "Femicide rate", weight: "20%", source: "UNODC" },
+        { label: "Trafficking rate", weight: "15%", source: "UNODC" },
+        { label: "Acid attacks / disfigurement", weight: "10%", source: "UNODC / national records" },
+      ]},
     ],
-    sources: [SRC.unwomen, SRC.wbgender, SRC.unesco, SRC.who, SRC.unodc, SRC.ilo],
-    note: "SHEtoken's native composite. 8 pillars (each normalised 0–100) minus a violence penalty. The penalty is subtracted, so a higher penalty score lowers the WEI.",
+    sources: [SRC.unwomen, SRC.wbgender, SRC.unesco, SRC.who, SRC.unodc, SRC.ilo, SRC.ipu, SRC.oecd],
+    note: "SHEtoken's native composite. 8 pillars (each a weighted blend of primary-source indicators, normalised 0–100) minus a violence penalty. Click any pillar below to see its indicators and sources. Inverted indicators (e.g. maternal mortality, pay gap, rape rate) are flipped so higher always = better. The penalty is subtracted — a higher penalty lowers the WEI; where WHO survey data exists it is weighted 70% vs 30% UNODC to correct underreporting.",
   },
 
   GPI: {
@@ -211,7 +273,8 @@ export const METHODOLOGY: Record<string, IndexMethodology> = {
       { label: "WADI (inverted)",field: "wadi_score", weight: 0.15, invert: true },
     ],
     sources: [SRC.unwomen, SRC.wbgender, SRC.who, SRC.unodc, SRC.ilo],
-    note: "Corporate outsourcing-risk score, derived from four other indexes. WADI is inverted (100−WADI) because higher AI-displacement risk worsens compliance.",
+    note: "A DERIVED index — unlike the others it uses no new primary data. It is a weighted re-mix of WEI, SVI, GPI and WADI to give corporations a single outsourcing-risk number. WADI is inverted (100−WADI) because higher AI-displacement risk worsens compliance. Its true data sources are whatever feed those four upstream indexes.",
+    derived: true,
   },
 };
 

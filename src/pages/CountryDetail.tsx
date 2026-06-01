@@ -425,6 +425,11 @@ export default function CountryDetail() {
                       >
                         {idx.code}
                       </div>
+                      {idx.code === "Compliance" && (
+                        <div className="text-[8px] font-semibold uppercase tracking-wide mb-1 opacity-70" style={{ color: idx.accent }}>
+                          derived
+                        </div>
+                      )}
                       <div className="text-2xl font-bold leading-none mb-1" style={{ color: idx.accent }}>
                         {q.isLoading ? "…" : score != null ? score.toFixed(1) : "—"}
                       </div>

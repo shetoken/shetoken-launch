@@ -659,6 +659,7 @@ export default function Dashboard() {
               {INDEX_CONFIGS.map((idx) => {
                 const isActive = selectedIndex === idx.label;
                 const isNative = idx.label === "WEI";
+                const isDerived = idx.label === "Compliance";
                 return (
                   <div key={idx.label} className="relative flex-1 min-w-[105px] group/idx">
                     <button
@@ -678,6 +679,11 @@ export default function Dashboard() {
                         {isNative && (
                           <span className="text-[9px] font-semibold px-1 py-0.5 rounded bg-amber-400/20 text-amber-400 leading-none tracking-wide">
                             NATIVE
+                          </span>
+                        )}
+                        {isDerived && (
+                          <span className="text-[9px] font-semibold px-1 py-0.5 rounded bg-emerald-400/20 text-emerald-400 leading-none tracking-wide">
+                            DERIVED
                           </span>
                         )}
                         {isActive && !isWEI && loadingIndex && (

@@ -1,5 +1,6 @@
+import { useState, Fragment } from "react";
 import { METHODOLOGY, computeScore } from "@/lib/methodology";
-import { ExternalLink, X } from "lucide-react";
+import { ExternalLink, X, ChevronRight, ChevronDown, Layers } from "lucide-react";
 
 interface Props {
   code: string;
@@ -15,6 +16,7 @@ interface Props {
  */
 export function MethodologyPanel({ code, row, country, onClose }: Props) {
   const m = METHODOLOGY[code];
+  const [expandedPillar, setExpandedPillar] = useState<string | null>(null);
   if (!m) return null;
 
   if (!row) {
@@ -45,14 +47,28 @@ export function MethodologyPanel({ code, row, country, onClose }: Props) {
 
       {/* Header */}
       <div className="mb-3 pr-8">
-        <div className="flex items-center gap-2 mb-1">
+        <div className="flex items-center gap-2 mb-1 flex-wrap">
           <span className="text-[10px] font-bold font-mono rounded px-1.5 py-0.5 border"
                 style={{ color: m.accent, backgroundColor: `${m.accent}18`, borderColor: `${m.accent}40` }}>
             {m.code}
           </span>
           <h3 className="text-base font-bold">{m.title}</h3>
+          {m.derived && (
+            <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded inline-flex items-center gap-1 leading-none tracking-wide"
+                  style={{ color: m.accent, backgroundColor: `${m.accent}1f`, border: `1px solid ${m.accent}40` }}>
+              <Layers className="h-2.5 w-2.5" /> DERIVED
+            </span>
+          )}
         </div>
         <p className="text-xs text-muted-foreground font-mono">{m.formula}</p>
+        {m.derived && (
+          <p className="text-[11px] mt-1.5 rounded-lg px-2.5 py-1.5"
+             style={{ color: m.accent, backgroundColor: `${m.accent}12`, border: `1px solid ${m.accent}30` }}>
+            This is a composite of other SheToken indexes — it introduces no new
+            primary data. Its inputs below are themselves full indexes; open each
+            of those tiles to trace its raw sources.
+          </p>
+        )}
       </div>
 
       {/* Breakdown table */}
@@ -71,30 +87,69 @@ export function MethodologyPanel({ code, row, country, onClose }: Props) {
             {contributions.map((c, i) => {
               const comp = m.components[i];
               const isPenalty = comp.label.trim().startsWith("−");
+              const hasDrill = !!comp.indicators?.length;
+              const isExp = expandedPillar === comp.label;
+              const colSpan = 2 + (m.kind === "weighted" ? 2 : m.kind === "indicators" ? 1 : 0);
               return (
-                <tr key={comp.label} className={`border-t border-border/20 ${isPenalty ? "text-red-400" : ""}`}>
-                  <td className="px-3 py-1.5">{comp.label}</td>
-                  <td className="px-3 py-1.5 text-right tabular-nums">
-                    {fmt(c.raw)}{comp.unit && comp.unit !== "0/1" ? <span className="text-muted-foreground/60 ml-0.5">{comp.unit}</span> : null}
-                    {comp.invert && !isNaN(c.raw) && (
-                      <span className="text-muted-foreground/60"> → {fmt(c.used)}</span>
+                <Fragment key={comp.label}>
+                  <tr
+                    onClick={hasDrill ? () => setExpandedPillar(isExp ? null : comp.label) : undefined}
+                    className={`border-t border-border/20 ${isPenalty ? "text-red-400" : ""} ${
+                      hasDrill ? "cursor-pointer hover:bg-card/40" : ""
+                    }`}
+                  >
+                    <td className="px-3 py-1.5">
+                      <span className="inline-flex items-center gap-1">
+                        {hasDrill && (isExp
+                          ? <ChevronDown className="h-3 w-3 opacity-60" />
+                          : <ChevronRight className="h-3 w-3 opacity-60" />)}
+                        {comp.label}
+                      </span>
+                    </td>
+                    <td className="px-3 py-1.5 text-right tabular-nums">
+                      {fmt(c.raw)}{comp.unit && comp.unit !== "0/1" ? <span className="text-muted-foreground/60 ml-0.5">{comp.unit}</span> : null}
+                      {comp.invert && !isNaN(c.raw) && (
+                        <span className="text-muted-foreground/60"> → {fmt(c.used)}</span>
+                      )}
+                    </td>
+                    {m.kind === "weighted" && (
+                      <td className="px-3 py-1.5 text-right tabular-nums text-muted-foreground">
+                        ×{comp.weight}
+                      </td>
                     )}
-                  </td>
-                  {m.kind === "weighted" && (
-                    <td className="px-3 py-1.5 text-right tabular-nums text-muted-foreground">
-                      ×{comp.weight}
-                    </td>
+                    {m.kind === "weighted" && (
+                      <td className="px-3 py-1.5 text-right tabular-nums font-medium"
+                          style={{ color: isPenalty ? undefined : m.accent }}>
+                        {c.contribution != null ? (c.contribution >= 0 ? "+" : "") + c.contribution.toFixed(2) : "—"}
+                      </td>
+                    )}
+                    {m.kind === "indicators" && (
+                      <td className="px-3 py-1.5 text-right text-muted-foreground/70">{comp.source}</td>
+                    )}
+                  </tr>
+                  {hasDrill && isExp && (
+                    <tr className="bg-background/40">
+                      <td colSpan={colSpan} className="px-3 py-2">
+                        <div className="text-[10px] text-muted-foreground/70 mb-1.5 uppercase tracking-wider">
+                          {comp.label.replace("− ", "")} — indicators &amp; sources
+                        </div>
+                        <div className="rounded-lg border border-border/30 overflow-hidden">
+                          <table className="w-full text-[11px]">
+                            <tbody>
+                              {comp.indicators!.map((ind) => (
+                                <tr key={ind.label} className="border-t border-border/20 first:border-t-0">
+                                  <td className="px-2.5 py-1 text-muted-foreground">{ind.label}</td>
+                                  <td className="px-2.5 py-1 text-right tabular-nums" style={{ color: m.accent }}>{ind.weight}</td>
+                                  <td className="px-2.5 py-1 text-right text-muted-foreground/60 whitespace-nowrap">{ind.source}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </td>
+                    </tr>
                   )}
-                  {m.kind === "weighted" && (
-                    <td className="px-3 py-1.5 text-right tabular-nums font-medium"
-                        style={{ color: isPenalty ? undefined : m.accent }}>
-                      {c.contribution != null ? (c.contribution >= 0 ? "+" : "") + c.contribution.toFixed(2) : "—"}
-                    </td>
-                  )}
-                  {m.kind === "indicators" && (
-                    <td className="px-3 py-1.5 text-right text-muted-foreground/70">{comp.source}</td>
-                  )}
-                </tr>
+                </Fragment>
               );
             })}
           </tbody>

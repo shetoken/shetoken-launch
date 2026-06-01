@@ -103,10 +103,17 @@ export interface LifepathStage {
   stage: string;
   age_band: string;
   headline: string;
-  cohort: string;
-  detail: string;
+  cohort?: string;
+  detail?: string;
+  felt?: string;
   note?: string;
   source?: string;
+}
+
+export interface LifepathMilestone {
+  label: string;
+  reached: number;   // share of 100 girls who clear this hurdle
+  stage: string;
 }
 
 export interface Lifepath {
@@ -115,6 +122,13 @@ export interface Lifepath {
   cohort_size?: number;
   disclaimer?: string;
   stages: LifepathStage[];
+  milestones?: LifepathMilestone[];
+}
+
+export interface AllCountryHistory {
+  years: number[];
+  global_avg: (number | null)[];
+  countries: { iso_code: string; country: string; scores: (number | null)[] }[];
 }
 
 export interface IndexScore {
@@ -151,6 +165,8 @@ export const api = {
       apiFetch<CountryHistory>(`/v1/wei/history/country/${iso}`),
     globalTrend: () =>
       apiFetch<Array<Record<string, number | string>>>('/v1/wei/history/global-trend'),
+    allHistory: () =>
+      apiFetch<AllCountryHistory>('/v1/wei/history/all-countries'),
     leaderboard: (limit = 10) =>
       apiFetch<CountryWEI[]>(`/v1/wei/leaderboard?limit=${limit}`),
   },

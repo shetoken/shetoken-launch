@@ -9,11 +9,12 @@ import {
   ResponsiveContainer, ReferenceLine, LabelList, Cell
 } from "recharts";
 import {
-  ArrowLeft, BarChart2, TrendingUp, TrendingDown,
+  ArrowLeft, ArrowRight, BarChart2, TrendingUp, TrendingDown,
   Info, AlertCircle, Users, ShieldAlert, ExternalLink, Cpu, Download
 } from "lucide-react";
 import { PerformanceSource } from "@/lib/api";
 import { MethodologyPanel } from "@/components/MethodologyPanel";
+import { LifePathModal } from "@/components/LifePathModal";
 import { downloadCountryReport } from "@/lib/countryReport";
 
 /* ── Pillar definitions with global-average and improvement lever ── */
@@ -253,6 +254,7 @@ export default function CountryDetail() {
   const { iso } = useParams<{ iso: string }>();
   const navigate = useNavigate();
   const [openMethod, setOpenMethod] = useState<string | null>(null);
+  const [lifeModalOpen, setLifeModalOpen] = useState(false);
 
   const { data: country, isLoading: loadingCountry, error: countryError } = useQuery({
     queryKey: ["country", iso],
@@ -283,11 +285,28 @@ export default function CountryDetail() {
     retry: false,
   });
 
+  // Benchmark cohort for the Life Path modal (Norway = high-outcome reference)
+  const benchmarkIso = iso?.toUpperCase() === "NOR" ? "ISL" : "NOR";
+  const { data: benchmarkLife } = useQuery({
+    queryKey: ["lifepath", benchmarkIso],
+    queryFn: async () => { try { return await api.lifepath(benchmarkIso); } catch { return null; } },
+    enabled: lifeModalOpen,
+    staleTime: 60 * 60 * 1000,
+    retry: false,
+  });
+
   /* ── Per-indicator data provenance (source + collection year) ── */
   const { data: provenance } = useQuery({
     queryKey: ["methodology"],
     queryFn:  api.methodology,
     staleTime: 60 * 60 * 1000,
+  });
+
+  /* ── All-country WEI history (faint backdrop for the trend) ── */
+  const { data: allHistory } = useQuery({
+    queryKey: ["wei-all-history"],
+    queryFn:  api.wei.allHistory,
+    staleTime: 30 * 60 * 1000,
   });
 
   /* ── Fetch all 7 external index scores for this country ── */
@@ -622,41 +641,73 @@ export default function CountryDetail() {
               </section>
             )}
 
-            {/* WEI TREND CHART */}
+            {/* WEI TREND CHART — selected country vs. all 105 countries */}
             <section className="mb-10">
-              <h2 className="text-xl font-bold mb-5">WEI Score Trend (2015–2024)</h2>
+              <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                <h2 className="text-xl font-bold">WEI Score Trend (2015–2024)</h2>
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1.5"><span className="w-5 h-0.5 rounded" style={{ background: "#f59e0b" }} />{country.country}</span>
+                  <span className="flex items-center gap-1.5"><span className="w-5 h-0.5 rounded border-t border-dashed" style={{ borderColor: "hsl(260 15% 65%)", height: 0 }} />Global avg</span>
+                  <span className="flex items-center gap-1.5"><span className="w-5 h-0.5 rounded" style={{ background: "hsl(260 15% 45%)", opacity: 0.4 }} />All 105 countries</span>
+                </div>
+              </div>
               <div className="bg-gradient-card border border-border/40 rounded-2xl p-6 shadow-card">
-                {loadingHistory ? (
+                {loadingHistory && !allHistory ? (
                   <div className="h-48 flex items-center justify-center text-muted-foreground">Loading trend data…</div>
-                ) : chartData.length < 2 ? (
+                ) : chartData.length < 2 && !allHistory ? (
                   <div className="h-48 flex flex-col items-center justify-center text-muted-foreground gap-2">
                     <BarChart2 className="h-8 w-8 opacity-40" />
                     <span className="text-sm">Trend data accumulating — check back next cycle.</span>
                   </div>
-                ) : (
-                  <ResponsiveContainer width="100%" height={260}>
-                    <LineChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(260 30% 20%)" />
-                      <XAxis dataKey="year" tick={{ fill: "hsl(260 15% 70%)", fontSize: 12 }} />
-                      <YAxis domain={[0, 100]} tick={{ fill: "hsl(260 15% 70%)", fontSize: 12 }} />
-                      <Tooltip
-                        contentStyle={{ background: "hsl(260 35% 9%)", border: "1px solid hsl(260 30% 20%)", borderRadius: 8 }}
-                        labelStyle={{ color: "hsl(40 30% 96%)" }}
-                        itemStyle={{ color: "hsl(45 95% 60%)" }}
-                      />
-                      <ReferenceLine y={50} stroke="hsl(260 30% 30%)" strokeDasharray="4 4" />
-                      <Line
-                        type="monotone"
-                        dataKey="score"
-                        stroke="hsl(45 95% 60%)"
-                        strokeWidth={2.5}
-                        dot={{ fill: "hsl(45 95% 60%)", r: 4 }}
-                        activeDot={{ r: 6 }}
-                        name="WEI Score"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                )}
+                ) : (() => {
+                  const years = allHistory?.years ?? chartData.map(d => d.year as number);
+                  const n = years.length;
+                  const VW = 720, VH = 300, pad = { l: 28, r: 14, t: 12, b: 26 };
+                  const cw = VW - pad.l - pad.r, ch = VH - pad.t - pad.b;
+                  const sx = (i: number) => pad.l + (n > 1 ? (i / (n - 1)) * cw : 0);
+                  const sy = (s: number) => pad.t + ch - (Math.max(0, Math.min(100, s)) / 100) * ch;
+                  const poly = (scores: (number | null)[]) =>
+                    scores.map((s, i) => (s == null ? null : `${sx(i).toFixed(1)},${sy(s).toFixed(1)}`))
+                          .filter(Boolean).join(" ");
+                  const selScores: (number | null)[] =
+                    allHistory?.countries.find(c => c.iso_code === country.iso_code)?.scores
+                    ?? chartData.map(d => (d.score as number) ?? null);
+                  return (
+                    <svg viewBox={`0 0 ${VW} ${VH}`} width="100%" style={{ display: "block" }}>
+                      {/* y gridlines + labels */}
+                      {[0, 25, 50, 75, 100].map(v => (
+                        <g key={v}>
+                          <line x1={pad.l} y1={sy(v)} x2={VW - pad.r} y2={sy(v)}
+                                stroke="hsl(260 25% 22%)" strokeWidth={v === 50 ? 0.8 : 0.4}
+                                strokeDasharray={v === 50 ? "4 4" : undefined} />
+                          <text x={pad.l - 4} y={sy(v) + 3} textAnchor="end" fontSize={9} fill="hsl(260 15% 55%)">{v}</text>
+                        </g>
+                      ))}
+                      {/* all countries — faint backdrop */}
+                      {allHistory?.countries
+                        .filter(c => c.iso_code !== country.iso_code)
+                        .map(c => (
+                          <polyline key={c.iso_code} points={poly(c.scores)} fill="none"
+                                    stroke="hsl(260 15% 50%)" strokeWidth={0.7} strokeOpacity={0.12} />
+                        ))}
+                      {/* global average — dashed */}
+                      {allHistory?.global_avg && (
+                        <polyline points={poly(allHistory.global_avg)} fill="none"
+                                  stroke="hsl(260 15% 72%)" strokeWidth={1.4} strokeDasharray="5 4" strokeOpacity={0.8} />
+                      )}
+                      {/* selected country — bold gold + dots */}
+                      <polyline points={poly(selScores)} fill="none"
+                                stroke="#f59e0b" strokeWidth={2.6} strokeLinejoin="round" />
+                      {selScores.map((s, i) => s == null ? null : (
+                        <circle key={i} cx={sx(i)} cy={sy(s)} r={2.8} fill="#f59e0b" />
+                      ))}
+                      {/* x-axis year labels */}
+                      {years.map((yr, i) => (i % 2 === 0 || i === n - 1) && (
+                        <text key={yr} x={sx(i)} y={VH - 8} textAnchor="middle" fontSize={9} fill="hsl(260 15% 55%)">{yr}</text>
+                      ))}
+                    </svg>
+                  );
+                })()}
               </div>
             </section>
 
@@ -694,12 +745,13 @@ export default function CountryDetail() {
                         </div>
                       </div>
                     ))}
-                    {(lifepath.stages?.length ?? 0) > 5 && (
-                      <p className="text-xs text-muted-foreground pt-2">
-                        +{lifepath.stages.length - 5} more life stages…
-                      </p>
-                    )}
                   </div>
+                  <button
+                    onClick={() => setLifeModalOpen(true)}
+                    className="mt-4 w-full flex items-center justify-center gap-1.5 text-xs font-medium text-accent hover:text-accent/80 border border-accent/30 hover:border-accent/60 bg-accent/5 hover:bg-accent/10 rounded-lg px-3 py-2 transition-smooth"
+                  >
+                    View full journey &amp; drop-off funnel <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
                 </div>
               ) : (
                 /* Placeholder when lifepath not available */
@@ -717,6 +769,17 @@ export default function CountryDetail() {
           </>
         ) : null}
       </main>
+
+      {/* Life Path funnel modal */}
+      {lifepath?.milestones?.length ? (
+        <LifePathModal
+          open={lifeModalOpen}
+          onClose={() => setLifeModalOpen(false)}
+          lifepath={lifepath}
+          benchmark={benchmarkLife}
+          benchmarkLabel={benchmarkLife?.country}
+        />
+      ) : null}
 
       <footer className="border-t border-border/40 py-8">
         <div className="container flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">

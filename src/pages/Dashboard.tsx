@@ -944,7 +944,6 @@ export default function Dashboard() {
                       </svg>
                     );
                   })()}
-                  </div>
 
                   {/* Legend */}
                   <div className="flex flex-wrap gap-3 mt-3">

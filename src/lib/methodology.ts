@@ -233,8 +233,9 @@ export const METHODOLOGY: Record<string, IndexMethodology> = {
     accent: "#ec4899",
     kind: "indicators",
     scoreField: "whi_score",
-    formula: "Reproductive & mental-health indicators → normalised 0–100 (higher = healthier)",
+    formula: "Maternal, reproductive & mental-health indicators → normalised 0–100 (higher = healthier)",
     components: [
+      { label: "Maternal mortality (childbirth deaths)", field: "maternal_mortality_per_100k", unit: "/100k", source: SRC.who.name },
       { label: "Depression prevalence",  field: "depression_prev_pct",      unit: "%",     source: SRC.who.name },
       { label: "Suicide rate",           field: "suicide_rate_per_100k",    unit: "/100k", source: SRC.who.name },
       { label: "Anaemia",                field: "anaemia_pct",              unit: "%",     source: SRC.nfhs.name },
@@ -243,8 +244,8 @@ export const METHODOLOGY: Record<string, IndexMethodology> = {
       { label: "Maternal MH support",    field: "maternal_mh_support",      unit: "/10",   source: SRC.who.name },
     ],
     sources: [SRC.who, SRC.unicef, SRC.nfhs],
-    note: "Higher score = healthier. Focus on reproductive and mental health. Exact sub-weights in methodology v3.0.",
-    vintage: "2025 edition · WHO / UNICEF / NFHS-5 releases 2019–2024",
+    note: "Higher score = healthier. Maternal mortality — death due to childbirth (WHO 2020, deaths per 100k live births) — carries the largest weight (20%); a country scores 0 on this dimension at ≥500 deaths/100k. The rest cover mental and reproductive health. Inverted indicators (mortality, depression, suicide, anaemia, unmet need) are flipped so higher = better.",
+    vintage: "2025 edition · maternal mortality WHO GHO 2020 · mental/menstrual modelled, anaemia NFHS-5 2019–21",
   },
 
   WVI: {

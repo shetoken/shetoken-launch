@@ -4,6 +4,7 @@ import { api, type CountryWEI, type IndexScore } from "@/lib/api";
 import { SEO } from "@/lib/seo";
 import { Nav } from "@/components/Nav";
 import { WorldMap } from "@/components/WorldMap";
+import { IndiaSafetyMap } from "@/components/IndiaSafetyMap";
 import { ShieldAlert, Phone, MapPin, Search, Info, Moon, Users, Ban } from "lucide-react";
 
 /* ── Advisory tiers from the WEI Safety & Justice pillar (0–100, higher = safer) ── */
@@ -203,6 +204,8 @@ export default function SafetyHotspots() {
             </p>
             {loadingStates ? (
               <div className="py-8 text-center text-muted-foreground text-sm">Loading state data…</div>
+            ) : sel?.iso_code === "IND" ? (
+              <IndiaSafetyMap states={states} advisoryFor={advisoryFor} />
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {states.map((st) => {

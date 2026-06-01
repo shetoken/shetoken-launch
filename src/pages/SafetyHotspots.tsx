@@ -4,7 +4,7 @@ import { api, type CountryWEI, type IndexScore } from "@/lib/api";
 import { SEO } from "@/lib/seo";
 import { Nav } from "@/components/Nav";
 import { WorldMap } from "@/components/WorldMap";
-import { IndiaSafetyMap } from "@/components/IndiaSafetyMap";
+import { StateChoroplethMap, type CityLabel } from "@/components/StateChoroplethMap";
 import { ShieldAlert, Phone, MapPin, Search, Info, Moon, Users, Ban } from "lucide-react";
 
 /* ── Advisory tiers from the WEI Safety & Justice pillar (0–100, higher = safer) ── */
@@ -47,6 +47,49 @@ const TIPS = [
 /* Countries with sub-national (state) safety data: ISO → API name */
 const SUBNATIONAL: Record<string, string> = {
   IND: "india", USA: "usa", BRA: "brazil", NGA: "nigeria", MEX: "mexico", PAK: "pakistan",
+};
+
+/* Key city label per Indian state (lng, lat) overlaid on the choropleth. */
+const INDIA_CITIES: CityLabel[] = [
+  { city: "Kochi", state: "Kerala", coords: [76.27, 9.93] },
+  { city: "Panaji", state: "Goa", coords: [73.83, 15.49] },
+  { city: "Chennai", state: "Tamil Nadu", coords: [80.27, 13.08] },
+  { city: "Aizawl", state: "Mizoram", coords: [92.72, 23.73] },
+  { city: "Shillong", state: "Meghalaya", coords: [91.88, 25.57] },
+  { city: "Lucknow", state: "Uttar Pradesh", coords: [80.95, 26.85] },
+  { city: "Patna", state: "Bihar", coords: [85.14, 25.61] },
+  { city: "Bhopal", state: "Madhya Pradesh", coords: [77.41, 23.26] },
+  { city: "Ranchi", state: "Jharkhand", coords: [85.31, 23.34] },
+  { city: "Guwahati", state: "Assam", coords: [91.75, 26.14] },
+  { city: "Jaipur", state: "Rajasthan", coords: [75.79, 26.91] },
+  { city: "Gurugram", state: "Haryana", coords: [77.03, 28.46] },
+  { city: "Raipur", state: "Chhattisgarh", coords: [81.63, 21.25] },
+  { city: "Bhubaneswar", state: "Odisha", coords: [85.82, 20.30] },
+  { city: "New Delhi", state: "Delhi", coords: [77.21, 28.61] },
+  { city: "Ahmedabad", state: "Gujarat", coords: [72.57, 23.03] },
+  { city: "Kolkata", state: "West Bengal", coords: [88.36, 22.57] },
+  { city: "Mumbai", state: "Maharashtra", coords: [72.88, 19.08] },
+  { city: "Ludhiana", state: "Punjab", coords: [75.86, 30.90] },
+  { city: "Hyderabad", state: "Telangana", coords: [78.49, 17.39] },
+  { city: "Bengaluru", state: "Karnataka", coords: [77.59, 12.97] },
+  { city: "Visakhapatnam", state: "Andhra Pradesh", coords: [83.22, 17.69] },
+  { city: "Dehradun", state: "Uttarakhand", coords: [78.03, 30.32] },
+  { city: "Shimla", state: "Himachal Pradesh", coords: [77.17, 31.10] },
+];
+
+/* Per-country choropleth config (state polygons). */
+const CHOROPLETH: Record<string, {
+  geoUrl: string; nameKey: string; projection: string; projectionConfig: Record<string, unknown>; cities?: CityLabel[];
+}> = {
+  IND: {
+    geoUrl: "https://cdn.jsdelivr.net/gh/Anujarya300/bubble_maps@master/data/geography-data/india.topo.json",
+    nameKey: "name", projection: "geoMercator", projectionConfig: { scale: 1000, center: [82.5, 22.8] },
+    cities: INDIA_CITIES,
+  },
+  USA: {
+    geoUrl: "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json",
+    nameKey: "name", projection: "geoAlbersUsa", projectionConfig: { scale: 1000 },
+  },
 };
 
 export default function SafetyHotspots() {
@@ -204,8 +247,16 @@ export default function SafetyHotspots() {
             </p>
             {loadingStates ? (
               <div className="py-8 text-center text-muted-foreground text-sm">Loading state data…</div>
-            ) : sel?.iso_code === "IND" ? (
-              <IndiaSafetyMap states={states} advisoryFor={advisoryFor} />
+            ) : sel && CHOROPLETH[sel.iso_code] ? (
+              <StateChoroplethMap
+                geoUrl={CHOROPLETH[sel.iso_code].geoUrl}
+                nameKey={CHOROPLETH[sel.iso_code].nameKey}
+                projection={CHOROPLETH[sel.iso_code].projection}
+                projectionConfig={CHOROPLETH[sel.iso_code].projectionConfig}
+                cities={CHOROPLETH[sel.iso_code].cities}
+                states={states}
+                advisoryFor={advisoryFor}
+              />
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {states.map((st) => {

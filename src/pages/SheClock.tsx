@@ -43,7 +43,8 @@ function cadence(r: number): string {
   if (s < 86400) return `one every ${(s / 3600).toFixed(1)} hr`;
   return `one every ${(s / 86400).toFixed(1)} days`;
 }
-const fmtTally = (n: number) => (n >= 100 ? Math.floor(n).toLocaleString("en-US") : n.toFixed(1));
+// Always whole people — never a fractional girl/woman.
+const fmtTally = (n: number) => Math.floor(n).toLocaleString("en-US");
 const pulsing = (rate: number, elapsed: number) =>
   rate > 0 && Math.floor(rate * elapsed) > Math.floor(rate * (elapsed - 0.25));
 

@@ -68,6 +68,7 @@ interface TooltipState {
   iso: string;
   score: number | null;     // null = country has no data in active index
   tier: number;
+  subnational: boolean;     // has state-level drill-down
   x: number;
   y: number;
 }
@@ -88,6 +89,8 @@ interface WorldMapProps {
   indexLabel?: string;
   /** Map canvas height in px. Default 500. */
   mapHeight?: number;
+  /** ISO alpha-3 codes that have state-level drill-down — highlighted with a gold border + tooltip note. */
+  subnationalIsos?: Set<string>;
 }
 
 export function WorldMap({
@@ -97,6 +100,7 @@ export function WorldMap({
   scoreOverride,
   indexLabel = "WEI",
   mapHeight = 500,
+  subnationalIsos,
 }: WorldMapProps) {
   const navigate = useNavigate();
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
@@ -107,13 +111,19 @@ export function WorldMap({
     [countries]
   );
 
+  // Resolve ISO-A3 from a geo numeric id, tolerating leading-zero differences
+  // (e.g. world-atlas "076" vs table key "76").
+  const isoForGeo = useCallback((geo: { id?: string | number }) => {
+    const raw = String(geo.id ?? "");
+    return NUM_TO_ISO3[raw] ?? NUM_TO_ISO3[String(Number(raw))];
+  }, []);
+
   const getDataForGeo = useCallback(
     (geo: { id?: string | number }) => {
-      const numericId = String(geo.id ?? "");
-      const iso3 = NUM_TO_ISO3[numericId];
+      const iso3 = isoForGeo(geo);
       return iso3 ? scoreMap.get(iso3) ?? null : null;
     },
-    [scoreMap]
+    [scoreMap, isoForGeo]
   );
 
   /** Resolve the display score: scoreOverride if provided, else WEI score */
@@ -132,18 +142,18 @@ export function WorldMap({
     (geo: { id?: string | number }, evt: React.MouseEvent) => {
       const data = getDataForGeo(geo);
       if (!data) return;
-      const numericId = String(geo.id ?? "");
-      const iso3 = NUM_TO_ISO3[numericId];
+      const iso3 = isoForGeo(geo);
       setTooltip({
         country: data.country,
         iso:     data.iso_code,
         score:   getDisplayScore(iso3),
         tier:    data.tier,
+        subnational: !!subnationalIsos?.has(data.iso_code),
         x:       evt.clientX,
         y:       evt.clientY,
       });
     },
-    [getDataForGeo, getDisplayScore]
+    [getDataForGeo, getDisplayScore, subnationalIsos, isoForGeo]
   );
 
   const handleMove = useCallback((evt: React.MouseEvent) => {
@@ -192,6 +202,11 @@ export function WorldMap({
               No {indexLabel} data
             </p>
           )}
+          {tooltip.subnational && (
+            <p className="text-xs mt-1 inline-flex items-center gap-1 font-medium" style={{ color: "#fcd34d" }}>
+              📍 State-level data available
+            </p>
+          )}
           <p className="text-xs text-accent mt-1">
             {onSelect ? "Click to select & compare →" : "Click to explore →"}
           </p>
@@ -211,20 +226,21 @@ export function WorldMap({
               {({ geographies }) =>
                 geographies.map((geo) => {
                   const data        = getDataForGeo(geo);
-                  const numericId   = String(geo.id ?? "");
-                  const iso3        = NUM_TO_ISO3[numericId];
+                  const iso3        = isoForGeo(geo);
                   const displayScore = getDisplayScore(iso3);
                   const isSelected  = !!selectedIso && data?.iso_code === selectedIso;
                   const fill        = isSelected ? "#f59e0b" : scoreToColor(displayScore);
                   const hasData     = !!data;   // clickable if WEI record exists
+                  const hasSub      = !!data && !!subnationalIsos?.has(data.iso_code);
 
                   return (
                     <Geography
                       key={geo.rsmKey}
                       geography={geo}
                       fill={fill}
-                      stroke={isSelected ? "#fcd34d" : "#0f172a"}
-                      strokeWidth={isSelected ? 1.5 : 0.4}
+                      stroke={isSelected ? "#fcd34d" : hasSub ? "#fcd34d" : "#0f172a"}
+                      strokeWidth={isSelected ? 1.5 : hasSub ? 1 : 0.4}
+                      strokeDasharray={hasSub && !isSelected ? "2 1.5" : undefined}
                       style={{
                         default: {
                           outline: "none",
@@ -269,6 +285,12 @@ export function WorldMap({
             {label}
           </span>
         ))}
+        {subnationalIsos && subnationalIsos.size > 0 && (
+          <span className="flex items-center gap-1.5">
+            <span className="w-3.5 h-2 inline-block flex-shrink-0 rounded-sm border-2 border-dashed" style={{ borderColor: "#fcd34d" }} />
+            State-level data
+          </span>
+        )}
       </div>
       <p className="text-center text-xs text-muted-foreground/40 mt-2">
         Scroll to zoom · Drag to pan · Click a country to select

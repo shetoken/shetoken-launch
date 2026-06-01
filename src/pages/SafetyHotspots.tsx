@@ -188,6 +188,7 @@ export default function SafetyHotspots() {
                 scoreOverride={scoreOverride}
                 indexLabel="Safety"
                 mapHeight={420}
+                subnationalIsos={new Set(Object.keys(SUBNATIONAL))}
               />
             </div>
 

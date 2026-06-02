@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { api } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 import { Nav } from "@/components/Nav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -224,11 +225,20 @@ function WhitepaperContent() {
   );
 }
 
+const WP_UNLOCK_KEY = "she_whitepaper_unlocked";
+
 export default function Whitepaper() {
+  const { user } = useAuth();
   const [form, setForm] = useState<Partial<FormData>>({});
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [loading, setLoading] = useState(false);
-  const [unlocked, setUnlocked] = useState(false);
+  // Access persists: once granted (this browser) or while signed in.
+  const [unlocked, setUnlocked] = useState<boolean>(() => {
+    try { return localStorage.getItem(WP_UNLOCK_KEY) === "1"; } catch { return false; }
+  });
+
+  // Signed-in users get the whitepaper — having an account is access.
+  useEffect(() => { if (user) setUnlocked(true); }, [user]);
 
   function handleChange(field: keyof FormData, value: string) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -249,8 +259,9 @@ export default function Whitepaper() {
     }
 
     setLoading(true);
+    // Save the lead (best-effort) — never block access on it. If the table is
+    // missing or RLS rejects the insert, we still grant access and log it.
     try {
-      // Save lead to Supabase
       const { error } = await supabase.from("she_whitepaper_leads").insert({
         full_name: result.data.full_name,
         email: result.data.email,
@@ -260,23 +271,22 @@ export default function Whitepaper() {
         country: result.data.country ?? null,
         intended_use: result.data.intended_use ?? null,
       });
-
       if (error && error.code !== "23505") {
-        throw error;
+        console.warn("Whitepaper lead not saved:", error.message);
       }
-
-      // Also subscribe to newsletter via API (non-blocking — CORS may vary by env)
-      api.subscribe(result.data.email, "ngo").catch(() => {});
-
-      toast.success("Access granted — welcome to the SHEtoken research community.");
-      setUnlocked(true);
-      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
-      console.error(err);
-      toast.error("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
+      console.warn("Whitepaper lead insert failed:", err);
     }
+
+    // Newsletter subscribe (non-blocking)
+    api.subscribe(result.data.email, "ngo").catch(() => {});
+
+    // Grant + persist access
+    try { localStorage.setItem(WP_UNLOCK_KEY, "1"); } catch { /* ignore */ }
+    toast.success("Access granted — welcome to the SHEtoken research community.");
+    setUnlocked(true);
+    setLoading(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   return (

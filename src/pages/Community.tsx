@@ -10,9 +10,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { ArrowRight, Mail, Users, Heart, ShieldCheck, CheckCircle, Sparkles } from "lucide-react";
+import { ArrowRight, Mail, Users, Heart, ShieldCheck, CheckCircle, Sparkles, HeartHandshake, Building2, Store } from "lucide-react";
 
 const emailSchema = z.string().email();
+
+/* ── Partner / sponsor intake ── */
+const PARTNER_TYPES = ["Impact investor", "Foundation / grantmaker", "Corporate / CSR", "Government", "Web3 infrastructure", "Individual donor"];
+const PARTNER_INTERESTS = ["Sponsor a scholarship drive", "Fund microfinance", "Match funding", "Strategic partnership", "Provide infrastructure", "General partnership"];
+const BUDGET_BANDS = ["In-kind / non-cash", "Under $5k", "$5k–25k", "$25k–100k", "$100k+", "Prefer not to say"];
+const splitList = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
 
 const GENDERS = ["Woman", "Non-binary", "Man", "Prefer to self-describe", "Prefer not to say"];
 const ELIGIBLE = new Set(["Woman", "Non-binary"]);
@@ -218,7 +224,221 @@ function SheCommunityCard() {
   );
 }
 
+/* ── Partner / sponsor sign-up ── */
+function PartnerCard() {
+  const { user, openAuth } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [f, setF] = useState({ org_name: "", partner_type: "", contact_name: "", website: "", regions: "", budget_band: "", message: "" });
+  const [interests, setInterests] = useState<string[]>([]);
+  const toggle = (i: string) => setInterests((arr) => arr.includes(i) ? arr.filter((x) => x !== i) : [...arr, i]);
+
+  const { data: existing, refetch } = useQuery({
+    queryKey: ["partner", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase.from("she_partners").select("id,org_name,status").eq("user_id", user!.id).maybeSingle();
+      return data as { id: string; org_name: string; status: string } | null;
+    },
+  });
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!f.org_name.trim() || !f.partner_type) { toast.error("Please add your organisation name and type."); return; }
+    setLoading(true);
+    try {
+      const { error } = await supabase.from("she_partners").upsert({
+        user_id: user!.id, email: user!.email,
+        org_name: f.org_name.trim(), partner_type: f.partner_type,
+        contact_name: f.contact_name.trim() || null, website: f.website.trim() || null,
+        interests, regions: splitList(f.regions),
+        budget_band: f.budget_band || null, message: f.message.trim() || null,
+        status: "pending",
+      }, { onConflict: "user_id" });
+      if (error) throw error;
+      toast.success("Thank you — your partner registration is in. We'll be in touch.");
+      setOpen(false); refetch();
+    } catch (err) { console.warn("partner join failed", err); toast.error("Could not save. Please try again."); }
+    finally { setLoading(false); }
+  }
+
+  return (
+    <div className="rounded-2xl border border-purple-400/25 bg-purple-400/5 p-6 shadow-card">
+      <div className="flex items-center gap-2 text-purple-300 text-xs font-semibold mb-2"><HeartHandshake className="h-3.5 w-3.5" /> PARTNER WITH US</div>
+      <h2 className="text-2xl font-bold mb-2">Partners &amp; sponsors</h2>
+      <p className="text-sm text-muted-foreground mb-5 max-w-xl">
+        Impact investors, foundations, corporates, governments and Web3 infrastructure partners — fund scholarship and
+        microfinance drives, sponsor regions, and help make women's advancement measurable and investable.
+      </p>
+
+      {!user ? (
+        <Button onClick={() => openAuth("signup")} className="bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90">
+          Sign in to register <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      ) : existing ? (
+        <div className="flex items-center gap-2 text-sm">
+          <CheckCircle className="h-5 w-5 text-emerald-400" />
+          <span className="text-muted-foreground">{existing.org_name} is registered as a partner ({existing.status}). We'll reach out.</span>
+        </div>
+      ) : !open ? (
+        <Button onClick={() => setOpen(true)} className="bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90">
+          Register as a partner <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      ) : (
+        <form onSubmit={submit} className="grid sm:grid-cols-2 gap-4 mt-2">
+          <div>
+            <label className="text-xs font-medium mb-1 block">Organisation name *</label>
+            <Input value={f.org_name} onChange={(e) => setF({ ...f, org_name: e.target.value })} placeholder="Organisation / fund" className="bg-background/60 border-border/60" />
+          </div>
+          <div>
+            <label className="text-xs font-medium mb-1 block">Partner type *</label>
+            <select className={selectCls} value={f.partner_type} onChange={(e) => setF({ ...f, partner_type: e.target.value })}>
+              <option value="">Select…</option>{PARTNER_TYPES.map((p) => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs font-medium mb-1 block">Contact name</label>
+            <Input value={f.contact_name} onChange={(e) => setF({ ...f, contact_name: e.target.value })} placeholder="Your name" className="bg-background/60 border-border/60" />
+          </div>
+          <div>
+            <label className="text-xs font-medium mb-1 block">Website</label>
+            <Input value={f.website} onChange={(e) => setF({ ...f, website: e.target.value })} placeholder="https://" className="bg-background/60 border-border/60" />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="text-xs font-medium mb-1.5 block">How would you like to partner?</label>
+            <div className="flex flex-wrap gap-1.5">
+              {PARTNER_INTERESTS.map((i) => (
+                <button type="button" key={i} onClick={() => toggle(i)}
+                  className={`text-xs px-2.5 py-1 rounded-full border transition-smooth ${interests.includes(i) ? "border-accent bg-accent/15 text-accent" : "border-border/60 text-muted-foreground hover:text-foreground"}`}>
+                  {i}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="text-xs font-medium mb-1 block">Regions of interest</label>
+            <Input value={f.regions} onChange={(e) => setF({ ...f, regions: e.target.value })} placeholder="e.g. Massachusetts, West Bengal" className="bg-background/60 border-border/60" />
+            <p className="text-[10px] text-muted-foreground mt-1">Comma-separated.</p>
+          </div>
+          <div>
+            <label className="text-xs font-medium mb-1 block">Indicative support</label>
+            <select className={selectCls} value={f.budget_band} onChange={(e) => setF({ ...f, budget_band: e.target.value })}>
+              <option value="">Prefer not to say</option>{BUDGET_BANDS.map((b) => <option key={b} value={b}>{b}</option>)}
+            </select>
+          </div>
+          <div className="sm:col-span-2">
+            <label className="text-xs font-medium mb-1 block">Anything else?</label>
+            <textarea value={f.message} onChange={(e) => setF({ ...f, message: e.target.value })} rows={2}
+              placeholder="Tell us what you're hoping to support (optional)"
+              className="w-full rounded-md border border-border/60 bg-background/60 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none" />
+          </div>
+          <div className="sm:col-span-2 flex gap-3">
+            <Button type="submit" disabled={loading} className="bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90">
+              {loading ? "Saving…" : "Submit registration"}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} className="border-border/60 bg-card/40">Cancel</Button>
+          </div>
+        </form>
+      )}
+    </div>
+  );
+}
+
+/* ── NGO / nonprofit self-registration ── */
+function NgoSelfSignupCard() {
+  const { user, openAuth } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
+  const [f, setF] = useState({ name: "", country: "", city: "", focus_area: "", website: "", contact_name: "", contact_email: "" });
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!f.name.trim()) { toast.error("Please add your organisation name."); return; }
+    setLoading(true);
+    try {
+      const { error } = await supabase.from("she_ngos").insert({
+        name: f.name.trim(), country: f.country.trim() || null, city: f.city.trim() || null,
+        focus_area: f.focus_area.trim() || null, website: f.website.trim() || null,
+        contact_name: f.contact_name.trim() || null,
+        contact_email: f.contact_email.trim() || user?.email || null,
+        verified: false, submitted_by: user?.id ?? null,
+      });
+      if (error) throw error;
+      toast.success("Thank you — your organisation is submitted for review.");
+      setDone(true);
+    } catch (err) { console.warn("ngo signup failed", err); toast.error("Could not submit. Please try again."); }
+    finally { setLoading(false); }
+  }
+
+  return (
+    <div className="rounded-2xl border border-emerald-400/25 bg-emerald-400/5 p-6 shadow-card">
+      <div className="flex items-center gap-2 text-emerald-300 text-xs font-semibold mb-2"><Building2 className="h-3.5 w-3.5" /> FOR ORGANISATIONS</div>
+      <h2 className="text-2xl font-bold mb-2">NGO &amp; nonprofit registry</h2>
+      <p className="text-sm text-muted-foreground mb-5 max-w-xl">
+        Women- and girls-serving organisations: join the SHE Community directory. Verified NGOs become disbursement and
+        advocacy partners for scholarship and microfinance drives — and can represent women without a phone of their own.
+      </p>
+
+      {!user ? (
+        <Button onClick={() => openAuth("signup")} className="bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90">
+          Sign in to register <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      ) : done ? (
+        <div className="flex items-center gap-2 text-sm">
+          <CheckCircle className="h-5 w-5 text-emerald-400" />
+          <span className="text-muted-foreground">Submitted for review. We verify each organisation before it goes live.</span>
+        </div>
+      ) : (
+        <form onSubmit={submit} className="grid sm:grid-cols-2 gap-4 mt-2">
+          <div className="sm:col-span-2">
+            <label className="text-xs font-medium mb-1 block">Organisation name *</label>
+            <Input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder="Organisation name" className="bg-background/60 border-border/60" />
+          </div>
+          <div>
+            <label className="text-xs font-medium mb-1 block">Country</label>
+            <Input value={f.country} onChange={(e) => setF({ ...f, country: e.target.value })} placeholder="Country" className="bg-background/60 border-border/60" />
+          </div>
+          <div>
+            <label className="text-xs font-medium mb-1 block">City</label>
+            <Input value={f.city} onChange={(e) => setF({ ...f, city: e.target.value })} placeholder="City" className="bg-background/60 border-border/60" />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="text-xs font-medium mb-1 block">Focus area</label>
+            <Input value={f.focus_area} onChange={(e) => setF({ ...f, focus_area: e.target.value })} placeholder="e.g. GBV support, girls' education, microfinance" className="bg-background/60 border-border/60" />
+          </div>
+          <div>
+            <label className="text-xs font-medium mb-1 block">Contact name</label>
+            <Input value={f.contact_name} onChange={(e) => setF({ ...f, contact_name: e.target.value })} placeholder="Your name" className="bg-background/60 border-border/60" />
+          </div>
+          <div>
+            <label className="text-xs font-medium mb-1 block">Contact email</label>
+            <Input value={f.contact_email} onChange={(e) => setF({ ...f, contact_email: e.target.value })} placeholder={user?.email ?? "contact@org.org"} className="bg-background/60 border-border/60" />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="text-xs font-medium mb-1 block">Website</label>
+            <Input value={f.website} onChange={(e) => setF({ ...f, website: e.target.value })} placeholder="https://" className="bg-background/60 border-border/60" />
+          </div>
+          <div className="sm:col-span-2">
+            <Button type="submit" disabled={loading} className="bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90">
+              {loading ? "Submitting…" : "Submit for review"}
+            </Button>
+          </div>
+        </form>
+      )}
+    </div>
+  );
+}
+
+const ROLES = [
+  { key: "member", label: "Join as a member", desc: "Women & non-binary — support, safety, solidarity.", Icon: Users },
+  { key: "partner", label: "Partner / Sponsor", desc: "Fund drives, sponsor regions, invest in impact.", Icon: HeartHandshake },
+  { key: "ngo", label: "NGO / Nonprofit", desc: "Register your organisation to the directory.", Icon: Building2 },
+  { key: "business", label: "Business owner", desc: "Sell products & services on SHEconomy.", Icon: Store },
+] as const;
+type Role = typeof ROLES[number]["key"];
+
 export default function Community() {
+  const [role, setRole] = useState<Role>("member");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
@@ -256,9 +476,44 @@ export default function Community() {
           </p>
         </section>
 
-        {/* SHE Community — primary action, above everything else */}
+        {/* Role gateway — choose how you're joining */}
+        <section className="container max-w-3xl mb-6">
+          <p className="text-xs font-semibold text-muted-foreground mb-3 text-center">I'm joining as…</p>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {ROLES.map((r) => {
+              const active = role === r.key;
+              return (
+                <button key={r.key} onClick={() => setRole(r.key)}
+                  className={`text-left rounded-2xl border p-4 transition-smooth ${active ? "border-accent bg-accent/10 shadow-glow" : "border-border/40 bg-gradient-card hover:border-accent/40"}`}>
+                  <r.Icon className={`h-5 w-5 mb-2 ${active ? "text-accent" : "text-muted-foreground"}`} />
+                  <div className="font-semibold text-sm leading-tight mb-1">{r.label}</div>
+                  <div className="text-[11px] text-muted-foreground leading-snug">{r.desc}</div>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Selected role panel */}
         <section className="container max-w-3xl mb-8">
-          <SheCommunityCard />
+          {role === "member" && <SheCommunityCard />}
+          {role === "partner" && <PartnerCard />}
+          {role === "ngo" && <NgoSelfSignupCard />}
+          {role === "business" && (
+            <div className="rounded-2xl border border-border/40 bg-gradient-card p-6 shadow-card">
+              <div className="flex items-center gap-2 text-accent text-xs font-semibold mb-2"><Store className="h-3.5 w-3.5" /> SHEconomy</div>
+              <h2 className="text-2xl font-bold mb-2">Sell on SHEconomy</h2>
+              <p className="text-sm text-muted-foreground mb-5 max-w-xl">
+                Women-owned businesses can open a shop, list products and services, and reach buyers who want to put their
+                money behind women. Set up your shop in the SHEconomy marketplace.
+              </p>
+              <Link to="/marketplace">
+                <Button className="bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90">
+                  Open your shop <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          )}
         </section>
 
         {/* Newsletter — lighter, secondary (no account needed) */}

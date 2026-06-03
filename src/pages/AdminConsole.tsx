@@ -8,17 +8,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { parseCsv } from "@/lib/csv";
-import { Lock, Globe, Users, Download, Activity, Clock, FileText, Eye, BarChart3, Heart, Upload, Plus } from "lucide-react";
+import { Lock, Globe, Users, Download, Activity, Clock, FileText, Eye, BarChart3, Heart, Upload, Plus, HeartHandshake, CheckCircle2 } from "lucide-react";
 
 interface EventRow { session_id: string | null; user_id: string | null; path: string | null; country: string | null; city: string | null; created_at: string; }
 interface ProfileRow { id: string; email: string | null; display_name: string | null; region: string | null; created_at: string; }
 interface DownloadRow { id: string; doc_type: string; doc_ref: string | null; user_email: string | null; country: string | null; city: string | null; created_at: string; }
 
-const TABS = ["overview", "users", "engagement", "downloads", "ngos", "marketplace"] as const;
+const TABS = ["overview", "users", "engagement", "downloads", "partners", "ngos", "marketplace"] as const;
 type Tab = typeof TABS[number];
 const tabLabel = (t: Tab) => (t === "ngos" ? "NGOs" : t);
 interface NgoRow { id: string; name: string; country: string | null; city: string | null; focus_area: string | null; website: string | null; contact_email: string | null; verified: boolean | null; created_at: string; }
 interface BizRow { id: string; name: string; owner_name: string | null; category: string | null; country: string | null; city: string | null; status: string; created_at: string; }
+interface PartnerRow { id: string; org_name: string; partner_type: string | null; contact_name: string | null; email: string | null; website: string | null; interests: string[] | null; regions: string[] | null; budget_band: string | null; status: string; created_at: string; }
 
 const tally = <T,>(arr: T[], key: (r: T) => string | null | undefined): [string, number][] => {
   const m = new Map<string, number>();
@@ -95,12 +96,27 @@ export default function AdminConsole() {
       if (error) throw error; return (data ?? []) as BizRow[];
     },
   });
+  const partners = useQuery({
+    queryKey: ["admin-partners"], enabled: isAdmin, staleTime: 30_000,
+    queryFn: async (): Promise<PartnerRow[]> => {
+      const { data, error } = await supabase.from("she_partners").select("*").order("created_at", { ascending: false }).limit(2000);
+      if (error) throw error; return (data ?? []) as PartnerRow[];
+    },
+  });
 
-  const ev = events.data ?? [], pf = profiles.data ?? [], dl = downloads.data ?? [], ng = ngos.data ?? [], bz = biz.data ?? [];
+  const ev = events.data ?? [], pf = profiles.data ?? [], dl = downloads.data ?? [], ng = ngos.data ?? [], bz = biz.data ?? [], pt = partners.data ?? [];
 
   async function setBizStatus(id: string, status: string) {
     const { error } = await supabase.from("she_businesses").update({ status, verified: status === "approved" }).eq("id", id);
     if (error) toast.error("Could not update."); else { toast.success(`Marked ${status}.`); biz.refetch(); }
+  }
+  async function setPartnerStatus(id: string, status: string) {
+    const { error } = await supabase.from("she_partners").update({ status }).eq("id", id);
+    if (error) toast.error("Could not update."); else { toast.success(`Marked ${status}.`); partners.refetch(); }
+  }
+  async function setNgoVerified(id: string, verified: boolean) {
+    const { error } = await supabase.from("she_ngos").update({ verified }).eq("id", id);
+    if (error) toast.error("Could not update."); else { toast.success(verified ? "Verified." : "Unverified."); ngos.refetch(); }
   }
 
   const [ngoForm, setNgoForm] = useState({ name: "", country: "", city: "", focus_area: "", website: "", contact_email: "" });
@@ -323,6 +339,47 @@ export default function AdminConsole() {
                   </div>
                 )}
 
+                {/* PARTNERS */}
+                {tab === "partners" && (
+                  <div className="space-y-6">
+                    <div className="grid sm:grid-cols-3 gap-4">
+                      <StatCard icon={<HeartHandshake className="h-3.5 w-3.5" />} label="Total partners" value={pt.length} />
+                      <StatCard icon={<Clock className="h-3.5 w-3.5" />} label="Pending review" value={pt.filter((p) => p.status === "pending").length} />
+                      <StatCard icon={<CheckCircle2 className="h-3.5 w-3.5" />} label="Verified" value={pt.filter((p) => p.status === "verified").length} />
+                    </div>
+                    <div className="grid lg:grid-cols-2 gap-4">
+                      <RankTable title="By partner type" rows={tally(pt, (p) => p.partner_type)} icon={<HeartHandshake className="h-3.5 w-3.5 text-accent" />} />
+                      <RankTable title="By region of interest" rows={tally(pt.flatMap((p) => (p.regions?.length ? p.regions : ["—"]).map((r) => ({ r }))), (x) => x.r)} icon={<Globe className="h-3.5 w-3.5 text-accent" />} />
+                    </div>
+                    <div className="rounded-2xl border border-border/40 bg-gradient-card shadow-card overflow-hidden">
+                      <div className="px-5 py-3 border-b border-border/40 flex items-center gap-2"><HeartHandshake className="h-4 w-4 text-accent" /><h3 className="text-sm font-semibold">Partners &amp; sponsors ({pt.length})</h3></div>
+                      <div className="overflow-x-auto"><table className="w-full text-xs">
+                        <thead className="bg-card/60 text-muted-foreground"><tr>{["Organisation", "Type", "Contact", "Interests", "Regions", "Support", "Status", "Action"].map((h) => <th key={h} className="text-left px-4 py-2 font-medium">{h}</th>)}</tr></thead>
+                        <tbody>
+                          {pt.map((p) => (
+                            <tr key={p.id} className="border-t border-border/20 align-top">
+                              <td className="px-4 py-2 font-medium">{p.org_name}{p.website && <a href={p.website.startsWith("http") ? p.website : `https://${p.website}`} target="_blank" rel="noreferrer" className="block text-accent hover:underline font-normal">{p.website}</a>}</td>
+                              <td className="px-4 py-2">{p.partner_type ?? "—"}</td>
+                              <td className="px-4 py-2">{p.contact_name ?? "—"}<span className="block text-muted-foreground">{p.email ?? ""}</span></td>
+                              <td className="px-4 py-2 max-w-[180px]">{p.interests?.join(", ") || "—"}</td>
+                              <td className="px-4 py-2">{p.regions?.join(", ") || "—"}</td>
+                              <td className="px-4 py-2 whitespace-nowrap">{p.budget_band ?? "—"}</td>
+                              <td className="px-4 py-2"><span className={p.status === "verified" ? "text-emerald-400" : p.status === "declined" ? "text-red-400" : "text-yellow-400"}>{p.status}</span></td>
+                              <td className="px-4 py-2">
+                                <div className="flex gap-1.5">
+                                  {p.status !== "verified" && <button onClick={() => setPartnerStatus(p.id, "verified")} className="text-[11px] text-emerald-400 border border-emerald-400/40 hover:bg-emerald-400/10 rounded px-2 py-0.5">Verify</button>}
+                                  {p.status !== "declined" && <button onClick={() => setPartnerStatus(p.id, "declined")} className="text-[11px] text-red-400 border border-red-400/40 hover:bg-red-400/10 rounded px-2 py-0.5">Decline</button>}
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                          {pt.length === 0 && <tr><td colSpan={8} className="px-4 py-6 text-center text-muted-foreground">No partners yet.</td></tr>}
+                        </tbody>
+                      </table></div>
+                    </div>
+                  </div>
+                )}
+
                 {/* NGOs */}
                 {tab === "ngos" && (
                   <div className="space-y-6">
@@ -360,19 +417,24 @@ export default function AdminConsole() {
                     <div className="rounded-2xl border border-border/40 bg-gradient-card shadow-card overflow-hidden">
                       <div className="px-5 py-3 border-b border-border/40 flex items-center gap-2"><Heart className="h-4 w-4 text-accent" /><h3 className="text-sm font-semibold">Vetted NGOs ({ng.length})</h3></div>
                       <div className="overflow-x-auto"><table className="w-full text-xs">
-                        <thead className="bg-card/60 text-muted-foreground"><tr>{["Name", "Country", "City", "Focus", "Website", "Contact"].map((h) => <th key={h} className="text-left px-4 py-2 font-medium">{h}</th>)}</tr></thead>
+                        <thead className="bg-card/60 text-muted-foreground"><tr>{["Name", "Country", "City", "Focus", "Contact", "Status", "Action"].map((h) => <th key={h} className="text-left px-4 py-2 font-medium">{h}</th>)}</tr></thead>
                         <tbody>
                           {ng.slice(0, 300).map((n) => (
                             <tr key={n.id} className="border-t border-border/20">
-                              <td className="px-4 py-2 font-medium">{n.name}</td>
+                              <td className="px-4 py-2 font-medium">{n.name}{n.website && <a href={n.website.startsWith("http") ? n.website : `https://${n.website}`} target="_blank" rel="noreferrer" className="block text-accent hover:underline font-normal">{n.website}</a>}</td>
                               <td className="px-4 py-2">{n.country ?? "—"}</td>
                               <td className="px-4 py-2">{n.city ?? "—"}</td>
                               <td className="px-4 py-2">{n.focus_area ?? "—"}</td>
-                              <td className="px-4 py-2 truncate max-w-[160px]">{n.website ? <a href={n.website.startsWith("http") ? n.website : `https://${n.website}`} target="_blank" rel="noreferrer" className="text-accent hover:underline">{n.website}</a> : "—"}</td>
                               <td className="px-4 py-2 truncate max-w-[160px]">{n.contact_email ?? "—"}</td>
+                              <td className="px-4 py-2">{n.verified ? <span className="text-emerald-400">verified</span> : <span className="text-yellow-400">pending</span>}</td>
+                              <td className="px-4 py-2">
+                                {n.verified
+                                  ? <button onClick={() => setNgoVerified(n.id, false)} className="text-[11px] text-muted-foreground border border-border/50 hover:bg-muted/30 rounded px-2 py-0.5">Unverify</button>
+                                  : <button onClick={() => setNgoVerified(n.id, true)} className="text-[11px] text-emerald-400 border border-emerald-400/40 hover:bg-emerald-400/10 rounded px-2 py-0.5">Verify</button>}
+                              </td>
                             </tr>
                           ))}
-                          {ng.length === 0 && <tr><td colSpan={6} className="px-4 py-6 text-center text-muted-foreground">No NGOs yet — add one or import a CSV.</td></tr>}
+                          {ng.length === 0 && <tr><td colSpan={7} className="px-4 py-6 text-center text-muted-foreground">No NGOs yet — add one or import a CSV.</td></tr>}
                         </tbody>
                       </table></div>
                     </div>

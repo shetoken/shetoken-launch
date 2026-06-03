@@ -342,14 +342,24 @@ export default function CountryDetail() {
         return { code: idx.code, label: idx.label, accent: idx.accent, score };
       }),
     ];
+    const pillars = PILLAR_COLS.map((p) => ({
+      label: p.label, code: p.code, description: p.description,
+      score: (country[p.key] as number) ?? 0, globalAvg: p.globalAvg, improvement: p.improvement,
+    }));
+    const vs = violenceSeverity(country.violence_penalty_score ?? 0);
     void downloadCountryReport({
       country,
       indexes,
+      pillars,
+      performanceSummary: performanceBlurb(country),
+      violence: { score: country.violence_penalty_score ?? 0, label: vs.label, context: vs.context },
       trend: chartData.filter((d): d is { year: number; score: number } =>
         typeof d.year === "number" && typeof d.score === "number"),
       lifepath: (lifepath?.stages ?? []).map((s) => ({
         age_band: s.age_band, headline: s.headline, cohort: s.cohort,
+        detail: s.detail, felt: s.felt, source: s.source,
       })),
+      milestones: (lifepath?.milestones ?? []).map((m) => ({ label: m.label, reached: m.reached })),
     });
   }
 

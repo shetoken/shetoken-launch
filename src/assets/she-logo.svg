@@ -23,12 +23,11 @@
 
   <circle cx="256" cy="256" r="252" fill="url(#bg)"/>
 
-  <circle cx="256" cy="256" r="246" fill="none" stroke="url(#rose)" stroke-width="2.5"/>
-  <circle cx="256" cy="256" r="212" fill="none" stroke="url(#rose)" stroke-width="4"/>
+  <circle cx="256" cy="256" r="246" fill="none" stroke="url(#rose)" stroke-width="3"/>
   <circle cx="256" cy="256" r="150" fill="none" stroke="url(#rose)" stroke-width="4"/>
 
-  <path id="topArc" d="M 38 256 A 218 218 0 0 1 474 256" fill="none"/>
-  <text font-family="Georgia, 'Times New Roman', serif" font-size="31" letter-spacing="6"
+  <path id="topArc" d="M 42 256 A 214 214 0 0 1 470 256" fill="none"/>
+  <text font-family="Georgia, 'Times New Roman', serif" font-size="30" letter-spacing="13"
         fill="url(#gold)" text-anchor="middle">
     <textPath href="#topArc" startOffset="50%">SHE  TOKEN</textPath>
   </text>

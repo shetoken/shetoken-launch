@@ -20,6 +20,9 @@ const AGE_BANDS = ["Under 18", "18–24", "25–34", "35–44", "45–54", "55�
 const INTERESTS = ["Safety", "Health", "Career", "Education", "Finance", "Motherhood", "Legal rights", "Mental health", "Entrepreneurship", "Activism"];
 const PROFESSIONS = ["Student", "Healthcare", "Education", "Tech", "Business", "NGO / Social work", "Government", "Arts & media", "Homemaker", "Other"];
 const REASONS = ["Find support", "Share my story", "Help other women", "Find resources", "Stay informed", "Networking", "Other"];
+const CARING = ["Parents", "Grandparents", "In-laws", "Partner / spouse", "Sibling(s)", "A person with a disability", "Other"];
+const COUNTS = ["0", "1", "2", "3", "4", "5+"];
+const numFrom = (s: string) => (s === "" ? null : s === "5+" ? 5 : parseInt(s, 10));
 
 const selectCls = "w-full h-10 rounded-md border border-border/60 bg-background/60 px-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring";
 
@@ -28,9 +31,14 @@ function SheCommunityCard() {
   const { user, openAuth } = useAuth();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [f, setF] = useState({ gender: "", age_band: "", country: "", city: "", profession: "", profession_other: "", reason: "", reason_other: "" });
+  const [f, setF] = useState({ gender: "", age_band: "", country: "", city: "", profession: "", profession_other: "", reason: "", reason_other: "", single_mother: "" });
   const [interests, setInterests] = useState<string[]>([]);
   const [interestsOther, setInterestsOther] = useState("");
+  const [depGirls, setDepGirls] = useState("");
+  const [depBoys, setDepBoys] = useState("");
+  const [caring, setCaring] = useState<string[]>([]);
+  const [caringOther, setCaringOther] = useState("");
+  const toggleCaring = (i: string) => setCaring((arr) => arr.includes(i) ? arr.filter((x) => x !== i) : [...arr, i]);
 
   const { data: member, refetch } = useQuery({
     queryKey: ["community-member", user?.id],
@@ -56,6 +64,9 @@ function SheCommunityCard() {
         interests, interests_other: interestsOther.trim() || null,
         profession: f.profession || null, profession_other: f.profession_other.trim() || null,
         reason: f.reason || null, reason_other: f.reason_other.trim() || null,
+        single_mother: f.single_mother || null,
+        dependent_girls: numFrom(depGirls), dependent_boys: numFrom(depBoys),
+        caring_for: caring, caring_for_other: caringOther.trim() || null,
       }, { onConflict: "user_id" });
       if (error) throw error;
       toast.success(eligible ? "You're on the SHE Community early-access list — welcome." : "Thanks — you're on our community list.");
@@ -138,6 +149,44 @@ function SheCommunityCard() {
             </select>
             {f.reason === "Other" && <Input value={f.reason_other} onChange={(e) => setF({ ...f, reason_other: e.target.value })} placeholder="Tell us more" className="bg-background/60 border-border/60 mt-2" />}
           </div>
+          {/* Family & care — optional */}
+          <div className="sm:col-span-2 border-t border-border/30 pt-4 mt-1">
+            <p className="text-xs font-semibold">Family &amp; care <span className="text-muted-foreground font-normal">(optional)</span></p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Caregiving shapes women's lives and opportunities — this helps us understand and support members. All optional.</p>
+          </div>
+          <div>
+            <label className="text-xs font-medium mb-1 block">Are you a single mother?</label>
+            <select className={selectCls} value={f.single_mother} onChange={(e) => setF({ ...f, single_mother: e.target.value })}>
+              <option value="">Prefer not to say</option><option value="Yes">Yes</option><option value="No">No</option>
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium mb-1 block">Dependent girls</label>
+              <select className={selectCls} value={depGirls} onChange={(e) => setDepGirls(e.target.value)}>
+                <option value="">—</option>{COUNTS.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-medium mb-1 block">Dependent boys</label>
+              <select className={selectCls} value={depBoys} onChange={(e) => setDepBoys(e.target.value)}>
+                <option value="">—</option>{COUNTS.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="sm:col-span-2">
+            <label className="text-xs font-medium mb-1.5 block">Also caring for someone in the family?</label>
+            <div className="flex flex-wrap gap-1.5">
+              {CARING.map((i) => (
+                <button type="button" key={i} onClick={() => toggleCaring(i)}
+                  className={`text-xs px-2.5 py-1 rounded-full border transition-smooth ${caring.includes(i) ? "border-accent bg-accent/15 text-accent" : "border-border/60 text-muted-foreground hover:text-foreground"}`}>
+                  {i}
+                </button>
+              ))}
+            </div>
+            {caring.includes("Other") && <Input value={caringOther} onChange={(e) => setCaringOther(e.target.value)} placeholder="Who else? (optional)" className="bg-background/60 border-border/60 mt-2" />}
+          </div>
+
           <div className="sm:col-span-2 flex gap-3">
             <Button type="submit" disabled={loading} className="bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90">
               {loading ? "Saving…" : "Join the early-access list"}

@@ -1,6 +1,6 @@
 import { jsPDF } from "jspdf";
 import type { CountryWEI } from "@/lib/api";
-import { PW, M, C, hexToRgb, paintBackground, headerBand, pageFooter, panel } from "@/lib/pdfTheme";
+import { PW, M, C, hexToRgb, paintBackground, headerBand, pageFooter, panel, getLogoDataUrl } from "@/lib/pdfTheme";
 
 export interface ReportIndexTile { code: string; label: string; accent: string; score: number | null; }
 export interface ReportTrendPoint { year: number; score: number; }
@@ -22,19 +22,20 @@ const PILLARS: { key: keyof CountryWEI; label: string }[] = [
 ];
 
 /** Generate and download a one-page Women's Empowerment Index report — styled to match the website. */
-export function downloadCountryReport(opts: {
+export async function downloadCountryReport(opts: {
   country: CountryWEI;
   indexes: ReportIndexTile[];
   trend: ReportTrendPoint[];
   lifepath: ReportLifeStage[];
 }) {
   const { country: c, indexes, trend, lifepath } = opts;
+  const logo = await getLogoDataUrl();
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   let y = 0;
 
   // ── Dark page + branded header band ─────────────────────────────────────
   paintBackground(doc);
-  headerBand(doc, "Women's Empowerment Index — Country Report");
+  headerBand(doc, "Women's Empowerment Index — Country Report", logo);
 
   // ── Country header ──────────────────────────────────────────────────────
   y = 100;

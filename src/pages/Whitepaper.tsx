@@ -363,7 +363,10 @@ export default function Whitepaper() {
                 Full access unlocked. Read below or download a copy to keep and share.
               </div>
               <Button
-                onClick={() => { downloadWhitepaper(); toast.success("Downloading the SHEtoken whitepaper…"); }}
+                onClick={() => {
+                  toast.success("Preparing your whitepaper PDF…");
+                  downloadWhitepaper().catch(() => toast.error("Could not generate the PDF. Please try again."));
+                }}
                 className="bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90"
               >
                 <Download className="h-4 w-4 mr-1.5" /> Download PDF

@@ -46,26 +46,67 @@ export function paintBackground(doc: jsPDF) {
   doc.rect(0, 0, PW, PH, "F");
 }
 
+/**
+ * Rasterise the SHE TOKEN coin (public/favicon.svg) to a PNG data URL so it can
+ * be embedded in jsPDF (which can't draw SVG natively). Cached after first call.
+ * Returns null if rasterisation isn't possible (e.g. SSR) — the header then
+ * falls back to the text wordmark alone.
+ */
+let _logoCache: string | null | undefined;
+export async function getLogoDataUrl(size = 256): Promise<string | null> {
+  if (_logoCache !== undefined) return _logoCache;
+  try {
+    const res = await fetch("/favicon.svg");
+    let svg = await res.text();
+    // give the SVG an explicit square intrinsic size so it rasterises crisply
+    svg = svg.replace("<svg ", `<svg width="${size}" height="${size}" `);
+    const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
+    const img = new Image();
+    img.width = size; img.height = size;
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error("logo load failed"));
+      img.src = url;
+    });
+    const canvas = document.createElement("canvas");
+    canvas.width = size; canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("no 2d ctx");
+    ctx.drawImage(img, 0, 0, size, size);
+    URL.revokeObjectURL(url);
+    _logoCache = canvas.toDataURL("image/png");
+  } catch (e) {
+    console.warn("SHEtoken logo rasterisation failed:", e);
+    _logoCache = null;
+  }
+  return _logoCache;
+}
+
 /** Branded header band with a gold underline. Returns the y below it. */
-export function headerBand(doc: jsPDF, subtitle: string): number {
+export function headerBand(doc: jsPDF, subtitle: string, logo?: string | null): number {
   doc.setFillColor(...C.cardTop);
   doc.rect(0, 0, PW, 64, "F");
   doc.setDrawColor(...C.gold);
   doc.setLineWidth(1.4);
   doc.line(0, 64, PW, 64);
 
+  let tx = M;
+  if (logo) {
+    try { doc.addImage(logo, "PNG", M, 14, 36, 36); tx = M + 46; } catch { /* ignore */ }
+  }
+
   doc.setFont("helvetica", "bold");
   doc.setFontSize(15);
   doc.setTextColor(...C.gold);
-  doc.text("SHE", M, 30);
+  doc.text("SHE", tx, 32);
   const w = doc.getTextWidth("SHE");
   doc.setTextColor(...C.ink);
-  doc.text("token", M + w, 30);
+  doc.text("token", tx + w, 32);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9.5);
   doc.setTextColor(...C.mut);
-  doc.text(subtitle, M, 47);
+  doc.text(subtitle, tx, 48);
 
   doc.setFontSize(8);
   doc.setTextColor(...C.mut);

@@ -342,7 +342,7 @@ export default function CountryDetail() {
         return { code: idx.code, label: idx.label, accent: idx.accent, score };
       }),
     ];
-    downloadCountryReport({
+    void downloadCountryReport({
       country,
       indexes,
       trend: chartData.filter((d): d is { year: number; score: number } =>

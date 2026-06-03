@@ -1,12 +1,13 @@
 import { jsPDF } from "jspdf";
-import { PW, PH, M, C, type RGB, paintBackground, headerBand, pageFooter, panel, drawTable } from "@/lib/pdfTheme";
+import { PW, PH, M, C, type RGB, paintBackground, headerBand, pageFooter, panel, drawTable, getLogoDataUrl } from "@/lib/pdfTheme";
 
 const SUBTITLE = "Whitepaper · v2.0 · May 2026 · $SHE";
 const CONTENT_W = PW - 2 * M;
 const BOTTOM = PH - 46; // keep clear of the footer
 
 /** Generate and download the full SHEtoken whitepaper, styled to match the website. */
-export function downloadWhitepaper() {
+export async function downloadWhitepaper() {
+  const logo = await getLogoDataUrl();
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   let page = 1;
   let y = 0;
@@ -17,7 +18,7 @@ export function downloadWhitepaper() {
       page += 1;
     }
     paintBackground(doc);
-    headerBand(doc, SUBTITLE);
+    headerBand(doc, SUBTITLE, logo);
     pageFooter(doc, "© 2026 SHE Foundation · Informational only — not financial advice.", `shetoken.org  ·  p.${page}`);
     y = 92;
   };

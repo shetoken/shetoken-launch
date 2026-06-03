@@ -66,6 +66,7 @@ export default function Why() {
             It measures the condition of women across 105 countries — and ties real value to real progress,
             so lifting women up finally counts.
           </p>
+          <p className="text-base md:text-lg font-semibold text-foreground mt-6">The world's first asset tied to the advancement of women.</p>
         </section>
 
         {/* THE NUMBERS */}

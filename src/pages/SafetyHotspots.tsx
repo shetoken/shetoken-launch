@@ -4,7 +4,7 @@ import { api, type CountryWEI, type IndexScore } from "@/lib/api";
 import { SEO } from "@/lib/seo";
 import { Nav } from "@/components/Nav";
 import { WorldMap } from "@/components/WorldMap";
-import { StateChoroplethMap, type CityLabel } from "@/components/StateChoroplethMap";
+import { StateChoroplethMap, stateKey, type CityLabel } from "@/components/StateChoroplethMap";
 import { ShieldAlert, Phone, MapPin, Search, Info, Moon, Users, Ban } from "lucide-react";
 
 /* ── Advisory tiers from the WEI Safety & Justice pillar (0–100, higher = safer) ── */
@@ -95,6 +95,7 @@ const CHOROPLETH: Record<string, {
 export default function SafetyHotspots() {
   const [search, setSearch] = useState("");
   const [selIso, setSelIso] = useState("IND");
+  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
 
   const { data: countriesRes, isLoading } = useQuery({
     queryKey: ["wei-countries"], queryFn: () => api.wei.countries(105), staleTime: 10 * 60 * 1000,
@@ -186,6 +187,8 @@ export default function SafetyHotspots() {
                 selectedIso={selIso}
                 onSelect={(c) => setSelIso(c.iso_code)}
                 scoreOverride={scoreOverride}
+                colorFor={(s) => (s == null ? "#1e293b" : advisoryFor(s).color)}
+                hideLegend
                 indexLabel="Safety"
                 mapHeight={420}
                 subnationalIsos={new Set(Object.keys(SUBNATIONAL))}
@@ -249,16 +252,53 @@ export default function SafetyHotspots() {
             {loadingStates ? (
               <div className="py-8 text-center text-muted-foreground text-sm">Loading state data…</div>
             ) : sel && CHOROPLETH[sel.iso_code] ? (
-              <StateChoroplethMap
-                key={sel.iso_code}
-                geoUrl={CHOROPLETH[sel.iso_code].geoUrl}
-                nameKey={CHOROPLETH[sel.iso_code].nameKey}
-                projection={CHOROPLETH[sel.iso_code].projection}
-                projectionConfig={CHOROPLETH[sel.iso_code].projectionConfig}
-                cities={CHOROPLETH[sel.iso_code].cities}
-                states={states}
-                advisoryFor={advisoryFor}
-              />
+              <div className="grid lg:grid-cols-3 gap-4 items-start">
+                <div className="lg:col-span-2">
+                  <StateChoroplethMap
+                    key={sel.iso_code}
+                    geoUrl={CHOROPLETH[sel.iso_code].geoUrl}
+                    nameKey={CHOROPLETH[sel.iso_code].nameKey}
+                    projection={CHOROPLETH[sel.iso_code].projection}
+                    projectionConfig={CHOROPLETH[sel.iso_code].projectionConfig}
+                    cities={CHOROPLETH[sel.iso_code].cities}
+                    states={states}
+                    advisoryFor={advisoryFor}
+                    hoveredKey={hoveredKey}
+                    onHoverKey={setHoveredKey}
+                  />
+                </div>
+                {/* Synced side-list — hover a row to highlight it on the map (and vice-versa) */}
+                <div className="lg:col-span-1 rounded-2xl border border-border/40 bg-gradient-card shadow-card overflow-hidden">
+                  <div className="px-3 py-2 border-b border-border/40 text-xs font-semibold text-muted-foreground">
+                    {states.length} states · least safe first
+                  </div>
+                  <div className="max-h-[480px] overflow-y-auto divide-y divide-border/20">
+                    {states.map((st) => {
+                      const a = advisoryFor(st.safety_justice_score ?? 0);
+                      const k = stateKey(st.state);
+                      const isHi = hoveredKey === k;
+                      return (
+                        <div
+                          key={st.state_code ?? st.state}
+                          onMouseEnter={() => setHoveredKey(k)}
+                          onMouseLeave={() => setHoveredKey(null)}
+                          className="flex items-center gap-2 px-3 py-1.5 cursor-default transition-colors"
+                          style={{ background: isHi ? `${a.color}1f` : "transparent" }}
+                        >
+                          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: a.color }} />
+                          <div className="min-w-0 flex-1">
+                            <div className="text-xs font-semibold truncate">{st.state}</div>
+                            <div className="text-[10px] leading-tight truncate" style={{ color: a.color }}>{a.label}</div>
+                          </div>
+                          <span className="text-[10px] font-medium text-muted-foreground shrink-0">
+                            {Number(st.safety_justice_score ?? 0).toFixed(0)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {states.map((st) => {

@@ -10,12 +10,13 @@ const ALIAS: Record<string, string> = {
   orissa: "odisha", telengana: "telangana", uttaranchal: "uttarakhand",
   nctofdelhi: "delhi", delhinct: "delhi", pondicherry: "puducherry",
 };
-const stateKey = (s: string) => { const n = norm(s); return ALIAS[n] || n; };
+export const stateKey = (s: string) => { const n = norm(s); return ALIAS[n] || n; };
 
 interface Hover { name: string; score: number | null; wei: number | null; advisory: Advisory | null; x: number; y: number; }
 
 export function StateChoroplethMap({
   geoUrl, nameKey, projection, projectionConfig, states, advisoryFor, cities, height = 520,
+  hoveredKey, onHoverKey,
 }: {
   geoUrl: string;
   nameKey: string;
@@ -25,6 +26,9 @@ export function StateChoroplethMap({
   advisoryFor: (score: number) => Advisory;
   cities?: CityLabel[];
   height?: number;
+  /** externally-controlled highlight (e.g. from a side list) — a stateKey() value */
+  hoveredKey?: string | null;
+  onHoverKey?: (k: string | null) => void;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<Hover | null>(null);
@@ -56,21 +60,23 @@ export function StateChoroplethMap({
           {({ geographies }) =>
             geographies.map((geo) => {
               const gname = (geo.properties?.[nameKey] as string) ?? "";
-              const st = lookup.get(stateKey(gname));
+              const gkey = stateKey(gname);
+              const st = lookup.get(gkey);
               const adv = st ? advisoryFor(st.safety_justice_score ?? 0) : null;
+              const isHi = hoveredKey != null && gkey === hoveredKey;
               return (
                 <Geography
                   key={geo.rsmKey}
                   geography={geo}
-                  onMouseEnter={(e) => setHover({
+                  onMouseEnter={(e) => { setHover({
                     name: st?.state ?? gname,
                     score: st ? (st.safety_justice_score ?? 0) : null,
                     wei: st ? (st.wei_score ?? 0) : null,
                     advisory: adv, ...pos(e),
-                  })}
-                  onMouseLeave={() => setHover(null)}
+                  }); onHoverKey?.(gkey); }}
+                  onMouseLeave={() => { setHover(null); onHoverKey?.(null); }}
                   style={{
-                    default: { fill: adv ? `${adv.color}cc` : "hsl(260 18% 17%)", stroke: "hsl(260 25% 34%)", strokeWidth: 0.5, outline: "none" },
+                    default: { fill: adv ? (isHi ? adv.color : `${adv.color}cc`) : (isHi ? "hsl(260 18% 26%)" : "hsl(260 18% 17%)"), stroke: isHi ? "hsl(40 30% 80%)" : "hsl(260 25% 34%)", strokeWidth: isHi ? 1.1 : 0.5, outline: "none" },
                     hover:   { fill: adv ? adv.color : "hsl(260 18% 22%)", stroke: "hsl(40 30% 80%)", strokeWidth: 0.9, outline: "none", cursor: "pointer" },
                     pressed: { fill: adv ? adv.color : "hsl(260 18% 22%)", outline: "none" },
                   }}

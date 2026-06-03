@@ -91,6 +91,10 @@ interface WorldMapProps {
   mapHeight?: number;
   /** ISO alpha-3 codes that have state-level drill-down — highlighted with a gold border + tooltip note. */
   subnationalIsos?: Set<string>;
+  /** Override the fill colour for a score (e.g. travel-advisory tiers instead of WEI tiers). */
+  colorFor?: (score: number | null | undefined) => string;
+  /** Hide the built-in WEI-tier legend (e.g. when the page shows its own legend). */
+  hideLegend?: boolean;
 }
 
 export function WorldMap({
@@ -101,6 +105,8 @@ export function WorldMap({
   indexLabel = "WEI",
   mapHeight = 500,
   subnationalIsos,
+  colorFor,
+  hideLegend,
 }: WorldMapProps) {
   const navigate = useNavigate();
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
@@ -229,7 +235,7 @@ export function WorldMap({
                   const iso3        = isoForGeo(geo);
                   const displayScore = getDisplayScore(iso3);
                   const isSelected  = !!selectedIso && data?.iso_code === selectedIso;
-                  const fill        = isSelected ? "#f59e0b" : scoreToColor(displayScore);
+                  const fill        = isSelected ? "#f59e0b" : (colorFor ? colorFor(displayScore) : scoreToColor(displayScore));
                   const hasData     = !!data;   // clickable if WEI record exists
                   const hasSub      = !!data && !!subnationalIsos?.has(data.iso_code);
 
@@ -267,6 +273,7 @@ export function WorldMap({
       </div>
 
       {/* Legend */}
+      {!hideLegend && (
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 justify-center mt-4 text-xs text-muted-foreground">
         {[
           { color: "#f59e0b", label: "Selected" },
@@ -292,6 +299,7 @@ export function WorldMap({
           </span>
         )}
       </div>
+      )}
       <p className="text-center text-xs text-muted-foreground/40 mt-2">
         Scroll to zoom · Drag to pan · Click a country to select
       </p>

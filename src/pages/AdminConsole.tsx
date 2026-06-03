@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState, useRef, Fragment } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,18 +8,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { parseCsv } from "@/lib/csv";
-import { Lock, Globe, Users, Download, Activity, Clock, FileText, Eye, BarChart3, Heart, Upload, Plus, HeartHandshake, CheckCircle2 } from "lucide-react";
+import { Lock, Globe, Users, Download, Activity, Clock, FileText, Eye, BarChart3, Heart, Upload, Plus, HeartHandshake, CheckCircle2, GraduationCap } from "lucide-react";
 
 interface EventRow { session_id: string | null; user_id: string | null; path: string | null; country: string | null; city: string | null; created_at: string; }
 interface ProfileRow { id: string; email: string | null; display_name: string | null; region: string | null; created_at: string; }
 interface DownloadRow { id: string; doc_type: string; doc_ref: string | null; user_email: string | null; country: string | null; city: string | null; created_at: string; }
 
-const TABS = ["overview", "users", "engagement", "downloads", "partners", "ngos", "marketplace"] as const;
+const TABS = ["overview", "users", "engagement", "downloads", "partners", "drives", "ngos", "marketplace"] as const;
 type Tab = typeof TABS[number];
 const tabLabel = (t: Tab) => (t === "ngos" ? "NGOs" : t);
 interface NgoRow { id: string; name: string; country: string | null; city: string | null; focus_area: string | null; website: string | null; contact_email: string | null; verified: boolean | null; created_at: string; }
 interface BizRow { id: string; name: string; owner_name: string | null; category: string | null; country: string | null; city: string | null; status: string; created_at: string; }
 interface PartnerRow { id: string; org_name: string; partner_type: string | null; contact_name: string | null; email: string | null; website: string | null; interests: string[] | null; regions: string[] | null; budget_band: string | null; status: string; created_at: string; }
+interface DriveRow { id: string; drive_type: string; title: string; sponsor_name: string | null; country: string | null; region: string | null; seats: number | null; amount: number | null; currency: string | null; deadline: string | null; partner_ngo: string | null; contact_email: string | null; status: string; created_at: string; }
+interface DriveAppRow { id: string; drive_id: string; applicant_name: string; applicant_email: string | null; region: string | null; is_nomination: boolean | null; nominator_name: string | null; status: string; created_at: string; }
 
 const tally = <T,>(arr: T[], key: (r: T) => string | null | undefined): [string, number][] => {
   const m = new Map<string, number>();
@@ -104,7 +106,22 @@ export default function AdminConsole() {
     },
   });
 
-  const ev = events.data ?? [], pf = profiles.data ?? [], dl = downloads.data ?? [], ng = ngos.data ?? [], bz = biz.data ?? [], pt = partners.data ?? [];
+  const drives = useQuery({
+    queryKey: ["admin-drives"], enabled: isAdmin, staleTime: 30_000,
+    queryFn: async (): Promise<DriveRow[]> => {
+      const { data, error } = await supabase.from("she_drives").select("*").order("created_at", { ascending: false }).limit(2000);
+      if (error) throw error; return (data ?? []) as DriveRow[];
+    },
+  });
+  const driveApps = useQuery({
+    queryKey: ["admin-drive-apps"], enabled: isAdmin, staleTime: 30_000,
+    queryFn: async (): Promise<DriveAppRow[]> => {
+      const { data, error } = await supabase.from("she_drive_applications").select("*").order("created_at", { ascending: false }).limit(5000);
+      if (error) throw error; return (data ?? []) as DriveAppRow[];
+    },
+  });
+
+  const ev = events.data ?? [], pf = profiles.data ?? [], dl = downloads.data ?? [], ng = ngos.data ?? [], bz = biz.data ?? [], pt = partners.data ?? [], dr = drives.data ?? [], da = driveApps.data ?? [];
 
   async function setBizStatus(id: string, status: string) {
     const { error } = await supabase.from("she_businesses").update({ status, verified: status === "approved" }).eq("id", id);
@@ -118,9 +135,18 @@ export default function AdminConsole() {
     const { error } = await supabase.from("she_ngos").update({ verified }).eq("id", id);
     if (error) toast.error("Could not update."); else { toast.success(verified ? "Verified." : "Unverified."); ngos.refetch(); }
   }
+  async function setDriveStatus(id: string, status: string) {
+    const { error } = await supabase.from("she_drives").update({ status }).eq("id", id);
+    if (error) toast.error("Could not update."); else { toast.success(`Marked ${status}.`); drives.refetch(); }
+  }
+  async function setDriveAppStatus(id: string, status: string) {
+    const { error } = await supabase.from("she_drive_applications").update({ status }).eq("id", id);
+    if (error) toast.error("Could not update."); else { toast.success(`Marked ${status}.`); driveApps.refetch(); }
+  }
 
   const [ngoForm, setNgoForm] = useState({ name: "", country: "", city: "", focus_area: "", website: "", contact_email: "" });
   const [savingNgo, setSavingNgo] = useState(false);
+  const [openDrive, setOpenDrive] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function addNgo(e: React.FormEvent) {
@@ -374,6 +400,73 @@ export default function AdminConsole() {
                             </tr>
                           ))}
                           {pt.length === 0 && <tr><td colSpan={8} className="px-4 py-6 text-center text-muted-foreground">No partners yet.</td></tr>}
+                        </tbody>
+                      </table></div>
+                    </div>
+                  </div>
+                )}
+
+                {/* DRIVES */}
+                {tab === "drives" && (
+                  <div className="space-y-6">
+                    <div className="grid sm:grid-cols-4 gap-4">
+                      <StatCard icon={<GraduationCap className="h-3.5 w-3.5" />} label="Total drives" value={dr.length} />
+                      <StatCard icon={<Clock className="h-3.5 w-3.5" />} label="Pending review" value={dr.filter((d) => d.status === "pending").length} />
+                      <StatCard icon={<CheckCircle2 className="h-3.5 w-3.5" />} label="Published" value={dr.filter((d) => d.status === "published").length} />
+                      <StatCard icon={<Users className="h-3.5 w-3.5" />} label="Applications" value={da.length} />
+                    </div>
+                    <div className="rounded-2xl border border-border/40 bg-gradient-card shadow-card overflow-hidden">
+                      <div className="px-5 py-3 border-b border-border/40 flex items-center gap-2"><GraduationCap className="h-4 w-4 text-accent" /><h3 className="text-sm font-semibold">Drives ({dr.length})</h3></div>
+                      <div className="overflow-x-auto"><table className="w-full text-xs">
+                        <thead className="bg-card/60 text-muted-foreground"><tr>{["Title", "Type", "Sponsor", "Region", "Seats", "Partner NGO", "Apps", "Status", "Action"].map((h) => <th key={h} className="text-left px-4 py-2 font-medium">{h}</th>)}</tr></thead>
+                        <tbody>
+                          {dr.map((d) => {
+                            const apps = da.filter((a) => a.drive_id === d.id);
+                            return (
+                              <Fragment key={d.id}>
+                                <tr className="border-t border-border/20 align-top">
+                                  <td className="px-4 py-2 font-medium max-w-[200px]">{d.title}</td>
+                                  <td className="px-4 py-2 capitalize">{d.drive_type}</td>
+                                  <td className="px-4 py-2">{d.sponsor_name ?? "—"}</td>
+                                  <td className="px-4 py-2">{[d.region, d.country].filter(Boolean).join(", ") || "—"}</td>
+                                  <td className="px-4 py-2">{d.seats ?? "—"}</td>
+                                  <td className="px-4 py-2">{d.partner_ngo ?? "—"}</td>
+                                  <td className="px-4 py-2"><button onClick={() => setOpenDrive(openDrive === d.id ? null : d.id)} className="text-accent hover:underline">{apps.length}</button></td>
+                                  <td className="px-4 py-2"><span className={d.status === "published" ? "text-emerald-400" : d.status === "declined" ? "text-red-400" : d.status === "closed" ? "text-muted-foreground" : "text-yellow-400"}>{d.status}</span></td>
+                                  <td className="px-4 py-2">
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {d.status !== "published" && <button onClick={() => setDriveStatus(d.id, "published")} className="text-[11px] text-emerald-400 border border-emerald-400/40 hover:bg-emerald-400/10 rounded px-2 py-0.5">Publish</button>}
+                                      {d.status !== "declined" && <button onClick={() => setDriveStatus(d.id, "declined")} className="text-[11px] text-red-400 border border-red-400/40 hover:bg-red-400/10 rounded px-2 py-0.5">Decline</button>}
+                                      {d.status === "published" && <button onClick={() => setDriveStatus(d.id, "closed")} className="text-[11px] text-muted-foreground border border-border/50 hover:bg-muted/30 rounded px-2 py-0.5">Close</button>}
+                                    </div>
+                                  </td>
+                                </tr>
+                                {openDrive === d.id && (
+                                  <tr className="bg-card/40"><td colSpan={9} className="px-4 py-3">
+                                    <div className="text-[11px] font-semibold text-muted-foreground mb-2">Applications &amp; nominations ({apps.length})</div>
+                                    {apps.length === 0 ? <p className="text-xs text-muted-foreground">None yet.</p> : (
+                                      <div className="space-y-1.5">
+                                        {apps.map((a) => (
+                                          <div key={a.id} className="flex items-center gap-2 flex-wrap text-xs border-b border-border/20 pb-1.5">
+                                            <span className="font-medium">{a.applicant_name}</span>
+                                            {a.is_nomination && <span className="text-[10px] text-purple-300 border border-purple-300/40 rounded px-1">nominated by {a.nominator_name ?? "advocate"}</span>}
+                                            <span className="text-muted-foreground">{a.applicant_email ?? ""}{a.region ? ` · ${a.region}` : ""}</span>
+                                            <span className={`ml-auto ${a.status === "awarded" ? "text-emerald-400" : a.status === "declined" ? "text-red-400" : a.status === "shortlisted" ? "text-accent" : "text-yellow-400"}`}>{a.status}</span>
+                                            <div className="flex gap-1">
+                                              {a.status !== "shortlisted" && <button onClick={() => setDriveAppStatus(a.id, "shortlisted")} className="text-[10px] text-accent border border-accent/40 hover:bg-accent/10 rounded px-1.5">Shortlist</button>}
+                                              {a.status !== "awarded" && <button onClick={() => setDriveAppStatus(a.id, "awarded")} className="text-[10px] text-emerald-400 border border-emerald-400/40 hover:bg-emerald-400/10 rounded px-1.5">Award</button>}
+                                              {a.status !== "declined" && <button onClick={() => setDriveAppStatus(a.id, "declined")} className="text-[10px] text-red-400 border border-red-400/40 hover:bg-red-400/10 rounded px-1.5">Decline</button>}
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </td></tr>
+                                )}
+                              </Fragment>
+                            );
+                          })}
+                          {dr.length === 0 && <tr><td colSpan={9} className="px-4 py-6 text-center text-muted-foreground">No drives yet — proposals appear here for review.</td></tr>}
                         </tbody>
                       </table></div>
                     </div>

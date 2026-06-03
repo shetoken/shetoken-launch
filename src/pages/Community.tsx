@@ -10,7 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { ArrowRight, Mail, Users, Heart, ShieldCheck, CheckCircle, Sparkles, HeartHandshake, Building2, Store } from "lucide-react";
+import { ArrowRight, Mail, Users, Heart, ShieldCheck, CheckCircle, Sparkles, HeartHandshake, Building2, Store, GraduationCap } from "lucide-react";
 
 const emailSchema = z.string().email();
 
@@ -431,7 +431,7 @@ function NgoSelfSignupCard() {
 
 const ROLES = [
   { key: "member", label: "Join as a member", desc: "Women & non-binary — support, safety, solidarity.", Icon: Users },
-  { key: "partner", label: "Partner / Sponsor", desc: "Fund drives, sponsor regions, invest in impact.", Icon: HeartHandshake },
+  { key: "partner", label: "Partner / Sponsor", desc: "Announce scholarship & microfinance drives, sponsor regions.", Icon: HeartHandshake },
   { key: "ngo", label: "NGO / Nonprofit", desc: "Register your organisation to the directory.", Icon: Building2 },
   { key: "business", label: "Business owner", desc: "Sell products & services on SHEconomy.", Icon: Store },
 ] as const;
@@ -514,6 +514,25 @@ export default function Community() {
               </Link>
             </div>
           )}
+        </section>
+
+        {/* Drives — scholarship / microfinance */}
+        <section className="container max-w-3xl mb-12">
+          <div className="rounded-2xl border border-purple-400/25 bg-gradient-to-br from-purple-400/10 to-emerald-400/5 p-6 shadow-card flex flex-col sm:flex-row sm:items-center gap-4">
+            <GraduationCap className="h-8 w-8 text-purple-300 shrink-0" />
+            <div className="flex-1">
+              <h3 className="font-bold text-lg mb-1">Scholarship &amp; microfinance drives</h3>
+              <p className="text-sm text-muted-foreground">
+                Partners, foundations and individuals fund scholarships, microfinance and grants for women and girls —
+                disbursed by vetted partner NGOs. Apply for support, or nominate a woman who can't apply herself.
+              </p>
+            </div>
+            <Link to="/drives" className="shrink-0">
+              <Button className="bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90">
+                View drives <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
         </section>
 
         {/* Newsletter — lighter, secondary (no account needed) */}

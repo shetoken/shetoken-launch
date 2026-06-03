@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, Mail } from "lucide-react";
-import logo from "@/assets/she-logo.jpg";
+import logo from "@/assets/she-logo.svg";
 
 function GoogleIcon() {
   return (

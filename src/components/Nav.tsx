@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ArrowRight, BarChart2, Clock, Coins, LogOut, ShieldAlert, User } from "lucide-react";
-import logo from "@/assets/she-logo.jpg";
+import logo from "@/assets/she-logo.svg";
 
 function UserAvatar({ name, email }: { name: string | null; email: string | null }) {
   const initials = name

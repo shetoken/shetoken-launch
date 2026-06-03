@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="SHE Token">
+  <defs>
+    <radialGradient id="bg" cx="42%" cy="36%" r="75%">
+      <stop offset="0%" stop-color="#54163a"/>
+      <stop offset="60%" stop-color="#3d0f28"/>
+      <stop offset="100%" stop-color="#2a0a1b"/>
+    </radialGradient>
+    <linearGradient id="rose" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f3c8a6"/>
+      <stop offset="45%" stop-color="#dd9069"/>
+      <stop offset="100%" stop-color="#b66a4d"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fde9ad"/>
+      <stop offset="38%" stop-color="#f4b62e"/>
+      <stop offset="72%" stop-color="#e0951e"/>
+      <stop offset="100%" stop-color="#c87d16"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <!-- coin face -->
+  <circle cx="256" cy="256" r="252" fill="url(#bg)"/>
+
+  <!-- concentric rose-gold rings -->
+  <circle cx="256" cy="256" r="246" fill="none" stroke="url(#rose)" stroke-width="2.5"/>
+  <circle cx="256" cy="256" r="212" fill="none" stroke="url(#rose)" stroke-width="4"/>
+  <circle cx="256" cy="256" r="150" fill="none" stroke="url(#rose)" stroke-width="4"/>
+
+  <!-- curved "SHE TOKEN" wordmark along the top band -->
+  <path id="topArc" d="M 34 256 A 222 222 0 0 1 478 256" fill="none"/>
+  <text font-family="Georgia, 'Times New Roman', serif" font-size="46" letter-spacing="10"
+        fill="url(#gold)" text-anchor="middle">
+    <textPath href="#topArc" startOffset="50%">SHE  TOKEN</textPath>
+  </text>
+
+  <!-- side stars on the band (9 o'clock & 3 o'clock) -->
+  <g fill="url(#rose)">
+    <g transform="translate(30,256) scale(1.15)">
+      <path d="M0,-12 L2.70,-3.72 L11.41,-3.71 L4.37,1.42 L7.05,9.71 L0,4.6 L-7.05,9.71 L-4.37,1.42 L-11.41,-3.71 L-2.70,-3.72 Z"/>
+    </g>
+    <g transform="translate(482,256) scale(1.15)">
+      <path d="M0,-12 L2.70,-3.72 L11.41,-3.71 L4.37,1.42 L7.05,9.71 L0,4.6 L-7.05,9.71 L-4.37,1.42 L-11.41,-3.71 L-2.70,-3.72 Z"/>
+    </g>
+  </g>
+
+  <!-- central double-bar dollar mark -->
+  <g filter="url(#soft)">
+    <text x="256" y="356" text-anchor="middle"
+          font-family="Georgia, 'Times New Roman', serif" font-weight="bold" font-size="300"
+          fill="url(#gold)">S</text>
+    <rect x="241" y="126" width="11" height="260" rx="3" fill="url(#gold)"/>
+    <rect x="262" y="126" width="11" height="260" rx="3" fill="url(#gold)"/>
+  </g>
+</svg>

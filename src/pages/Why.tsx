@@ -75,16 +75,34 @@ export default function Why() {
             <p className="text-center text-xs uppercase tracking-widest text-muted-foreground mb-10">The scale of the problem</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Stat
-                value="$360B"
-                label="Annual cost of gender inequality to global GDP"
-                source="McKinsey Global Institute"
-                href="https://www.mckinsey.com/featured-insights/gender-equality/the-power-of-parity-how-advancing-womens-equality-can-add-12-trillion-to-global-growth"
-              />
-              <Stat
                 value="1 in 3"
                 label="Women experience physical or sexual violence in their lifetime"
                 source="WHO 2021"
                 href="https://www.who.int/news-room/fact-sheets/detail/violence-against-women"
+              />
+              <Stat
+                value="70%"
+                label="Of the world's people living in extreme poverty are women"
+                source="UN Women"
+                href="https://www.unwomen.org/en/news/in-focus/women-and-the-sdgs/sdg-1-no-poverty"
+              />
+              <Stat
+                value="2 / 3"
+                label="Of the world's illiterate adults are women"
+                source="UNESCO"
+                href="https://uis.unesco.org/en/topic/literacy"
+              />
+              <Stat
+                value="26%"
+                label="Of parliamentary seats worldwide are held by women"
+                source="IPU 2024"
+                href="https://data.ipu.org/women-ranking"
+              />
+              <Stat
+                value="20%"
+                label="Average gender pay gap — women earn less for the same work"
+                source="ILO"
+                href="https://ilostat.ilo.org/topics/gender/"
               />
               <Stat
                 value="135 yrs"
@@ -93,8 +111,14 @@ export default function Why() {
                 href="https://www.weforum.org/reports/global-gender-gap-report-2023/"
               />
               <Stat
+                value="$360B"
+                label="Annual cost of gender inequality to global GDP"
+                source="McKinsey Global Institute"
+                href="https://www.mckinsey.com/featured-insights/gender-equality/the-power-of-parity-how-advancing-womens-equality-can-add-12-trillion-to-global-growth"
+              />
+              <Stat
                 value="$0"
-                label="Amount of capital directly priced against measurable gender outcomes"
+                label="Capital directly priced against measurable gender outcomes — until now"
                 source="SHEtoken research"
               />
             </div>

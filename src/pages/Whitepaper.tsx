@@ -228,17 +228,28 @@ function WhitepaperContent() {
 const WP_UNLOCK_KEY = "she_whitepaper_unlocked";
 
 export default function Whitepaper() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [form, setForm] = useState<Partial<FormData>>({});
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [loading, setLoading] = useState(false);
-  // Access persists: once granted (this browser) or while signed in.
+  // Access persists once the form has been completed on this browser.
   const [unlocked, setUnlocked] = useState<boolean>(() => {
     try { return localStorage.getItem(WP_UNLOCK_KEY) === "1"; } catch { return false; }
   });
 
-  // Signed-in users get the whitepaper — having an account is access.
-  useEffect(() => { if (user) setUnlocked(true); }, [user]);
+  // Pre-fill the gate form from the signed-in user's account so first-time
+  // viewers don't retype their name/email (only fills still-empty fields).
+  useEffect(() => {
+    if (!user) return;
+    const metaName = (user.user_metadata?.full_name as string | undefined) ?? "";
+    setForm((f) => ({
+      ...f,
+      full_name: f.full_name || metaName || profile?.display_name || "",
+      email:     f.email     || user.email || profile?.email || "",
+      company:   f.company   || profile?.company || "",
+      job_title: f.job_title || profile?.job_title || "",
+    }));
+  }, [user, profile]);
 
   function handleChange(field: keyof FormData, value: string) {
     setForm((f) => ({ ...f, [field]: value }));

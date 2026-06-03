@@ -54,18 +54,18 @@ export default function Why() {
         {/* HERO */}
         <section className="container max-w-4xl text-center py-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/30 bg-accent/10 text-accent text-xs mb-8">
-            <AlertCircle className="h-3 w-3" /> Why impact tokens matter
+            <AlertCircle className="h-3 w-3" /> Why SHEtoken exists
           </div>
           <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
             She was always the currency.<br />
-            <span className="text-gradient">The world just needed a way to measure it.</span>
+            <span className="text-gradient">The world just never measured her worth.</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Aid is charity. ESG is self-reporting. Traditional crypto is speculation.
-            SHEtoken is a third way — a financial instrument mathematically tied to real outcomes,
-            built from independent data, auditable by anyone.
+            Women's lives are held back by violence, poverty and exclusion — and by two failures we can fix:
+            we don't measure how bad it is, and nothing rewards making it better. SHEtoken does both.
+            It measures the condition of women across 105 countries — and ties real value to real progress,
+            so lifting women up finally counts.
           </p>
-          <p className="text-base md:text-lg font-semibold text-foreground mt-6">The first asset backed by the advancement of women.</p>
         </section>
 
         {/* THE NUMBERS */}

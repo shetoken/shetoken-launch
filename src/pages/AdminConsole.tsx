@@ -1,18 +1,23 @@
-import { useMemo } from "react";
+import { useMemo, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Nav } from "@/components/Nav";
 import { Button } from "@/components/ui/button";
-import { Lock, Globe, Users, Download, Activity, Clock, FileText, Eye, BarChart3 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { parseCsv } from "@/lib/csv";
+import { Lock, Globe, Users, Download, Activity, Clock, FileText, Eye, BarChart3, Heart, Upload, Plus } from "lucide-react";
 
 interface EventRow { session_id: string | null; user_id: string | null; path: string | null; country: string | null; city: string | null; created_at: string; }
 interface ProfileRow { id: string; email: string | null; display_name: string | null; region: string | null; created_at: string; }
 interface DownloadRow { id: string; doc_type: string; doc_ref: string | null; user_email: string | null; country: string | null; city: string | null; created_at: string; }
 
-const TABS = ["overview", "users", "engagement", "downloads"] as const;
+const TABS = ["overview", "users", "engagement", "downloads", "ngos"] as const;
 type Tab = typeof TABS[number];
+const tabLabel = (t: Tab) => (t === "ngos" ? "NGOs" : t);
+interface NgoRow { id: string; name: string; country: string | null; city: string | null; focus_area: string | null; website: string | null; contact_email: string | null; verified: boolean | null; created_at: string; }
 
 const tally = <T,>(arr: T[], key: (r: T) => string | null | undefined): [string, number][] => {
   const m = new Map<string, number>();
@@ -75,8 +80,55 @@ export default function AdminConsole() {
       if (error) throw error; return (data ?? []) as DownloadRow[];
     },
   });
+  const ngos = useQuery({
+    queryKey: ["admin-ngos"], enabled: isAdmin, staleTime: 30_000,
+    queryFn: async (): Promise<NgoRow[]> => {
+      const { data, error } = await supabase.from("she_ngos").select("*").order("created_at", { ascending: false }).limit(3000);
+      if (error) throw error; return (data ?? []) as NgoRow[];
+    },
+  });
 
-  const ev = events.data ?? [], pf = profiles.data ?? [], dl = downloads.data ?? [];
+  const ev = events.data ?? [], pf = profiles.data ?? [], dl = downloads.data ?? [], ng = ngos.data ?? [];
+
+  const [ngoForm, setNgoForm] = useState({ name: "", country: "", city: "", focus_area: "", website: "", contact_email: "" });
+  const [savingNgo, setSavingNgo] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function addNgo(e: React.FormEvent) {
+    e.preventDefault();
+    if (!ngoForm.name.trim()) { toast.error("NGO name is required."); return; }
+    setSavingNgo(true);
+    try {
+      const { error } = await supabase.from("she_ngos").insert({ ...ngoForm, name: ngoForm.name.trim(), verified: true });
+      if (error) throw error;
+      toast.success("NGO added.");
+      setNgoForm({ name: "", country: "", city: "", focus_area: "", website: "", contact_email: "" });
+      ngos.refetch();
+    } catch (err) { console.warn(err); toast.error("Could not add NGO."); }
+    finally { setSavingNgo(false); }
+  }
+
+  async function uploadCsv(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const rows = parseCsv(await file.text());
+      const mapped = rows.map((r) => ({
+        name: r.name || r.ngo || r.organisation || r.organization || "",
+        country: r.country || null, city: r.city || null,
+        focus_area: r.focus_area || r.focus || r.area || null,
+        website: r.website || r.url || null,
+        contact_email: r.contact_email || r.email || r.contact || null,
+        verified: true,
+      })).filter((r) => r.name.trim());
+      if (!mapped.length) { toast.error("CSV needs a 'name' column with at least one row."); return; }
+      const { error } = await supabase.from("she_ngos").insert(mapped);
+      if (error) throw error;
+      toast.success(`Imported ${mapped.length} NGO${mapped.length === 1 ? "" : "s"}.`);
+      ngos.refetch();
+    } catch (err) { console.warn(err); toast.error("CSV import failed — check the format."); }
+    finally { if (fileRef.current) fileRef.current.value = ""; }
+  }
 
   const stats = useMemo(() => {
     const sessions = new Map<string, { min: number; max: number; n: number }>();
@@ -144,7 +196,7 @@ export default function AdminConsole() {
               {TABS.map((t) => (
                 <button key={t} onClick={() => setParams({ tab: t })}
                   className={`px-4 py-2 text-sm capitalize transition-smooth border-b-2 -mb-px ${tab === t ? "border-accent text-foreground font-medium" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
-                  {t}
+                  {tabLabel(t)}
                 </button>
               ))}
             </div>
@@ -252,6 +304,62 @@ export default function AdminConsole() {
                             </tr>
                           ))}
                           {dl.length === 0 && <tr><td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">No downloads yet.</td></tr>}
+                        </tbody>
+                      </table></div>
+                    </div>
+                  </div>
+                )}
+
+                {/* NGOs */}
+                {tab === "ngos" && (
+                  <div className="space-y-6">
+                    <div className="grid lg:grid-cols-2 gap-4">
+                      {/* Add manually */}
+                      <form onSubmit={addNgo} className="rounded-2xl border border-border/40 bg-gradient-card p-5 shadow-card space-y-3">
+                        <h3 className="text-sm font-semibold flex items-center gap-1.5"><Plus className="h-4 w-4 text-accent" /> Add a vetted NGO</h3>
+                        <Input value={ngoForm.name} onChange={(e) => setNgoForm({ ...ngoForm, name: e.target.value })} placeholder="Organisation name *" className="bg-background/60 border-border/60" />
+                        <div className="grid grid-cols-2 gap-3">
+                          <Input value={ngoForm.country} onChange={(e) => setNgoForm({ ...ngoForm, country: e.target.value })} placeholder="Country" className="bg-background/60 border-border/60" />
+                          <Input value={ngoForm.city} onChange={(e) => setNgoForm({ ...ngoForm, city: e.target.value })} placeholder="City" className="bg-background/60 border-border/60" />
+                        </div>
+                        <Input value={ngoForm.focus_area} onChange={(e) => setNgoForm({ ...ngoForm, focus_area: e.target.value })} placeholder="Focus area (e.g. GBV, education)" className="bg-background/60 border-border/60" />
+                        <div className="grid grid-cols-2 gap-3">
+                          <Input value={ngoForm.website} onChange={(e) => setNgoForm({ ...ngoForm, website: e.target.value })} placeholder="Website" className="bg-background/60 border-border/60" />
+                          <Input value={ngoForm.contact_email} onChange={(e) => setNgoForm({ ...ngoForm, contact_email: e.target.value })} placeholder="Contact email" className="bg-background/60 border-border/60" />
+                        </div>
+                        <Button type="submit" disabled={savingNgo} className="bg-gradient-primary text-primary-foreground border-0">{savingNgo ? "Adding…" : "Add NGO"}</Button>
+                      </form>
+                      {/* CSV upload */}
+                      <div className="rounded-2xl border border-border/40 bg-gradient-card p-5 shadow-card">
+                        <h3 className="text-sm font-semibold flex items-center gap-1.5 mb-2"><Upload className="h-4 w-4 text-accent" /> Bulk import (CSV)</h3>
+                        <p className="text-xs text-muted-foreground mb-3">
+                          Upload a CSV with a header row. Recognised columns: <code className="text-foreground">name</code> (required),
+                          <code className="text-foreground"> country</code>, <code className="text-foreground">city</code>,
+                          <code className="text-foreground"> focus_area</code>, <code className="text-foreground">website</code>,
+                          <code className="text-foreground"> contact_email</code>.
+                        </p>
+                        <input ref={fileRef} type="file" accept=".csv,text/csv" onChange={uploadCsv}
+                          className="block w-full text-xs text-muted-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-accent/15 file:text-accent file:px-3 file:py-1.5 file:text-xs file:cursor-pointer" />
+                        <p className="text-[11px] text-muted-foreground/70 mt-3">Imported NGOs are marked verified. Review them in the list below.</p>
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-border/40 bg-gradient-card shadow-card overflow-hidden">
+                      <div className="px-5 py-3 border-b border-border/40 flex items-center gap-2"><Heart className="h-4 w-4 text-accent" /><h3 className="text-sm font-semibold">Vetted NGOs ({ng.length})</h3></div>
+                      <div className="overflow-x-auto"><table className="w-full text-xs">
+                        <thead className="bg-card/60 text-muted-foreground"><tr>{["Name", "Country", "City", "Focus", "Website", "Contact"].map((h) => <th key={h} className="text-left px-4 py-2 font-medium">{h}</th>)}</tr></thead>
+                        <tbody>
+                          {ng.slice(0, 300).map((n) => (
+                            <tr key={n.id} className="border-t border-border/20">
+                              <td className="px-4 py-2 font-medium">{n.name}</td>
+                              <td className="px-4 py-2">{n.country ?? "—"}</td>
+                              <td className="px-4 py-2">{n.city ?? "—"}</td>
+                              <td className="px-4 py-2">{n.focus_area ?? "—"}</td>
+                              <td className="px-4 py-2 truncate max-w-[160px]">{n.website ? <a href={n.website.startsWith("http") ? n.website : `https://${n.website}`} target="_blank" rel="noreferrer" className="text-accent hover:underline">{n.website}</a> : "—"}</td>
+                              <td className="px-4 py-2 truncate max-w-[160px]">{n.contact_email ?? "—"}</td>
+                            </tr>
+                          ))}
+                          {ng.length === 0 && <tr><td colSpan={6} className="px-4 py-6 text-center text-muted-foreground">No NGOs yet — add one or import a CSV.</td></tr>}
                         </tbody>
                       </table></div>
                     </div>

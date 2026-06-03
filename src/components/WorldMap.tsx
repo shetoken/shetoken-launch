@@ -235,7 +235,11 @@ export function WorldMap({
                   const iso3        = isoForGeo(geo);
                   const displayScore = getDisplayScore(iso3);
                   const isSelected  = !!selectedIso && data?.iso_code === selectedIso;
-                  const fill        = isSelected ? "#f59e0b" : (colorFor ? colorFor(displayScore) : scoreToColor(displayScore));
+                  const advMode     = !!colorFor;   // advisory-tier colouring (Safety map)
+                  const baseFill    = colorFor ? colorFor(displayScore) : scoreToColor(displayScore);
+                  // In advisory mode keep the scale colour and show selection via a white
+                  // outline — recolouring it gold collides with the yellow advisory tier.
+                  const fill        = isSelected && !advMode ? "#f59e0b" : baseFill;
                   const hasData     = !!data;   // clickable if WEI record exists
                   const hasSub      = !!data && !!subnationalIsos?.has(data.iso_code);
 
@@ -244,8 +248,8 @@ export function WorldMap({
                       key={geo.rsmKey}
                       geography={geo}
                       fill={fill}
-                      stroke={isSelected ? "#fcd34d" : hasSub ? "#fcd34d" : "#0f172a"}
-                      strokeWidth={isSelected ? 1.5 : hasSub ? 1 : 0.4}
+                      stroke={isSelected ? (advMode ? "#ffffff" : "#fcd34d") : hasSub ? "#fcd34d" : "#0f172a"}
+                      strokeWidth={isSelected ? (advMode ? 2 : 1.5) : hasSub ? 1 : 0.4}
                       strokeDasharray={hasSub && !isSelected ? "2 1.5" : undefined}
                       style={{
                         default: {
@@ -254,10 +258,10 @@ export function WorldMap({
                         },
                         hover: {
                           outline: "none",
-                          fill: hasData ? (isSelected ? "#fcd34d" : "#a78bfa") : fill,
+                          fill: hasData ? (isSelected ? (advMode ? baseFill : "#fcd34d") : "#a78bfa") : fill,
                           cursor: hasData ? "pointer" : "default",
                         },
-                        pressed: { outline: "none", fill: "#7c3aed" },
+                        pressed: { outline: "none", fill: advMode ? baseFill : "#7c3aed" },
                       }}
                       onMouseEnter={(evt) => handleEnter(geo, evt)}
                       onMouseMove={handleMove}

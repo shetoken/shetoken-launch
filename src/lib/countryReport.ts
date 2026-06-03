@@ -1,6 +1,7 @@
 import { jsPDF } from "jspdf";
 import type { CountryWEI } from "@/lib/api";
 import { METHODOLOGY, computeScore } from "@/lib/methodology";
+import { getCountryMapPng } from "@/lib/worldGeo";
 import { PW, PH, M, C, type RGB, hexToRgb, paintBackground, headerBand, pageFooter, panel, getLogoDataUrl, coverPage } from "@/lib/pdfTheme";
 
 type ProvByCode = Record<string, Record<string, { year?: string; status?: string }>>;
@@ -44,6 +45,7 @@ export async function downloadCountryReport(opts: {
   milestones?: ReportMilestone[];
   states?: ReportState[];
   global?: ReportGlobal;
+  allCountries?: { iso_code: string; wei_score: number }[];
   methodRows?: Record<string, Record<string, unknown> | undefined>;
   provenance?: ProvByCode;
 }) {
@@ -53,7 +55,14 @@ export async function downloadCountryReport(opts: {
   const global = opts.global;
   const methodRows = opts.methodRows;
   const provenance = opts.provenance;
+  const distribution = (opts.allCountries ?? []).map((x) => x.wei_score).filter((v) => typeof v === "number");
   const logo = await getLogoDataUrl();
+  const mapPng = opts.allCountries?.length
+    ? await getCountryMapPng({
+        scoreByIso: Object.fromEntries(opts.allCountries.map((x) => [x.iso_code, x.wei_score])),
+        selectedIso: c.iso_code,
+      })
+    : null;
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   let page = 0;
   let y = 0;
@@ -201,6 +210,68 @@ export async function downloadCountryReport(opts: {
   if (global) {
     heading("Global Context");
     para(`Where ${c.country} sits among ${global.countriesScored} countries, with the global index averages for reference.`, C.mut, 8.5);
+
+    // World map — WEI choropleth with this country in gold
+    if (mapPng) {
+      const mh = CONTENT_W * 0.46;
+      ensure(mh + 28);
+      doc.setFillColor(...C.card); doc.setDrawColor(...C.border); doc.setLineWidth(0.7);
+      doc.roundedRect(M, y, CONTENT_W, mh, 6, 6, "FD");
+      try { doc.addImage(mapPng, "PNG", M + 4, y + 4, CONTENT_W - 8, mh - 8); } catch { /* ignore */ }
+      y += mh + 6;
+      // legend
+      const legend: [string, RGB][] = [
+        [`${c.country} (selected)`, hexToRgb("#f59e0b")], ["75+", C.emerald], ["60–74", hexToRgb("#22c55e")],
+        ["45–59", C.amber], ["30–44", hexToRgb("#f97316")], ["<30", C.red], ["No data", hexToRgb("#283143")],
+      ];
+      let lx = M;
+      doc.setFont("helvetica", "normal"); doc.setFontSize(6.8);
+      legend.forEach(([lab, col]) => {
+        doc.setFillColor(...col); doc.roundedRect(lx, y - 5, 7, 7, 1.5, 1.5, "F");
+        doc.setTextColor(...C.mut); doc.text(lab, lx + 10, y + 1);
+        lx += 12 + doc.getTextWidth(lab) + 14;
+      });
+      y += 12;
+    }
+
+    // WEI distribution across all countries, with this country marked
+    if (distribution.length >= 8) {
+      doc.setFont("helvetica", "bold"); doc.setFontSize(9.5); doc.setTextColor(...C.ink);
+      ensure(110);
+      doc.text(`WEI distribution — ${distribution.length} countries`, M, y + 2); y += 8;
+      const ch = 78, x0 = M, y0 = y;
+      panel(doc, x0, y0, CONTENT_W, ch, C.card);
+      const bw = 6;
+      const dens: number[] = [];
+      let maxD = 0;
+      for (let xx = 0; xx <= 100; xx++) {
+        let s = 0;
+        for (const v of distribution) { const t = (xx - v) / bw; s += Math.exp(-0.5 * t * t); }
+        dens.push(s); if (s > maxD) maxD = s;
+      }
+      const px = (xx: number) => x0 + (xx / 100) * CONTENT_W;
+      const py = (d: number) => y0 + ch - 6 - (maxD ? d / maxD : 0) * (ch - 18);
+      // 50 mid gridline
+      doc.setDrawColor(...C.border); doc.setLineWidth(0.4); doc.line(px(50), y0 + 4, px(50), y0 + ch - 6);
+      // density curve
+      doc.setDrawColor(...C.gold); doc.setLineWidth(1.5);
+      for (let xx = 1; xx <= 100; xx++) doc.line(px(xx - 1), py(dens[xx - 1]), px(xx), py(dens[xx]));
+      // global average marker
+      const ga = global.weiAvg;
+      doc.setDrawColor(...C.mut); doc.setLineWidth(0.7); doc.line(px(ga), y0 + 4, px(ga), y0 + ch - 6);
+      doc.setFontSize(6.5); doc.setTextColor(...C.mut); doc.text(`global avg ${ga.toFixed(1)}`, px(ga) + 3, y0 + 12);
+      // this country marker (gold dashed)
+      const cs = c.wei_score ?? 0;
+      doc.setDrawColor(...C.gold); doc.setLineWidth(1); doc.setLineDashPattern([2, 2], 0);
+      doc.line(px(cs), y0 + 4, px(cs), y0 + ch - 6);
+      doc.setLineDashPattern([], 0);
+      doc.setFontSize(7); doc.setTextColor(...C.gold);
+      doc.text(`${c.iso_code} ${cs.toFixed(1)}`, px(cs), y0 + 10, { align: cs > 60 ? "right" : "left" });
+      // x-axis labels
+      doc.setFontSize(6); doc.setTextColor(...C.mut);
+      [0, 25, 50, 75, 100].forEach((t) => doc.text(`${t}`, px(t), y0 + ch + 7, { align: t === 0 ? "left" : t === 100 ? "right" : "center" }));
+      y += ch + 14;
+    }
 
     // Snapshot — 4 cells (2 × 2)
     const cells: [string, string, RGB][] = [

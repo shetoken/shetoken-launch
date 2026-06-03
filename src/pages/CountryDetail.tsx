@@ -319,6 +319,11 @@ export default function CountryDetail() {
   /* ── Global summary (averages, tier distribution) for the report's global context ── */
   const { data: summary } = useQuery({ queryKey: ["summary"], queryFn: api.summary, staleTime: 10 * 60 * 1000 });
 
+  /* ── All countries (for the report's world map + WEI distribution) ── */
+  const { data: allCountriesRes } = useQuery({
+    queryKey: ["wei-countries", 105], queryFn: () => api.wei.countries(105), staleTime: 10 * 60 * 1000,
+  });
+
   /* ── State-level safety data, for countries that have sub-national scores ── */
   const subSafetyName = country ? SUBNATIONAL_SAFETY[country.iso_code] : undefined;
   const { data: statesRes } = useQuery({
@@ -393,6 +398,7 @@ export default function CountryDetail() {
           WVI: summary.wvi_global_avg, Compliance: summary.compliance_global_avg,
         },
       } : undefined,
+      allCountries: (allCountriesRes?.data ?? []).map((x) => ({ iso_code: x.iso_code, wei_score: x.wei_score ?? 0 })),
       lifepath: (lifepath?.stages ?? []).map((s) => ({
         age_band: s.age_band, headline: s.headline, cohort: s.cohort,
         detail: s.detail, felt: s.felt, source: s.source,

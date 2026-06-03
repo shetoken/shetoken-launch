@@ -58,7 +58,7 @@ export default function Why() {
           </div>
           <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
             She was always the currency.<br />
-            <span className="text-gradient">The world just never measured her worth.</span>
+            <span className="text-gradient">The world just needed a way to measure it.</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Women's lives are held back by violence, poverty and exclusion — and by two failures we can fix:
@@ -66,7 +66,7 @@ export default function Why() {
             It measures the condition of women across 105 countries — and ties real value to real progress,
             so lifting women up finally counts.
           </p>
-          <p className="text-base md:text-lg font-semibold text-foreground mt-6">The world's first asset tied to the advancement of women.</p>
+          <p className="text-base md:text-lg font-semibold text-foreground mt-6">The world's first cryptocurrency tied to the advancement of women.</p>
         </section>
 
         {/* THE NUMBERS */}

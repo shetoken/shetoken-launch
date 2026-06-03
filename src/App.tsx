@@ -17,6 +17,7 @@ import Compare from "./pages/Compare.tsx";
 import SHEconomy from "./pages/SHEconomy.tsx";
 import SheClock from "./pages/SheClock.tsx";
 import SafetyHotspots from "./pages/SafetyHotspots.tsx";
+import AdminDownloads from "./pages/AdminDownloads.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient({
@@ -50,6 +51,7 @@ const App = () => (
               <Route path="/sheconomy" element={<SHEconomy />} />
               <Route path="/she-clock" element={<SheClock />} />
               <Route path="/safety" element={<SafetyHotspots />} />
+              <Route path="/admin/downloads" element={<AdminDownloads />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

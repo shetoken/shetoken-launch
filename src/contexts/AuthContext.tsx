@@ -14,6 +14,7 @@ export interface SheProfile {
   company: string | null;
   job_title: string | null;
   bio: string | null;
+  is_admin: boolean | null;
   created_at: string;
   updated_at: string | null;
 }

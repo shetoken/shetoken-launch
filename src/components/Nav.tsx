@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowRight, BarChart2, Clock, Coins, LogOut, ShieldAlert, User } from "lucide-react";
+import { ArrowRight, BarChart2, Clock, Coins, Download, LogOut, ShieldAlert, User } from "lucide-react";
 import logo from "@/assets/she-logo.svg";
 
 function UserAvatar({ name, email }: { name: string | null; email: string | null }) {
@@ -103,6 +103,13 @@ export function Nav() {
                     <BarChart2 className="h-4 w-4 mr-2" /> Live Dashboard
                   </Link>
                 </DropdownMenuItem>
+                {profile?.is_admin && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin/downloads" className="cursor-pointer">
+                      <Download className="h-4 w-4 mr-2" /> Downloads (admin)
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => signOut()}

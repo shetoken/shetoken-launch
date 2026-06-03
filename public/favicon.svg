@@ -26,10 +26,10 @@
 
   <!-- concentric rose-gold rings -->
   <circle cx="256" cy="256" r="246" fill="none" stroke="url(#rose)" stroke-width="3"/>
-  <circle cx="256" cy="256" r="150" fill="none" stroke="url(#rose)" stroke-width="4"/>
+  <circle cx="256" cy="256" r="188" fill="none" stroke="url(#rose)" stroke-width="4"/>
 
   <!-- curved "SHE TOKEN" wordmark along the top band -->
-  <path id="topArc" d="M 42 256 A 214 214 0 0 1 470 256" fill="none"/>
+  <path id="topArc" d="M 50 256 A 206 206 0 0 1 462 256" fill="none"/>
   <text font-family="Georgia, 'Times New Roman', serif" font-size="30" letter-spacing="13"
         fill="url(#gold)" text-anchor="middle">
     <textPath href="#topArc" startOffset="50%">SHE  TOKEN</textPath>
@@ -37,10 +37,10 @@
 
   <!-- side stars on the band (9 o'clock & 3 o'clock) -->
   <g fill="url(#rose)">
-    <g transform="translate(30,256) scale(1.15)">
+    <g transform="translate(39,256) scale(1.15)">
       <path d="M0,-12 L2.70,-3.72 L11.41,-3.71 L4.37,1.42 L7.05,9.71 L0,4.6 L-7.05,9.71 L-4.37,1.42 L-11.41,-3.71 L-2.70,-3.72 Z"/>
     </g>
-    <g transform="translate(482,256) scale(1.15)">
+    <g transform="translate(473,256) scale(1.15)">
       <path d="M0,-12 L2.70,-3.72 L11.41,-3.71 L4.37,1.42 L7.05,9.71 L0,4.6 L-7.05,9.71 L-4.37,1.42 L-11.41,-3.71 L-2.70,-3.72 Z"/>
     </g>
   </g>

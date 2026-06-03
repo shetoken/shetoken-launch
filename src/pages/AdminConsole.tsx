@@ -8,13 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { parseCsv } from "@/lib/csv";
-import { Lock, Globe, Users, Download, Activity, Clock, FileText, Eye, BarChart3, Heart, Upload, Plus, HeartHandshake, CheckCircle2, GraduationCap } from "lucide-react";
+import { Lock, Globe, Users, Download, Activity, Clock, FileText, Eye, BarChart3, Heart, Upload, Plus, HeartHandshake, CheckCircle2, GraduationCap, Award, Star, Trash2 } from "lucide-react";
 
 interface EventRow { session_id: string | null; user_id: string | null; path: string | null; country: string | null; city: string | null; created_at: string; }
 interface ProfileRow { id: string; email: string | null; display_name: string | null; region: string | null; created_at: string; }
 interface DownloadRow { id: string; doc_type: string; doc_ref: string | null; user_email: string | null; country: string | null; city: string | null; created_at: string; }
 
-const TABS = ["overview", "users", "engagement", "downloads", "partners", "drives", "ngos", "marketplace"] as const;
+const TABS = ["overview", "users", "engagement", "downloads", "partners", "drives", "ngos", "initiatives", "marketplace"] as const;
 type Tab = typeof TABS[number];
 const tabLabel = (t: Tab) => (t === "ngos" ? "NGOs" : t);
 interface NgoRow { id: string; name: string; country: string | null; city: string | null; focus_area: string | null; website: string | null; contact_email: string | null; verified: boolean | null; created_at: string; }
@@ -22,6 +22,8 @@ interface BizRow { id: string; name: string; owner_name: string | null; category
 interface PartnerRow { id: string; org_name: string; partner_type: string | null; contact_name: string | null; email: string | null; website: string | null; interests: string[] | null; regions: string[] | null; budget_band: string | null; status: string; created_at: string; }
 interface DriveRow { id: string; drive_type: string; title: string; sponsor_name: string | null; country: string | null; region: string | null; seats: number | null; amount: number | null; currency: string | null; deadline: string | null; partner_ngo: string | null; contact_email: string | null; status: string; created_at: string; }
 interface DriveAppRow { id: string; drive_id: string; applicant_name: string; applicant_email: string | null; region: string | null; is_nomination: boolean | null; nominator_name: string | null; status: string; created_at: string; }
+interface InitiativeRow { id: string; name: string; category: string | null; region: string | null; country: string | null; url: string | null; logo_url: string | null; blurb: string | null; spotlight: boolean | null; published: boolean | null; created_at: string; }
+const INITIATIVE_CATS = ["Safety", "Education", "Economic", "Health", "Leadership", "Rights", "General"];
 
 const tally = <T,>(arr: T[], key: (r: T) => string | null | undefined): [string, number][] => {
   const m = new Map<string, number>();
@@ -121,7 +123,15 @@ export default function AdminConsole() {
     },
   });
 
-  const ev = events.data ?? [], pf = profiles.data ?? [], dl = downloads.data ?? [], ng = ngos.data ?? [], bz = biz.data ?? [], pt = partners.data ?? [], dr = drives.data ?? [], da = driveApps.data ?? [];
+  const inits = useQuery({
+    queryKey: ["admin-initiatives"], enabled: isAdmin, staleTime: 30_000,
+    queryFn: async (): Promise<InitiativeRow[]> => {
+      const { data, error } = await supabase.from("she_initiatives").select("*").order("created_at", { ascending: false }).limit(2000);
+      if (error) throw error; return (data ?? []) as InitiativeRow[];
+    },
+  });
+
+  const ev = events.data ?? [], pf = profiles.data ?? [], dl = downloads.data ?? [], ng = ngos.data ?? [], bz = biz.data ?? [], pt = partners.data ?? [], dr = drives.data ?? [], da = driveApps.data ?? [], it = inits.data ?? [];
 
   async function setBizStatus(id: string, status: string) {
     const { error } = await supabase.from("she_businesses").update({ status, verified: status === "approved" }).eq("id", id);
@@ -148,6 +158,35 @@ export default function AdminConsole() {
   const [savingNgo, setSavingNgo] = useState(false);
   const [openDrive, setOpenDrive] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const [initForm, setInitForm] = useState({ name: "", category: "General", region: "", country: "", url: "", logo_url: "", blurb: "", spotlight: false });
+  const [savingInit, setSavingInit] = useState(false);
+  async function addInitiative(e: React.FormEvent) {
+    e.preventDefault();
+    if (!initForm.name.trim()) { toast.error("Initiative name is required."); return; }
+    setSavingInit(true);
+    try {
+      const { error } = await supabase.from("she_initiatives").insert({
+        name: initForm.name.trim(), category: initForm.category || null,
+        region: initForm.region.trim() || null, country: initForm.country.trim() || null,
+        url: initForm.url.trim() || null, logo_url: initForm.logo_url.trim() || null,
+        blurb: initForm.blurb.trim() || null, spotlight: initForm.spotlight, published: true,
+      });
+      if (error) throw error;
+      toast.success("Initiative recognized.");
+      setInitForm({ name: "", category: "General", region: "", country: "", url: "", logo_url: "", blurb: "", spotlight: false });
+      inits.refetch();
+    } catch (err) { console.warn(err); toast.error("Could not add initiative."); }
+    finally { setSavingInit(false); }
+  }
+  async function updateInitiative(id: string, patch: Record<string, unknown>) {
+    const { error } = await supabase.from("she_initiatives").update(patch).eq("id", id);
+    if (error) toast.error("Could not update."); else inits.refetch();
+  }
+  async function deleteInitiative(id: string) {
+    const { error } = await supabase.from("she_initiatives").delete().eq("id", id);
+    if (error) toast.error("Could not delete."); else { toast.success("Removed."); inits.refetch(); }
+  }
 
   async function addNgo(e: React.FormEvent) {
     e.preventDefault();
@@ -528,6 +567,65 @@ export default function AdminConsole() {
                             </tr>
                           ))}
                           {ng.length === 0 && <tr><td colSpan={7} className="px-4 py-6 text-center text-muted-foreground">No NGOs yet — add one or import a CSV.</td></tr>}
+                        </tbody>
+                      </table></div>
+                    </div>
+                  </div>
+                )}
+
+                {/* INITIATIVES — recognition wall (admin-curated) */}
+                {tab === "initiatives" && (
+                  <div className="space-y-6">
+                    <form onSubmit={addInitiative} className="rounded-2xl border border-border/40 bg-gradient-card p-5 shadow-card space-y-3">
+                      <h3 className="text-sm font-semibold flex items-center gap-1.5"><Award className="h-4 w-4 text-accent" /> Recognize an initiative</h3>
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        <Input value={initForm.name} onChange={(e) => setInitForm({ ...initForm, name: e.target.value })} placeholder="Initiative / organisation name *" className="bg-background/60 border-border/60" />
+                        <select value={initForm.category} onChange={(e) => setInitForm({ ...initForm, category: e.target.value })} className="h-10 rounded-md border border-border/60 bg-background/60 px-3 text-sm">
+                          {INITIATIVE_CATS.map((c) => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                        <Input value={initForm.region} onChange={(e) => setInitForm({ ...initForm, region: e.target.value })} placeholder="Region / state" className="bg-background/60 border-border/60" />
+                        <Input value={initForm.country} onChange={(e) => setInitForm({ ...initForm, country: e.target.value })} placeholder="Country" className="bg-background/60 border-border/60" />
+                        <Input value={initForm.url} onChange={(e) => setInitForm({ ...initForm, url: e.target.value })} placeholder="Website / link" className="bg-background/60 border-border/60" />
+                        <Input value={initForm.logo_url} onChange={(e) => setInitForm({ ...initForm, logo_url: e.target.value })} placeholder="Logo image URL (optional)" className="bg-background/60 border-border/60" />
+                      </div>
+                      <textarea value={initForm.blurb} onChange={(e) => setInitForm({ ...initForm, blurb: e.target.value })} rows={2} placeholder="Why we recognize them (one or two lines)"
+                        className="w-full rounded-md border border-border/60 bg-background/60 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring resize-none" />
+                      <div className="flex items-center justify-between">
+                        <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
+                          <input type="checkbox" checked={initForm.spotlight} onChange={(e) => setInitForm({ ...initForm, spotlight: e.target.checked })} className="accent-current" />
+                          <Star className="h-3.5 w-3.5 text-accent" /> Feature in Spotlight
+                        </label>
+                        <Button type="submit" disabled={savingInit} className="bg-gradient-primary text-primary-foreground border-0">{savingInit ? "Adding…" : "Recognize"}</Button>
+                      </div>
+                    </form>
+
+                    <div className="rounded-2xl border border-border/40 bg-gradient-card shadow-card overflow-hidden">
+                      <div className="px-5 py-3 border-b border-border/40 flex items-center gap-2"><Award className="h-4 w-4 text-accent" /><h3 className="text-sm font-semibold">Recognized initiatives ({it.length})</h3></div>
+                      <div className="overflow-x-auto"><table className="w-full text-xs">
+                        <thead className="bg-card/60 text-muted-foreground"><tr>{["Name", "Category", "Location", "Link", "Spotlight", "Published", "Action"].map((h) => <th key={h} className="text-left px-4 py-2 font-medium">{h}</th>)}</tr></thead>
+                        <tbody>
+                          {it.map((n) => (
+                            <tr key={n.id} className="border-t border-border/20">
+                              <td className="px-4 py-2 font-medium max-w-[220px]"><div className="truncate">{n.name}</div>{n.blurb && <div className="text-muted-foreground font-normal truncate max-w-[220px]">{n.blurb}</div>}</td>
+                              <td className="px-4 py-2">{n.category ?? "—"}</td>
+                              <td className="px-4 py-2">{[n.region, n.country].filter(Boolean).join(", ") || "—"}</td>
+                              <td className="px-4 py-2 truncate max-w-[140px]">{n.url ? <a href={n.url.startsWith("http") ? n.url : `https://${n.url}`} target="_blank" rel="noreferrer" className="text-accent hover:underline">link</a> : "—"}</td>
+                              <td className="px-4 py-2">
+                                <button onClick={() => updateInitiative(n.id, { spotlight: !n.spotlight })} title="Toggle spotlight">
+                                  <Star className={`h-4 w-4 ${n.spotlight ? "text-accent fill-accent" : "text-muted-foreground"}`} />
+                                </button>
+                              </td>
+                              <td className="px-4 py-2">
+                                <button onClick={() => updateInitiative(n.id, { published: !n.published })} className={`text-[11px] rounded px-2 py-0.5 border ${n.published ? "text-emerald-400 border-emerald-400/40" : "text-muted-foreground border-border/50"}`}>
+                                  {n.published ? "live" : "hidden"}
+                                </button>
+                              </td>
+                              <td className="px-4 py-2">
+                                <button onClick={() => deleteInitiative(n.id)} className="text-red-400 hover:bg-red-400/10 rounded p-1" title="Remove"><Trash2 className="h-3.5 w-3.5" /></button>
+                              </td>
+                            </tr>
+                          ))}
+                          {it.length === 0 && <tr><td colSpan={7} className="px-4 py-6 text-center text-muted-foreground">No initiatives yet — recognize one above.</td></tr>}
                         </tbody>
                       </table></div>
                     </div>

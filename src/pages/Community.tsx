@@ -10,7 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
-import { ArrowRight, Mail, Users, Heart, ShieldCheck, CheckCircle, Sparkles, HeartHandshake, Building2, Store, GraduationCap } from "lucide-react";
+import { ArrowRight, Mail, Users, Heart, ShieldCheck, CheckCircle, Sparkles, HeartHandshake, Building2, Store, GraduationCap, Award } from "lucide-react";
 import { SupportersMarquee } from "@/components/SupportersMarquee";
 
 const emailSchema = z.string().email();
@@ -534,6 +534,25 @@ export default function Community() {
             <Link to="/drives" className="shrink-0">
               <Button className="bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90">
                 View drives <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </section>
+
+        {/* Initiatives we celebrate */}
+        <section className="container max-w-3xl mb-12">
+          <div className="rounded-2xl border border-accent/25 bg-accent/5 p-6 shadow-card flex flex-col sm:flex-row sm:items-center gap-4">
+            <Award className="h-8 w-8 text-accent shrink-0" />
+            <div className="flex-1">
+              <h3 className="font-bold text-lg mb-1">Initiatives we celebrate</h3>
+              <p className="text-sm text-muted-foreground">
+                Advancing women belongs to many. We recognize organizations and movements making women safer, freer and
+                more powerful — whether or not they partner with us.
+              </p>
+            </div>
+            <Link to="/initiatives" className="shrink-0">
+              <Button variant="outline" className="border-accent/40 text-accent bg-card/40 hover:bg-accent/10">
+                See who we celebrate <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </div>

@@ -136,31 +136,51 @@ export function coverPage(
   const L = 150;
   if (opts.logo) { try { doc.addImage(opts.logo, "PNG", cx - L / 2, 96, L, L); } catch { /* ignore */ } }
 
-  let y = 96 + L + 40;
-
+  // eyebrow pill — echoes the site's gold-bordered chips
+  let y = 96 + L + 30;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.5);
+  doc.setFontSize(8.5);
+  const cs = 1.3;
+  // width including letter-spacing applied after every glyph (+ a small safety margin)
+  const ebW = doc.getTextWidth(opts.eyebrow) + cs * opts.eyebrow.length;
+  const chipH = 21, padX = 18;
+  const chipW = ebW + padX * 2;
+  doc.setDrawColor(...C.gold);
+  doc.setFillColor(...C.card);
+  doc.setLineWidth(0.8);
+  doc.roundedRect(cx - chipW / 2, y, chipW, chipH, chipH / 2, chipH / 2, "FD");
   doc.setTextColor(...C.gold);
-  doc.text(opts.eyebrow, cx, y, { align: "center", charSpace: 2 });
+  // position manually (align:center ignores charSpace, which would shift text right)
+  doc.text(opts.eyebrow, cx - ebW / 2, y + 14, { charSpace: cs });
 
-  y += 34;
+  // title — "SHE" in gold, the remainder in cream, centered as a unit
+  y += chipH + 42;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(42);
+  doc.setFontSize(40);
+  const head = opts.title.slice(0, 3);
+  const tail = opts.title.slice(3);
+  const wHead = doc.getTextWidth(head);
+  const wTail = doc.getTextWidth(tail);
+  const startX = cx - (wHead + wTail) / 2;
+  doc.setTextColor(...C.gold);
+  doc.text(head, startX, y);
   doc.setTextColor(...C.ink);
-  doc.text(opts.title, cx, y, { align: "center" });
+  doc.text(tail, startX + wHead, y);
 
-  y += 24;
+  // subtitle
+  y += 30;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(13);
+  doc.setFontSize(12.5);
   doc.setTextColor(...C.gold);
   doc.text(opts.subtitle, cx, y, { align: "center" });
 
-  y += 26;
+  // divider
+  y += 32;
   doc.setDrawColor(...C.gold);
   doc.setLineWidth(1);
-  doc.line(cx - 70, y, cx + 70, y);
+  doc.line(cx - 55, y, cx + 55, y);
 
-  y += 28;
+  y += 36;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10.5);
   doc.setTextColor(...C.mut);

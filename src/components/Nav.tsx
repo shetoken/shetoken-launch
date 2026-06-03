@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowRight, BarChart2, Clock, Coins, Download, LogOut, ShieldAlert, User, Users } from "lucide-react";
+import { ArrowRight, BarChart2, Clock, Coins, Download, FileText, LogOut, ShieldAlert, User, Users } from "lucide-react";
 import logo from "@/assets/she-logo.svg";
 
 function UserAvatar({ name, email }: { name: string | null; email: string | null }) {
@@ -33,7 +33,6 @@ export function Nav() {
     { to: "/sheconomy", label: "SHEconomy", icon: <Coins className="h-3.5 w-3.5" /> },
     { to: "/she-clock", label: "She-Clock", icon: <Clock className="h-3.5 w-3.5" /> },
     { to: "/safety", label: "Safety", icon: <ShieldAlert className="h-3.5 w-3.5" /> },
-    { to: "/whitepaper", label: "Whitepaper" },
   ];
 
   // Show "Work with us" only on home page nav
@@ -100,6 +99,11 @@ export function Nav() {
                 <DropdownMenuItem asChild>
                   <Link to="/dashboard" className="cursor-pointer">
                     <BarChart2 className="h-4 w-4 mr-2" /> Live Dashboard
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/whitepaper" className="cursor-pointer">
+                    <FileText className="h-4 w-4 mr-2" /> Whitepaper
                   </Link>
                 </DropdownMenuItem>
                 {profile?.is_admin && (

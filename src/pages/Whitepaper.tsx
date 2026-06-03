@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Lock, CheckCircle, ExternalLink, FileText, Download } from "lucide-react";
 import { downloadWhitepaper } from "@/lib/whitepaperPdf";
+import { trackDownload } from "@/lib/downloads";
 
 const formSchema = z.object({
   full_name: z.string().min(2, "Please enter your full name"),
@@ -240,7 +241,7 @@ function WhitepaperContent() {
 const WP_UNLOCK_KEY = "she_whitepaper_unlocked";
 
 export default function Whitepaper() {
-  const { user, profile } = useAuth();
+  const { user, profile, openAuth } = useAuth();
   const [form, setForm] = useState<Partial<FormData>>({});
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [loading, setLoading] = useState(false);
@@ -364,12 +365,19 @@ export default function Whitepaper() {
               </div>
               <Button
                 onClick={() => {
+                  if (!user) {
+                    toast.info("Please sign in to download the whitepaper.");
+                    openAuth("signin");
+                    return;
+                  }
                   toast.success("Preparing your whitepaper PDF…");
-                  downloadWhitepaper().catch(() => toast.error("Could not generate the PDF. Please try again."));
+                  downloadWhitepaper()
+                    .then(() => trackDownload({ docType: "whitepaper", docRef: "whitepaper", userId: user.id, userEmail: user.email }))
+                    .catch(() => toast.error("Could not generate the PDF. Please try again."));
                 }}
                 className="bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90"
               >
-                <Download className="h-4 w-4 mr-1.5" /> Download PDF
+                <Download className="h-4 w-4 mr-1.5" /> Download Whitepaper
               </Button>
             </div>
             <WhitepaperContent />

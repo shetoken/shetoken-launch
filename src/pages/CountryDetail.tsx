@@ -18,6 +18,9 @@ import { MethodologyPanel } from "@/components/MethodologyPanel";
 import { LifePathModal } from "@/components/LifePathModal";
 import { WeiTrendChart } from "@/components/WeiTrendChart";
 import { downloadCountryReport } from "@/lib/countryReport";
+import { trackDownload } from "@/lib/downloads";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 /* ── Pillar definitions with global-average and improvement lever ── */
 const PILLAR_COLS: Array<{
@@ -260,6 +263,7 @@ const SUBNATIONAL_SAFETY: Record<string, string> = {
 export default function CountryDetail() {
   const { iso } = useParams<{ iso: string }>();
   const navigate = useNavigate();
+  const { user, openAuth } = useAuth();
   const [openMethod, setOpenMethod] = useState<string | null>(null);
   const [lifeModalOpen, setLifeModalOpen] = useState(false);
 
@@ -354,6 +358,11 @@ export default function CountryDetail() {
 
   function handleDownloadPdf() {
     if (!country) return;
+    if (!user) {
+      toast.info("Please sign in to download the country report.");
+      openAuth("signin");
+      return;
+    }
     const indexes = [
       { code: "WEI", label: "Women's Empowerment", accent: "#f59e0b", score: country.wei_score ?? null },
       ...INDEX_STRIP.map((idx, i) => {
@@ -405,6 +414,7 @@ export default function CountryDetail() {
       })),
       milestones: (lifepath?.milestones ?? []).map((m) => ({ label: m.label, reached: m.reached })),
     });
+    void trackDownload({ docType: "country_report", docRef: country.iso_code, userId: user.id, userEmail: user.email });
   }
 
   if (countryError) {
@@ -447,7 +457,7 @@ export default function CountryDetail() {
               disabled={!country}
               className="flex items-center gap-1.5 text-xs text-accent hover:text-accent/80 border border-accent/30 hover:border-accent/60 bg-accent/5 hover:bg-accent/10 rounded-lg px-3 py-1.5 transition-smooth disabled:opacity-40"
             >
-              <Download className="h-3.5 w-3.5" /> Download PDF
+              <Download className="h-3.5 w-3.5" /> Download Country Report
             </button>
             <Link
               to={`/compare?countries=${iso}`}

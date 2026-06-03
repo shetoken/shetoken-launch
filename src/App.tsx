@@ -63,7 +63,7 @@ const App = () => (
               <Route path="/compare" element={<Compare />} />
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/simulator" element={<SHEconomy />} />
-              <Route path="/sheconomy" element={<Navigate to="/simulator" replace />} />
+              <Route path="/sheconomy" element={<Navigate to="/marketplace" replace />} />
               <Route path="/she-clock" element={<SheClock />} />
               <Route path="/safety" element={<SafetyHotspots />} />
               <Route path="/admin" element={<AdminConsole />} />

@@ -11,7 +11,7 @@ import {
 } from "recharts";
 import {
   ArrowLeft, ArrowRight, BarChart2, TrendingUp, TrendingDown,
-  Info, AlertCircle, Users, ShieldAlert, ExternalLink, Cpu, Download
+  Info, AlertCircle, Users, ShieldAlert, ExternalLink, Cpu, Download, Clock
 } from "lucide-react";
 import { PerformanceSource } from "@/lib/api";
 import { MethodologyPanel } from "@/components/MethodologyPanel";
@@ -515,6 +515,30 @@ export default function CountryDetail() {
                 </div>
               )}
             </section>
+
+            {/* SAFETY + LIVE CLOCK cross-links */}
+            {country && (
+              <section className="mb-10 grid sm:grid-cols-2 gap-4">
+                {(() => {
+                  const s = country.safety_justice_score ?? 0;
+                  const adv = s >= 65 ? { l: "Generally safe", c: "#10b981" } : s >= 48 ? { l: "Don't walk alone after dark", c: "#eab308" } : s >= 35 ? { l: "Avoid travelling alone", c: "#f97316" } : { l: "Reconsider non-essential travel", c: "#ef4444" };
+                  return (
+                    <Link to="/safety" className="group rounded-2xl border border-border/40 bg-gradient-card p-5 shadow-card hover:border-accent/50 transition-smooth">
+                      <div className="flex items-center gap-2 mb-1.5"><ShieldAlert className="h-4 w-4" style={{ color: adv.c }} /><span className="text-[10px] uppercase tracking-wide text-muted-foreground">Women's safety</span></div>
+                      <div className="font-bold" style={{ color: adv.c }}>{adv.l}</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">Safety &amp; Justice {s.toFixed(0)}/100 · {country.country}</div>
+                      <span className="inline-flex items-center gap-1 text-xs text-accent mt-3">Open the full safety map <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" /></span>
+                    </Link>
+                  );
+                })()}
+                <Link to="/she-clock" className="group rounded-2xl border border-border/40 bg-gradient-card p-5 shadow-card hover:border-accent/50 transition-smooth">
+                  <div className="flex items-center gap-2 mb-1.5"><Clock className="h-4 w-4 text-accent" /><span className="text-[10px] uppercase tracking-wide text-muted-foreground">Live now</span></div>
+                  <div className="font-bold">What's happening this second</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">See {country.country} on the live She-Clock — births, violence and loss in real time.</div>
+                  <span className="inline-flex items-center gap-1 text-xs text-accent mt-3">Open the She-Clock <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" /></span>
+                </Link>
+              </section>
+            )}
 
             {/* 8-INDEX SCORECARD */}
             <section className="mb-10">

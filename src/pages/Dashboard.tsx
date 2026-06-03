@@ -10,7 +10,7 @@ import { WorldMap } from "@/components/WorldMap";
 import {
   ArrowRight, ArrowUpDown, TrendingUp, TrendingDown,
   Search, Globe2, Sparkles, AlertCircle, Map as MapIcon, List, X, Loader2,
-  Activity, Zap,
+  Activity, Zap, ShieldAlert, Clock,
 } from "lucide-react";
 
 /* ── Tier labels ── */
@@ -1219,6 +1219,23 @@ export default function Dashboard() {
               )}
             </div>
           )}
+        </section>
+
+        {/* ── EXPLORE: Safety + She-Clock (consolidated from the old nav tabs) ── */}
+        <section className="mt-12">
+          <h2 className="text-base font-bold mb-4">Explore the data</h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            <Link to="/safety" className="group rounded-2xl border border-border/40 bg-gradient-card p-6 shadow-card hover:border-accent/50 transition-smooth">
+              <div className="flex items-center gap-2 text-accent mb-2"><ShieldAlert className="h-5 w-5" /><span className="font-bold text-foreground">Women's Safety Advisory</span></div>
+              <p className="text-sm text-muted-foreground mb-4">Where it's safe to travel as a woman — country advisories, state-level maps and local helplines, from WHO, UNODC &amp; UN Women data.</p>
+              <span className="inline-flex items-center gap-1 text-sm text-accent">Open the safety map <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" /></span>
+            </Link>
+            <Link to="/she-clock" className="group rounded-2xl border border-border/40 bg-gradient-card p-6 shadow-card hover:border-accent/50 transition-smooth">
+              <div className="flex items-center gap-2 text-accent mb-2"><Clock className="h-5 w-5" /><span className="font-bold text-foreground">She-Clock</span></div>
+              <p className="text-sm text-muted-foreground mb-4">A live, per-second picture of what girls and women face today — births, violence and loss — across countries, in real time.</p>
+              <span className="inline-flex items-center gap-1 text-sm text-accent">Open the full clock <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" /></span>
+            </Link>
+          </div>
         </section>
 
         {/* ── ABOUT THE DATA ── */}

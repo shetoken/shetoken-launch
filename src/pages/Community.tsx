@@ -22,6 +22,7 @@ const PROFESSIONS = ["Student", "Healthcare", "Education", "Tech", "Business", "
 const REASONS = ["Find support", "Share my story", "Help other women", "Find resources", "Stay informed", "Networking", "Other"];
 const CARING = ["Parents", "Grandparents", "In-laws", "Partner / spouse", "Sibling(s)", "A person with a disability", "Other"];
 const COUNTS = ["0", "1", "2", "3", "4", "5+"];
+const CIRCUMSTANCES = ["Sole earner for my family", "Young carer (caring since I was young)", "Lost a parent", "Widow", "Caring while studying or working", "Survivor"];
 const numFrom = (s: string) => (s === "" ? null : s === "5+" ? 5 : parseInt(s, 10));
 
 const selectCls = "w-full h-10 rounded-md border border-border/60 bg-background/60 px-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring";
@@ -38,7 +39,10 @@ function SheCommunityCard() {
   const [depBoys, setDepBoys] = useState("");
   const [caring, setCaring] = useState<string[]>([]);
   const [caringOther, setCaringOther] = useState("");
+  const [circumstances, setCircumstances] = useState<string[]>([]);
+  const [story, setStory] = useState("");
   const toggleCaring = (i: string) => setCaring((arr) => arr.includes(i) ? arr.filter((x) => x !== i) : [...arr, i]);
+  const toggleCircumstance = (i: string) => setCircumstances((arr) => arr.includes(i) ? arr.filter((x) => x !== i) : [...arr, i]);
 
   const { data: member, refetch } = useQuery({
     queryKey: ["community-member", user?.id],
@@ -67,6 +71,7 @@ function SheCommunityCard() {
         single_mother: f.single_mother || null,
         dependent_girls: numFrom(depGirls), dependent_boys: numFrom(depBoys),
         caring_for: caring, caring_for_other: caringOther.trim() || null,
+        circumstances, story: story.trim() || null,
       }, { onConflict: "user_id" });
       if (error) throw error;
       toast.success(eligible ? "You're on the SHE Community early-access list — welcome." : "Thanks — you're on our community list.");
@@ -185,6 +190,20 @@ function SheCommunityCard() {
               ))}
             </div>
             {caring.includes("Other") && <Input value={caringOther} onChange={(e) => setCaringOther(e.target.value)} placeholder="Who else? (optional)" className="bg-background/60 border-border/60 mt-2" />}
+          </div>
+          <div className="sm:col-span-2">
+            <label className="text-xs font-medium mb-1.5 block">Does any of this describe your journey? <span className="text-muted-foreground font-normal">(optional — choose what feels right)</span></label>
+            <div className="flex flex-wrap gap-1.5">
+              {CIRCUMSTANCES.map((i) => (
+                <button type="button" key={i} onClick={() => toggleCircumstance(i)}
+                  className={`text-xs px-2.5 py-1 rounded-full border transition-smooth ${circumstances.includes(i) ? "border-accent bg-accent/15 text-accent" : "border-border/60 text-muted-foreground hover:text-foreground"}`}>
+                  {i}
+                </button>
+              ))}
+            </div>
+            <textarea value={story} onChange={(e) => setStory(e.target.value)} rows={2}
+              placeholder="Anything about your journey you'd like to share? (optional)"
+              className="w-full mt-2 rounded-md border border-border/60 bg-background/60 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none" />
           </div>
 
           <div className="sm:col-span-2 flex gap-3">

@@ -1,6 +1,9 @@
 import { jsPDF } from "jspdf";
 import type { CountryWEI } from "@/lib/api";
+import { METHODOLOGY, computeScore } from "@/lib/methodology";
 import { PW, PH, M, C, type RGB, hexToRgb, paintBackground, headerBand, pageFooter, panel, getLogoDataUrl, coverPage } from "@/lib/pdfTheme";
+
+type ProvByCode = Record<string, Record<string, { year?: string; status?: string }>>;
 
 export interface ReportIndexTile { code: string; label: string; accent: string; score: number | null; }
 export interface ReportPillar { label: string; code: string; description: string; score: number; globalAvg: number; improvement: string; }
@@ -24,9 +27,13 @@ export async function downloadCountryReport(opts: {
   trend: ReportTrendPoint[];
   lifepath: ReportLifeStage[];
   milestones?: ReportMilestone[];
+  methodRows?: Record<string, Record<string, unknown> | undefined>;
+  provenance?: ProvByCode;
 }) {
   const { country: c, indexes, pillars, performanceSummary, violence, trend, lifepath } = opts;
   const milestones = opts.milestones ?? [];
+  const methodRows = opts.methodRows;
+  const provenance = opts.provenance;
   const logo = await getLogoDataUrl();
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   let page = 0;
@@ -301,6 +308,120 @@ export async function downloadCountryReport(opts: {
     doc.text(`${trend[0].year}`, x0 + 4, y0 + chartH - 4);
     doc.text(`${trend[trend.length - 1].year}`, x0 + chartW - 4, y0 + chartH - 4, { align: "right" });
     y += chartH + 12;
+  }
+
+  // ── How Each Score Is Calculated (per-index methodology) ────────────────
+  if (methodRows) {
+    const fmt = (n: number) => (isNaN(n) ? "—" : Number.isInteger(n) ? String(n) : n.toFixed(1));
+    // jsPDF's built-in fonts are WinAnsi — map math/arrow glyphs to ASCII so
+    // formulas don't render as garbage (and don't break text width/wrapping).
+    const tx = (s: unknown) => String(s ?? "")
+      .replace(/→/g, "->")   // →
+      .replace(/×/g, "x")    // ×
+      .replace(/÷/g, "/")    // ÷
+      .replace(/−/g, "-")    // −
+      .replace(/≥/g, ">=")   // ≥
+      .replace(/≤/g, "<=")   // ≤
+      .replace(/Σ/g, "Sum"); // Σ
+    const dataAsOf = (vintage: string, prov?: Record<string, { year?: string; status?: string }>) => {
+      const ys = prov ? Object.values(prov).map((p) => parseInt(p.year ?? "", 10)).filter((v) => !isNaN(v)) : [];
+      if (!ys.length) return `Data as of: ${vintage}`;
+      const minY = Math.min(...ys), maxY = Math.max(...ys);
+      const nV = Object.values(prov!).filter((p) => p.status === "verified").length;
+      const nM = Object.values(prov!).filter((p) => p.status === "modeled").length;
+      const range = minY === maxY ? `${minY}` : `${minY}–${maxY}`;
+      const mix = nV || nM ? ` · ${nV} verified · ${nM} modelled` : "";
+      return `Data as of: collection years ${range}${mix}`;
+    };
+
+    heading("How Each Score Is Calculated");
+    para("The formula, this country's actual inputs, and the source documents behind each of the eight SHEtoken indexes.", C.mut, 8.5);
+
+    ["WEI", "GPI", "SVI", "WADI", "WEVI", "WHI", "WVI", "Compliance"].forEach((code) => {
+      const m = METHODOLOGY[code];
+      const row = methodRows[code];
+      if (!m || !row) return;
+      const acc = hexToRgb(m.accent);
+      const weighted = m.kind === "weighted";
+
+      // Index header (badge + title + DERIVED) — keep with at least the formula row
+      ensure(60);
+      y += 10;
+      doc.setFont("helvetica", "bold"); doc.setFontSize(8);
+      const bw = doc.getTextWidth(m.code) + 10;
+      doc.setFillColor(...C.card); doc.setDrawColor(...acc); doc.setLineWidth(0.7);
+      doc.roundedRect(M, y - 9, bw, 14, 3, 3, "FD");
+      doc.setTextColor(...acc); doc.text(m.code, M + 5, y + 1);
+      doc.setTextColor(...C.ink); doc.setFontSize(11);
+      doc.text(m.title, M + bw + 8, y + 1);
+      if (m.derived) {
+        doc.setFontSize(6.5); doc.setTextColor(...acc);
+        doc.text("DERIVED", M + bw + 12 + doc.getTextWidth(m.title), y);
+      }
+      y += 12;
+      doc.setFont("courier", "normal"); doc.setFontSize(8); doc.setTextColor(...C.mut);
+      doc.splitTextToSize(tx(m.formula), CONTENT_W).forEach((ln: string) => { ensure(11); doc.text(ln, M, y + 8); y += 11; });
+      doc.setFont("helvetica", "italic"); doc.setFontSize(7.5); doc.setTextColor(...acc);
+      ensure(12); doc.text(dataAsOf(m.vintage, provenance?.[code]), M, y + 8); y += 14;
+
+      // Breakdown table
+      const { contributions, total } = computeScore(m, row);
+      const valX = weighted ? M + 300 : M + 330;
+      const wX = M + 392, conX = M + CONTENT_W;
+      const compW = weighted ? 230 : 250;
+      const lineH = 10.5, pad = 4;
+
+      ensure(18);
+      doc.setFillColor(...C.cardTop); doc.setDrawColor(...C.border); doc.setLineWidth(0.6);
+      doc.rect(M, y, CONTENT_W, 15, "FD");
+      doc.setFont("helvetica", "bold"); doc.setFontSize(6.6); doc.setTextColor(...C.gold);
+      doc.text("COMPONENT", M + 6, y + 10);
+      doc.text(c.country.toUpperCase(), valX, y + 10, { align: "right" });
+      if (weighted) { doc.text("WEIGHT", wX, y + 10, { align: "right" }); doc.text("CONTRIBUTION", conX, y + 10, { align: "right" }); }
+      else doc.text("SOURCE", conX, y + 10, { align: "right" });
+      y += 15;
+
+      contributions.forEach((cc, i) => {
+        const comp = m.components[i];
+        const isPen = comp.label.trim().startsWith("−");
+        const compLines = doc.splitTextToSize(tx(comp.label), compW);
+        const rowH = compLines.length * lineH + pad;
+        ensure(rowH + 1);
+        if (i % 2 === 1) { doc.setFillColor(...C.card); doc.rect(M, y, CONTENT_W, rowH, "F"); }
+        const baseY = y + pad + lineH * 0.55;
+        doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...(isPen ? C.red : C.ink));
+        compLines.forEach((ln: string, k: number) => doc.text(ln, M + 6, y + pad + lineH * (k + 0.55)));
+        const valStr = `${fmt(cc.raw)}${comp.unit && comp.unit !== "0/1" ? comp.unit : ""}${comp.invert && !isNaN(cc.raw) ? ` → ${fmt(cc.used)}` : ""}`;
+        doc.setTextColor(...(isPen ? C.red : C.mut)); doc.text(valStr, valX, baseY, { align: "right" });
+        if (weighted) {
+          doc.setTextColor(...C.mut); doc.text(`×${comp.weight}`, wX, baseY, { align: "right" });
+          doc.setFont("helvetica", "bold"); doc.setTextColor(...(isPen ? C.red : acc));
+          doc.text(cc.contribution != null ? `${cc.contribution >= 0 ? "+" : ""}${cc.contribution.toFixed(2)}` : "—", conX, baseY, { align: "right" });
+        } else {
+          doc.setFontSize(7); doc.setTextColor(...C.mut);
+          const yr = provenance?.[code]?.[comp.field]?.year;
+          doc.text(`${tx(comp.source ?? "")}${yr ? ` · ${yr}` : ""}`, conX, baseY, { align: "right" });
+        }
+        doc.setDrawColor(...C.border); doc.setLineWidth(0.3); doc.line(M, y + rowH, M + CONTENT_W, y + rowH);
+        y += rowH;
+      });
+
+      if ((weighted || m.kind === "average") && total != null) {
+        ensure(18);
+        doc.setDrawColor(...acc); doc.setLineWidth(1); doc.line(M, y, M + CONTENT_W, y);
+        doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(...C.ink);
+        doc.text(`${m.kind === "average" ? "Average" : "Total"} = ${m.code} score`, M + 6, y + 13);
+        doc.setTextColor(...acc); doc.text(fmt(total), conX, y + 13, { align: "right" });
+        y += 18;
+      }
+      y += 4;
+
+      para(tx(m.note), C.mut, 7.5);
+      ensure(12);
+      doc.setFont("helvetica", "bold"); doc.setFontSize(6.8); doc.setTextColor(...C.mut);
+      doc.text(`DATA SOURCES:  ${m.sources.map((s) => s.name).join("   ·   ")}`, M, y + 6);
+      y += 16;
+    });
   }
 
   // ── About the Data ──────────────────────────────────────────────────────

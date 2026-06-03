@@ -347,10 +347,18 @@ export default function CountryDetail() {
       score: (country[p.key] as number) ?? 0, globalAvg: p.globalAvg, improvement: p.improvement,
     }));
     const vs = violenceSeverity(country.violence_penalty_score ?? 0);
+    const methodRows: Record<string, Record<string, unknown> | undefined> = {
+      WEI: country as unknown as Record<string, unknown>,
+    };
+    INDEX_STRIP.forEach((idx, i) => {
+      methodRows[idx.code] = indexQueries[i].data as Record<string, unknown> | undefined;
+    });
     void downloadCountryReport({
       country,
       indexes,
       pillars,
+      methodRows,
+      provenance: provenance?.indexes,
       performanceSummary: performanceBlurb(country),
       violence: { score: country.violence_penalty_score ?? 0, label: vs.label, context: vs.context },
       trend: chartData.filter((d): d is { year: number; score: number } =>

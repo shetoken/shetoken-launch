@@ -96,6 +96,7 @@ export default function SafetyHotspots() {
   const [search, setSearch] = useState("");
   const [selIso, setSelIso] = useState("IND");
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
+  const [stateSort, setStateSort] = useState<"least" | "safest" | "name">("least");
 
   const { data: countriesRes, isLoading } = useQuery({
     queryKey: ["wei-countries"], queryFn: () => api.wei.countries(105), staleTime: 10 * 60 * 1000,
@@ -138,9 +139,12 @@ export default function SafetyHotspots() {
     enabled: !!subName,
     staleTime: 30 * 60 * 1000,
   });
-  const states = useMemo(() =>
-    [...(statesRes?.data ?? [])].sort((a, b) => (a.safety_justice_score ?? 0) - (b.safety_justice_score ?? 0)),
-    [statesRes]);
+  const states = useMemo(() => {
+    const list = [...(statesRes?.data ?? [])];
+    if (stateSort === "safest") return list.sort((a, b) => (b.safety_justice_score ?? 0) - (a.safety_justice_score ?? 0));
+    if (stateSort === "name") return list.sort((a, b) => a.state.localeCompare(b.state));
+    return list.sort((a, b) => (a.safety_justice_score ?? 0) - (b.safety_justice_score ?? 0)); // least safe first
+  }, [statesRes, stateSort]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -269,8 +273,25 @@ export default function SafetyHotspots() {
                 </div>
                 {/* Synced side-list — hover a row to highlight it on the map (and vice-versa) */}
                 <div className="lg:col-span-1 rounded-2xl border border-border/40 bg-gradient-card shadow-card overflow-hidden">
-                  <div className="px-3 py-2 border-b border-border/40 text-xs font-semibold text-muted-foreground">
-                    {states.length} states · least safe first
+                  <div className="px-3 py-2 border-b border-border/40 flex items-center justify-between gap-2">
+                    <span className="text-xs font-semibold text-muted-foreground">{states.length} states</span>
+                    <div className="flex items-center gap-1 text-[10px]">
+                      {([
+                        { k: "least", t: "Least safe" },
+                        { k: "safest", t: "Safest" },
+                        { k: "name", t: "A–Z" },
+                      ] as const).map((o) => (
+                        <button
+                          key={o.k}
+                          onClick={() => setStateSort(o.k)}
+                          className={`px-1.5 py-0.5 rounded transition-colors ${
+                            stateSort === o.k ? "bg-accent/20 text-accent font-semibold" : "text-muted-foreground hover:text-foreground"
+                          }`}
+                        >
+                          {o.t}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                   <div className="max-h-[480px] overflow-y-auto divide-y divide-border/20">
                     {states.map((st) => {

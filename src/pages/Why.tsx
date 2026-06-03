@@ -100,6 +100,38 @@ export default function Why() {
           </div>
         </section>
 
+        {/* THE SYSTEM — simple, four parts */}
+        <section className="py-20 container max-w-5xl">
+          <div className="text-center mb-12">
+            <p className="text-xs uppercase tracking-widest text-accent mb-3">How it works</p>
+            <h2 className="text-3xl md:text-5xl font-bold mb-5">Imagine a way to make<br /><span className="text-gradient">helping women pay off.</span></h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Not charity. Not a promise. A simple system you can watch working — in four parts.</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-5">
+            {[
+              { n: "01", verb: "We measure it", icon: Activity, title: "Live Data", desc: "A live score of how women are doing, across 105 countries.", to: "/dashboard", cta: "See the data" },
+              { n: "02", verb: "We price it", icon: Coins, title: "$SHE", desc: "When women's lives improve, $SHE goes up. When they get worse, it goes down.", to: "/simulator", cta: "Try the simulator" },
+              { n: "03", verb: "We build it", icon: Store, title: "SHEconomy", desc: "Women sell real products and services — and earn real income.", to: "/marketplace", cta: "Visit SHEconomy" },
+              { n: "04", verb: "We belong", icon: Users, title: "SHE Community", desc: "A private space where women have each other's backs.", to: "/community", cta: "Join the community" },
+            ].map((p) => (
+              <div key={p.verb} className="bg-gradient-card border border-border/40 rounded-2xl p-6 shadow-card">
+                <div className="flex items-center gap-3 mb-2">
+                  <p.icon className="h-7 w-7 text-accent shrink-0" />
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-accent">{p.n} · {p.verb}</span>
+                    <h3 className="text-lg font-bold leading-tight">{p.title}</h3>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">{p.desc}</p>
+                <Link to={p.to} className="inline-flex items-center gap-1 text-sm text-accent hover:gap-1.5 transition-all">{p.cta} <ArrowRight className="h-4 w-4" /></Link>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 text-center text-base bg-card/30 border border-accent/20 rounded-2xl p-6 leading-relaxed">
+            <span className="text-accent font-semibold">The whole idea:</span> the better women earn, learn and stay safe, the higher the score — and the higher $SHE goes. <strong className="text-foreground">Helping women finally becomes worth something.</strong>
+          </div>
+        </section>
+
         {/* THREE SYSTEMS THAT FAILED */}
         <section className="py-20 container max-w-5xl">
           <div className="text-center mb-14">
@@ -177,38 +209,6 @@ export default function Why() {
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* THE SYSTEM — FOUR-PILLAR FLYWHEEL */}
-        <section className="py-20 container max-w-5xl">
-          <div className="text-center mb-4">
-            <p className="text-xs uppercase tracking-widest text-accent mb-3">The system</p>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Measure. Invest. Build. <span className="text-gradient">Belong.</span></h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              $SHE isn't backed by gold — it's backed by the <strong className="text-foreground">measured advancement of women</strong>.
-              Four parts, one flywheel: as the community and the women's economy create real progress, the index rises — and the asset rises with it.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-5 mt-12">
-            {[
-              { n: "01", verb: "Measure", icon: Activity, title: "Live Data — the Women's Empowerment Index", desc: "You can't value what you can't measure. The WEI scores women's empowerment across 105 countries, updated weekly from UN, WHO and World Bank data. This is what $SHE is backed by.", to: "/dashboard", cta: "Explore the data" },
-              { n: "02", verb: "Invest", icon: Coins, title: "$SHE — outcome-priced capital", desc: "When women's lives improve, $SHE is minted; when they deteriorate, it's burned. Progress for women becomes financial value — so investing in women becomes investing in $SHE.", to: "/simulator", cta: "Try the $SHE Simulator" },
-              { n: "03", verb: "Build", icon: Store, title: "SHEconomy — the women-owned marketplace", desc: "Real women-owned businesses, real income. The marketplace is where empowerment is produced — turning the index from a number into livelihoods.", to: "/marketplace", cta: "Visit SHEconomy" },
-              { n: "04", verb: "Belong", icon: Users, title: "SHE Community — the people behind the data", desc: "The verified women who power it all — sellers, members, supporters. A private, women-first space built for support and solidarity.", to: "/community", cta: "Join SHE Community" },
-            ].map((p) => (
-              <div key={p.verb} className="bg-gradient-card border border-border/40 rounded-2xl p-6 shadow-card flex flex-col">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-accent mb-2">{p.n} · {p.verb}</span>
-                <div className="flex items-center gap-2 mb-2"><p.icon className="h-6 w-6 text-accent shrink-0" /><h3 className="text-lg font-bold leading-tight">{p.title}</h3></div>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">{p.desc}</p>
-                <Link to={p.to} className="inline-flex items-center gap-1 text-sm text-accent hover:gap-1.5 transition-all">{p.cta} <ArrowRight className="h-4 w-4" /></Link>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-8 text-center text-sm text-muted-foreground bg-card/30 border border-border/40 rounded-2xl p-5 leading-relaxed">
-            <span className="text-accent font-semibold">The flywheel:</span> SHE Community + SHEconomy create real economic progress for women → the WEI rises → $SHE (backed by the WEI) appreciates → capital flows back into women's businesses and programs → progress compounds.
           </div>
         </section>
 

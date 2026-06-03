@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { ArrowRight, Mail, Users, Heart, ShieldCheck, CheckCircle, Sparkles, HeartHandshake, Building2, Store, GraduationCap } from "lucide-react";
+import { SupportersMarquee } from "@/components/SupportersMarquee";
 
 const emailSchema = z.string().email();
 
@@ -475,6 +476,9 @@ export default function Community() {
             A movement to make women's empowerment measurable — and a private, women-first space built for women.
           </p>
         </section>
+
+        {/* Rolling supporters — partners, sponsors, NGOs, businesses */}
+        <SupportersMarquee />
 
         {/* Role gateway — choose how you're joining */}
         <section className="container max-w-3xl mb-6">

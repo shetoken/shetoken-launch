@@ -12,6 +12,14 @@ export interface ReportLifeStage { age_band: string; headline: string; cohort?: 
 export interface ReportMilestone { label: string; reached: number; }
 export interface ReportViolence { score: number; label: string; context: string; }
 export interface ReportState { state: string; safety_justice_score: number; wei_score?: number; }
+export interface ReportGlobal {
+  weiAvg: number;
+  countriesScored: number;
+  highest: { country: string; score: number };
+  lowest: { country: string; score: number };
+  tiers: [number, number, number, number];
+  indexAvgs: Record<string, number | undefined>;
+}
 
 const TIER_LABEL: Record<number, string> = { 1: "Preferred", 2: "Acceptable", 3: "Caution", 4: "Avoid" };
 const CONTENT_W = PW - 2 * M;
@@ -35,12 +43,14 @@ export async function downloadCountryReport(opts: {
   lifepath: ReportLifeStage[];
   milestones?: ReportMilestone[];
   states?: ReportState[];
+  global?: ReportGlobal;
   methodRows?: Record<string, Record<string, unknown> | undefined>;
   provenance?: ProvByCode;
 }) {
   const { country: c, indexes, pillars, performanceSummary, violence, lifepath } = opts;
   const milestones = opts.milestones ?? [];
   const states = opts.states ?? [];
+  const global = opts.global;
   const methodRows = opts.methodRows;
   const provenance = opts.provenance;
   const logo = await getLogoDataUrl();
@@ -186,6 +196,93 @@ export async function downloadCountryReport(opts: {
   heading("Performance Summary");
   para(performanceSummary, C.mut, 9.5);
   para("Scores derived from UN Women, World Bank, WHO, UNESCO and UNODC data for 2025. Signal-backed summaries update after the weekly pipeline runs.", C.mut, 7.5, true);
+
+  // ── Global Context ──────────────────────────────────────────────────────
+  if (global) {
+    heading("Global Context");
+    para(`Where ${c.country} sits among ${global.countriesScored} countries, with the global index averages for reference.`, C.mut, 8.5);
+
+    // Snapshot — 4 cells (2 × 2)
+    const cells: [string, string, RGB][] = [
+      ["Global WEI average", `${global.weiAvg.toFixed(1)} / 100`, C.gold],
+      [`${c.country} · rank #${c.rank} of ${global.countriesScored}`, `${(c.wei_score ?? 0).toFixed(1)} / 100`, C.ink],
+      ["Highest", `${global.highest.country} · ${global.highest.score.toFixed(1)}`, C.emerald],
+      ["Lowest", `${global.lowest.country} · ${global.lowest.score.toFixed(1)}`, C.red],
+    ];
+    const cellW = (CONTENT_W - 8) / 2, cellH = 36;
+    ensure(2 * cellH + 18);
+    cells.forEach(([label, val, col], i) => {
+      const x = M + (i % 2) * (cellW + 8), yy = y + Math.floor(i / 2) * (cellH + 8);
+      panel(doc, x, yy, cellW, cellH, C.card);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(...C.mut);
+      doc.text(doc.splitTextToSize(label, cellW - 20)[0] ?? label, x + 10, yy + 14);
+      doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.setTextColor(...col);
+      doc.text(val, x + 10, yy + 30);
+    });
+    y += 2 * cellH + 8 + 14;
+
+    // Country distribution by tier
+    ensure(20);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(9.5); doc.setTextColor(...C.ink);
+    doc.text("Country Distribution by Tier", M, y); y += 6;
+    const tierMeta: [string, string][] = [
+      ["Tier 1 · Preferred", "#10b981"], ["Tier 2 · Acceptable", "#eab308"],
+      ["Tier 3 · Caution", "#f97316"], ["Tier 4 · Avoid", "#ef4444"],
+    ];
+    const totalC = global.tiers.reduce((a, b) => a + b, 0) || 1;
+    tierMeta.forEach(([label, color], i) => {
+      const count = global.tiers[i], pct = (count / totalC) * 100, mine = c.tier === i + 1;
+      ensure(16);
+      y += 14;
+      doc.setFont("helvetica", mine ? "bold" : "normal"); doc.setFontSize(8);
+      doc.setTextColor(...(mine ? hexToRgb(color) : C.mut));
+      doc.text(`${label}${mine ? `   (${c.country})` : ""}`, M, y);
+      const bx = M + 190, bw = CONTENT_W - 190 - 70, byy = y - 7;
+      doc.setFillColor(...C.card); doc.roundedRect(bx, byy, bw, 8, 2, 2, "F");
+      doc.setFillColor(...hexToRgb(color)); doc.roundedRect(bx, byy, Math.max(2, bw * pct / 100), 8, 2, 2, "F");
+      doc.setFont("helvetica", "bold"); doc.setTextColor(...C.ink);
+      doc.text(`${count} (${pct.toFixed(1)}%)`, M + CONTENT_W, y, { align: "right" });
+    });
+    y += 14;
+
+    // 8 indexes — country vs global average
+    ensure(20);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(9.5); doc.setTextColor(...C.ink);
+    doc.text(`8 Indexes — ${c.country} vs Global Average`, M, y); y += 8;
+    const vX = M + 320, gX = M + 420, dX = M + CONTENT_W;
+    ensure(15);
+    doc.setFillColor(...C.cardTop); doc.setDrawColor(...C.border); doc.setLineWidth(0.6);
+    doc.rect(M, y, CONTENT_W, 15, "FD");
+    doc.setFont("helvetica", "bold"); doc.setFontSize(6.6); doc.setTextColor(...C.gold);
+    doc.text("INDEX", M + 6, y + 10);
+    doc.text(c.country.toUpperCase(), vX, y + 10, { align: "right" });
+    doc.text("GLOBAL AVG", gX, y + 10, { align: "right" });
+    doc.text("VS GLOBAL", dX, y + 10, { align: "right" });
+    y += 15;
+    indexes.forEach((idx, i) => {
+      const v = idx.score ?? 0, g = global.indexAvgs[idx.code];
+      const rowH = 13;
+      ensure(rowH);
+      if (i % 2 === 1) { doc.setFillColor(...C.card); doc.rect(M, y, CONTENT_W, rowH, "F"); }
+      const [rr, gg, bb] = hexToRgb(idx.accent);
+      doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(rr, gg, bb);
+      doc.text(idx.code, M + 6, y + 9);
+      doc.setFont("helvetica", "normal"); doc.setTextColor(...C.mut); doc.setFontSize(7.5);
+      doc.text(doc.splitTextToSize(idx.label, 200)[0] ?? idx.label, M + 6 + doc.getTextWidth(idx.code) + 8, y + 9);
+      doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(...C.ink);
+      doc.text(idx.score != null ? v.toFixed(1) : "—", vX, y + 9, { align: "right" });
+      doc.setFont("helvetica", "normal"); doc.setTextColor(...C.mut);
+      doc.text(g != null ? g.toFixed(1) : "—", gX, y + 9, { align: "right" });
+      if (g != null && idx.score != null) {
+        const d = v - g;
+        doc.setFont("helvetica", "bold"); doc.setTextColor(...(d >= 0 ? C.emerald : C.red));
+        doc.text(`${d >= 0 ? "+" : ""}${d.toFixed(1)}`, dX, y + 9, { align: "right" });
+      }
+      doc.setDrawColor(...C.border); doc.setLineWidth(0.3); doc.line(M, y + rowH, M + CONTENT_W, y + rowH);
+      y += rowH;
+    });
+    y += 8;
+  }
 
   // ── 8 Pillar Breakdown ──────────────────────────────────────────────────
   heading("8 Pillar Breakdown");

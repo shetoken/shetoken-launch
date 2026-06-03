@@ -316,6 +316,9 @@ export default function CountryDetail() {
     staleTime: 30 * 60 * 1000,
   });
 
+  /* ── Global summary (averages, tier distribution) for the report's global context ── */
+  const { data: summary } = useQuery({ queryKey: ["summary"], queryFn: api.summary, staleTime: 10 * 60 * 1000 });
+
   /* ── State-level safety data, for countries that have sub-national scores ── */
   const subSafetyName = country ? SUBNATIONAL_SAFETY[country.iso_code] : undefined;
   const { data: statesRes } = useQuery({
@@ -378,6 +381,18 @@ export default function CountryDetail() {
       states: (statesRes?.data ?? []).map((s) => ({
         state: s.state, safety_justice_score: s.safety_justice_score ?? 0, wei_score: s.wei_score,
       })),
+      global: summary ? {
+        weiAvg: summary.global_wei_score,
+        countriesScored: summary.countries_scored,
+        highest: { country: summary.highest_country, score: summary.highest_score },
+        lowest: { country: summary.lowest_country, score: summary.lowest_score },
+        tiers: [summary.tier_1_count, summary.tier_2_count, summary.tier_3_count, summary.tier_4_count] as [number, number, number, number],
+        indexAvgs: {
+          WEI: summary.global_wei_score, GPI: summary.gpi_global_avg, SVI: summary.svi_global_avg,
+          WADI: summary.wadi_global_avg, WEVI: summary.wevi_global_avg, WHI: summary.whi_global_avg,
+          WVI: summary.wvi_global_avg, Compliance: summary.compliance_global_avg,
+        },
+      } : undefined,
       lifepath: (lifepath?.stages ?? []).map((s) => ({
         age_band: s.age_band, headline: s.headline, cohort: s.cohort,
         detail: s.detail, felt: s.felt, source: s.source,

@@ -151,7 +151,6 @@ function SheCommunityCard() {
 }
 
 export default function Community() {
-  const { user, openAuth } = useAuth();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
@@ -176,37 +175,36 @@ export default function Community() {
       <Nav />
 
       <main className="pt-24 pb-24">
-        {/* HERO + newsletter */}
-        <section className="container max-w-3xl text-center py-12">
+        {/* HERO */}
+        <section className="container max-w-3xl text-center pt-12 pb-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/30 bg-accent/10 text-accent text-xs mb-8">
             <Users className="h-3 w-3" /> Join the movement
           </div>
           <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
             Be part of the<br /><span className="text-gradient">SHEtoken</span> community.
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-10">
-            A movement to make women's empowerment measurable — and a safe, women-first space.
-            Subscribe to the newsletter, create your account, and join SHE Community.
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            A movement to make women's empowerment measurable — and a private, women-first space built for women.
           </p>
-
-          <form onSubmit={handleSubscribe} id="subscribe" className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto mb-3">
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" className="h-12 bg-card/40 border-border/60" />
-            <Button type="submit" disabled={loading} className="h-12 px-6 bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90 shrink-0">
-              {loading ? "…" : done ? "Subscribed ✓" : "Subscribe"}
-            </Button>
-          </form>
-          <p className="text-xs text-muted-foreground mb-8">WEI reports, safety signals and early-access invites. No spam — unsubscribe anytime.</p>
-
-          {!user && (
-            <Button size="lg" variant="outline" onClick={() => openAuth("signup")} className="h-12 px-8 border-border/60 bg-card/40 backdrop-blur">
-              Create an account <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          )}
         </section>
 
-        {/* SHE Community early access */}
-        <section className="container max-w-3xl mb-12">
+        {/* SHE Community — primary action, above everything else */}
+        <section className="container max-w-3xl mb-8">
           <SheCommunityCard />
+        </section>
+
+        {/* Newsletter — lighter, secondary (no account needed) */}
+        <section className="container max-w-3xl mb-12">
+          <div className="rounded-2xl border border-border/40 bg-gradient-card p-5 shadow-card text-center">
+            <p className="text-sm text-muted-foreground mb-3">Not ready to join? Just get the newsletter — no account needed.</p>
+            <form onSubmit={handleSubscribe} id="subscribe" className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" className="h-11 bg-background/60 border-border/60" />
+              <Button type="submit" disabled={loading} className="h-11 px-6 bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90 shrink-0">
+                {loading ? "…" : done ? "Subscribed ✓" : "Subscribe"}
+              </Button>
+            </form>
+            <p className="text-[11px] text-muted-foreground mt-2">WEI reports, safety signals and early-access invites. No spam — unsubscribe anytime.</p>
+          </div>
         </section>
 
         {/* gentle teaser */}

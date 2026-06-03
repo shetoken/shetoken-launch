@@ -39,7 +39,14 @@ export function StateChoroplethMap({
     const r = wrapRef.current?.getBoundingClientRect();
     return r ? { x: e.clientX - r.left, y: e.clientY - r.top } : { x: 0, y: 0 };
   };
-  const onMove = (e: React.MouseEvent) => { if (hover) setHover({ ...hover, ...pos(e) }); };
+  // Use a functional updater so we always read the LATEST hover content.
+  // A stale closure here would overwrite a freshly-entered state's name/score
+  // with the previously-hovered state's data while keeping the new cursor
+  // position — making tooltips look "mixed up" during continuous movement.
+  const onMove = (e: React.MouseEvent) => {
+    const p = pos(e);
+    setHover((h) => (h ? { ...h, ...p } : h));
+  };
 
   return (
     <div ref={wrapRef} className="relative bg-gradient-card border border-border/40 rounded-2xl p-1 shadow-card" onMouseMove={onMove}>

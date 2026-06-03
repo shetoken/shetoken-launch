@@ -82,13 +82,23 @@ export async function downloadCountryReport(opts: {
   const ensure = (h: number) => { if (y + h > BOTTOM) startPage(); };
 
   const heading = (t: string) => {
-    ensure(34);
-    y += 8;
+    ensure(44);
+    y += 20;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(13);
     doc.setTextColor(...C.gold);
     doc.text(t, M, y);
-    y += 16;
+    y += 17;
+  };
+  // Sub-section label within a section, with consistent breathing room above/below.
+  const subHeading = (t: string) => {
+    ensure(26);
+    y += 10;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9.5);
+    doc.setTextColor(...C.ink);
+    doc.text(t, M, y);
+    y += 6;
   };
   const para = (text: string, color: RGB = C.mut, size = 9.5, italic = false) => {
     const lh = size * 1.42;
@@ -236,9 +246,8 @@ export async function downloadCountryReport(opts: {
 
     // WEI distribution across all countries, with this country marked
     if (distribution.length >= 8) {
-      doc.setFont("helvetica", "bold"); doc.setFontSize(9.5); doc.setTextColor(...C.ink);
-      ensure(110);
-      doc.text(`WEI distribution — ${distribution.length} countries`, M, y + 2); y += 8;
+      subHeading(`WEI distribution — ${distribution.length} countries`);
+      ensure(94);
       const ch = 78, x0 = M, y0 = y;
       panel(doc, x0, y0, CONTENT_W, ch, C.card);
       const bw = 6;
@@ -293,9 +302,7 @@ export async function downloadCountryReport(opts: {
     y += 2 * cellH + 8 + 14;
 
     // Country distribution by tier
-    ensure(20);
-    doc.setFont("helvetica", "bold"); doc.setFontSize(9.5); doc.setTextColor(...C.ink);
-    doc.text("Country Distribution by Tier", M, y); y += 6;
+    subHeading("Country Distribution by Tier");
     const tierMeta: [string, string][] = [
       ["Tier 1 · Preferred", "#10b981"], ["Tier 2 · Acceptable", "#eab308"],
       ["Tier 3 · Caution", "#f97316"], ["Tier 4 · Avoid", "#ef4444"],
@@ -314,12 +321,10 @@ export async function downloadCountryReport(opts: {
       doc.setFont("helvetica", "bold"); doc.setTextColor(...C.ink);
       doc.text(`${count} (${pct.toFixed(1)}%)`, M + CONTENT_W, y, { align: "right" });
     });
-    y += 14;
+    y += 8;
 
     // 8 indexes — country vs global average
-    ensure(20);
-    doc.setFont("helvetica", "bold"); doc.setFontSize(9.5); doc.setTextColor(...C.ink);
-    doc.text(`8 Indexes — ${c.country} vs Global Average`, M, y); y += 8;
+    subHeading(`8 Indexes — ${c.country} vs Global Average`);
     const vX = M + 320, gX = M + 420, dX = M + CONTENT_W;
     ensure(15);
     doc.setFillColor(...C.cardTop); doc.setDrawColor(...C.border); doc.setLineWidth(0.6);

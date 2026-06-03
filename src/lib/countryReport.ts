@@ -303,5 +303,73 @@ export async function downloadCountryReport(opts: {
     y += chartH + 12;
   }
 
+  // ── About the Data ──────────────────────────────────────────────────────
+  ensure(232);
+  heading("About the Data");
+  {
+    const colGap = 16;
+    const colW = (CONTENT_W - 2 * colGap) / 3;
+    const colX = [M, M + colW + colGap, M + 2 * (colW + colGap)];
+    const top = y;
+
+    const colTitle = (x: number, cy: number, title: string) => {
+      doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(...C.ink);
+      let yy = cy;
+      doc.splitTextToSize(title, colW).forEach((ln: string) => { yy += 12; doc.text(ln, x, yy); });
+      return yy + 4;
+    };
+    const colBody = (x: number, cy: number, paras: string[]) => {
+      let yy = cy;
+      doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(...C.mut);
+      paras.forEach((p) => {
+        doc.splitTextToSize(p, colW).forEach((ln: string) => { yy += 10; doc.text(ln, x, yy); });
+        yy += 6;
+      });
+      return yy;
+    };
+
+    // Col 1 — WEI
+    let c1 = colTitle(colX[0], top, "Women's Empowerment Index (WEI)");
+    c1 = colBody(colX[0], c1, [
+      "SHEtoken's native composite index. Scores 105 countries across 8 pillars — Empowerment, Bodily Autonomy, Safety & Justice, Education, Economic, Health, Dignity & Welfare, and Digital & Social — weighted and adjusted by a Violence Penalty. Updated weekly by the SHEtoken AI agent from 100+ multilingual news sources, arXiv, PubMed, and GDELT.",
+    ]);
+
+    // Col 2 — Comparison Indexes (coloured codes)
+    let c2 = colTitle(colX[1], top, "Comparison Indexes");
+    const META: [string, string, string][] = [
+      ["GPI", "#a855f7", "— Gender Poverty Index: female poverty rates & resource access"],
+      ["SVI", "#ef4444", "— Sexual Violence Index: prevalence & legal protection"],
+      ["WADI", "#3b82f6", "— Women & AI Displacement Index: automation risk by gender"],
+      ["WEVI", "#f97316", "— Widow Vulnerability Index: legal & economic widow status"],
+      ["WHI", "#ec4899", "— Women's Health Index: maternal, reproductive & mental health"],
+      ["WVI", "#06b6d4", "— Women's Voice Index: political representation & civic freedom"],
+      ["Compliance", "#10b981", "— Rights Compliance: CEDAW, SDG 5 & treaty adherence"],
+    ];
+    doc.setFontSize(7.5);
+    META.forEach(([code, hex, desc]) => {
+      const lines = doc.splitTextToSize(`${code} ${desc}`, colW);
+      doc.setFont("helvetica", "normal"); doc.setTextColor(...C.mut);
+      lines.forEach((ln: string, i: number) => doc.text(ln, colX[1], c2 + 10 + i * 10));
+      doc.setTextColor(...hexToRgb(hex)); doc.text(code, colX[1], c2 + 10);
+      c2 += lines.length * 10 + 4;
+    });
+
+    // Col 3 — Sources & Methodology
+    let c3 = colTitle(colX[2], top, "Sources & Methodology");
+    c3 = colBody(colX[2], c3, [
+      "Baseline data is derived from UN Women, World Bank Gender Data Portal, WHO, UNICEF, OECD, ILO, and Amnesty International reports (2023–2025).",
+      "Weekly signals are extracted by a local AI classifier (Phi-3.5 Mini + Qwen2.5) from 100+ news sources across 15 languages and supplemented by academic research from arXiv and PubMed.",
+      "All scores are normalised 0–100. Higher = better for women. Scores are indicative and intended for research & awareness, not as financial advice.",
+    ]);
+
+    y = Math.max(c1, c2, c3) + 10;
+    doc.setDrawColor(...C.border); doc.setLineWidth(0.5); doc.line(M, y, PW - M, y); y += 12;
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(...C.mut);
+    doc.text(
+      `Data last updated: ${new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}  ·  WEI v3.0  ·  105 countries scored  ·  Full methodology at shetoken.org/whitepaper`,
+      M, y
+    );
+  }
+
   doc.save(`SHEtoken-WEI-${c.iso_code}-report.pdf`);
 }

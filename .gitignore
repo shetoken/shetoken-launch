@@ -26,3 +26,8 @@ dist-ssr
 
 # Local preview/dev tooling
 .claude/
+
+# Environment files (never commit secrets)
+.env
+.env.*
+!.env.example

@@ -11,11 +11,19 @@ export interface ReportTrendPoint { year: number; score: number; }
 export interface ReportLifeStage { age_band: string; headline: string; cohort?: string; detail?: string; felt?: string; source?: string; }
 export interface ReportMilestone { label: string; reached: number; }
 export interface ReportViolence { score: number; label: string; context: string; }
+export interface ReportState { state: string; safety_justice_score: number; wei_score?: number; }
 
 const TIER_LABEL: Record<number, string> = { 1: "Preferred", 2: "Acceptable", 3: "Caution", 4: "Avoid" };
 const CONTENT_W = PW - 2 * M;
 const BOTTOM = PH - 46;
 const scoreColor = (v: number): RGB => (v >= 70 ? C.emerald : v >= 40 ? C.amber : C.red);
+/** Women's travel-safety advisory tier from a Safety & Justice score (matches the Safety page). */
+const ADVISORY = (s: number): { label: string; color: string } =>
+  s >= 65 ? { label: "Generally safe", color: "#10b981" } :
+  s >= 48 ? { label: "Don't walk alone after dark", color: "#eab308" } :
+  s >= 35 ? { label: "Avoid travelling alone", color: "#f97316" } :
+            { label: "Reconsider non-essential travel", color: "#ef4444" };
+const percentileTier = (v: number) => (v >= 70 ? "Top tier" : v >= 40 ? "Mid tier" : "Bottom tier");
 
 /** Comprehensive Women's Empowerment Index country report — styled to match the website. */
 export async function downloadCountryReport(opts: {
@@ -24,14 +32,15 @@ export async function downloadCountryReport(opts: {
   pillars: ReportPillar[];
   performanceSummary: string;
   violence: ReportViolence;
-  trend: ReportTrendPoint[];
   lifepath: ReportLifeStage[];
   milestones?: ReportMilestone[];
+  states?: ReportState[];
   methodRows?: Record<string, Record<string, unknown> | undefined>;
   provenance?: ProvByCode;
 }) {
-  const { country: c, indexes, pillars, performanceSummary, violence, trend, lifepath } = opts;
+  const { country: c, indexes, pillars, performanceSummary, violence, lifepath } = opts;
   const milestones = opts.milestones ?? [];
+  const states = opts.states ?? [];
   const methodRows = opts.methodRows;
   const provenance = opts.provenance;
   const logo = await getLogoDataUrl();
@@ -122,7 +131,7 @@ export async function downloadCountryReport(opts: {
       ["Population", `${c.population_millions?.toFixed(1)}M`],
       ["Data Year", "2025"],
     ];
-    const rowH = 19, ph = 3 * rowH + 12, colW = CONTENT_W / 2;
+    const rowH = 19, ph = 3 * rowH + rowH + 14, colW = CONTENT_W / 2;
     ensure(ph + 6);
     panel(doc, M, y, CONTENT_W, ph, C.card);
     rows.forEach(([k, v], i) => {
@@ -133,6 +142,14 @@ export async function downloadCountryReport(opts: {
       doc.setFont("helvetica", "bold"); doc.setTextColor(...C.ink);
       doc.text(v, M + colW - 14 + col * colW, yy, { align: "right" });
     });
+    // Full-width safety-status row
+    const adv = ADVISORY(c.safety_justice_score ?? 0);
+    const syy = y + 16 + 3 * rowH;
+    doc.setDrawColor(...C.border); doc.setLineWidth(0.4); doc.line(M + 14, syy - 13, M + CONTENT_W - 14, syy - 13);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(...C.mut);
+    doc.text("Women's safety status", M + 14, syy);
+    doc.setFont("helvetica", "bold"); doc.setTextColor(...hexToRgb(adv.color));
+    doc.text(`${adv.label}  ·  Safety ${(c.safety_justice_score ?? 0).toFixed(0)}/100`, M + CONTENT_W - 14, syy, { align: "right" });
     y += ph + 12;
   }
 
@@ -172,35 +189,37 @@ export async function downloadCountryReport(opts: {
 
   // ── 8 Pillar Breakdown ──────────────────────────────────────────────────
   heading("8 Pillar Breakdown");
-  {
-    const pcW = (CONTENT_W - 16) / 2, pcH = 62;
-    for (let r = 0; r < Math.ceil(pillars.length / 2); r++) {
-      ensure(pcH + 10);
-      const rowY = y;
-      for (let col = 0; col < 2; col++) {
-        const p = pillars[r * 2 + col];
-        if (!p) continue;
-        const x = M + col * (pcW + 16);
-        panel(doc, x, rowY, pcW, pcH, C.card);
-        doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(...C.gold);
-        doc.text(p.label.toUpperCase(), x + 12, rowY + 15);
-        doc.setTextColor(...C.ink); doc.setFontSize(18);
-        doc.text(p.score.toFixed(1), x + 12, rowY + 35);
-        const delta = p.score - p.globalAvg;
-        doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
-        doc.setTextColor(...(delta >= 0 ? C.emerald : C.red));
-        doc.text(`${delta >= 0 ? "+" : ""}${delta.toFixed(0)} vs global avg`, x + pcW - 12, rowY + 16, { align: "right" });
-        // bar
-        const bx = x + 12, bw = pcW - 24, byy = rowY + 40;
-        doc.setFillColor(...C.bg); doc.roundedRect(bx, byy, bw, 6, 2, 2, "F");
-        doc.setFillColor(...scoreColor(p.score));
-        doc.roundedRect(bx, byy, Math.max(2, bw * Math.min(100, p.score) / 100), 6, 2, 2, "F");
-        doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(...C.mut);
-        doc.text(doc.splitTextToSize(p.description, pcW - 24)[0] ?? "", x + 12, rowY + 56);
-      }
-      y = rowY + pcH + 10;
-    }
-  }
+  para("Each pillar vs. the global average, its percentile tier, and the lever that would most improve it.", C.mut, 8.5);
+  pillars.forEach((p) => {
+    const delta = p.score - p.globalAvg;
+    const leverLines = doc.splitTextToSize(`Lever: ${p.improvement}`, CONTENT_W - 24);
+    const cardH = 52 + leverLines.length * 9 + 6;
+    ensure(cardH + 8);
+    panel(doc, M, y, CONTENT_W, cardH, C.card);
+    // label + score
+    doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(...C.gold);
+    doc.text(p.label.toUpperCase(), M + 12, y + 15);
+    doc.setTextColor(...C.ink); doc.setFontSize(13);
+    doc.text(`${p.score.toFixed(1)}/100`, M + CONTENT_W - 12, y + 15, { align: "right" });
+    // bar
+    const bx = M + 12, bw = CONTENT_W - 24, byy = y + 22;
+    doc.setFillColor(...C.bg); doc.roundedRect(bx, byy, bw, 6, 2, 2, "F");
+    doc.setFillColor(...scoreColor(p.score));
+    doc.roundedRect(bx, byy, Math.max(2, bw * Math.min(100, p.score) / 100), 6, 2, 2, "F");
+    // delta · tier · global avg
+    doc.setFont("helvetica", "bold"); doc.setFontSize(7.5); doc.setTextColor(...(delta >= 0 ? C.emerald : C.red));
+    const deltaStr = `${delta >= 0 ? "+" : ""}${delta.toFixed(0)} vs global avg`;
+    doc.text(deltaStr, M + 12, y + 40);
+    doc.setFont("helvetica", "normal"); doc.setTextColor(...C.mut);
+    doc.text(`   ·   ${percentileTier(p.score)}   ·   global avg ${p.globalAvg.toFixed(0)}/100`, M + 12 + doc.getTextWidth(deltaStr), y + 40);
+    // description
+    doc.setFontSize(7.5); doc.setTextColor(...C.mut);
+    doc.text(doc.splitTextToSize(p.description, CONTENT_W - 24)[0] ?? "", M + 12, y + 50);
+    // improvement lever
+    doc.setFont("helvetica", "italic"); doc.setTextColor(...C.gold);
+    leverLines.forEach((ln: string, k: number) => doc.text(ln, M + 12, y + 60 + k * 9));
+    y += cardH + 8;
+  });
 
   // ── Violence Penalty ────────────────────────────────────────────────────
   heading("Violence Penalty");
@@ -287,27 +306,35 @@ export async function downloadCountryReport(opts: {
     }
   }
 
-  // ── WEI Trend ───────────────────────────────────────────────────────────
-  if (trend.length >= 2) {
-    heading(`WEI Trend (${trend[0].year}–${trend[trend.length - 1].year})`);
-    ensure(86);
-    const chartH = 64, chartW = CONTENT_W, x0 = M, y0 = y;
-    panel(doc, x0, y0, chartW, chartH);
-    doc.setDrawColor(...C.border); doc.setLineWidth(0.5);
-    const y50 = y0 + chartH - (50 / 100) * chartH;
-    doc.line(x0, y50, x0 + chartW, y50);
-    doc.setFontSize(6.5); doc.setTextColor(...C.mut); doc.text("50", x0 + 4, y50 - 2);
-    const n = trend.length;
-    const sx = (i: number) => x0 + (i / (n - 1)) * chartW;
-    const sy = (v: number) => y0 + chartH - (Math.min(100, Math.max(0, v)) / 100) * chartH;
-    doc.setDrawColor(...C.gold); doc.setLineWidth(1.6);
-    for (let i = 1; i < n; i++) doc.line(sx(i - 1), sy(trend[i - 1].score), sx(i), sy(trend[i].score));
-    doc.setFillColor(...C.gold);
-    trend.forEach((pt, i) => doc.circle(sx(i), sy(pt.score), 1.6, "F"));
-    doc.setFontSize(6.5); doc.setTextColor(...C.mut);
-    doc.text(`${trend[0].year}`, x0 + 4, y0 + chartH - 4);
-    doc.text(`${trend[trend.length - 1].year}`, x0 + chartW - 4, y0 + chartH - 4, { align: "right" });
-    y += chartH + 12;
+  // ── State-Level Safety (countries with sub-national data) ───────────────
+  if (states.length) {
+    const sorted = [...states].sort((a, b) => (a.safety_justice_score ?? 0) - (b.safety_justice_score ?? 0));
+    heading(`State-Level Safety — ${c.country}`);
+    para("Safety varies widely within a country. States/regions ranked least safe first, by Safety & Justice score.", C.mut, 8.5);
+    // header row
+    ensure(16);
+    doc.setFillColor(...C.cardTop); doc.setDrawColor(...C.border); doc.setLineWidth(0.6);
+    doc.rect(M, y, CONTENT_W, 15, "FD");
+    doc.setFont("helvetica", "bold"); doc.setFontSize(6.6); doc.setTextColor(...C.gold);
+    doc.text("STATE / REGION", M + 6, y + 10);
+    doc.text("SAFETY /100", M + 300, y + 10, { align: "right" });
+    doc.text("ADVISORY", M + CONTENT_W - 6, y + 10, { align: "right" });
+    y += 15;
+    sorted.forEach((st, i) => {
+      const sc = st.safety_justice_score ?? 0;
+      const adv = ADVISORY(sc);
+      const rowH = 13;
+      ensure(rowH);
+      if (i % 2 === 1) { doc.setFillColor(...C.card); doc.rect(M, y, CONTENT_W, rowH, "F"); }
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...C.ink);
+      doc.text(doc.splitTextToSize(st.state, 250)[0] ?? st.state, M + 6, y + 9);
+      doc.setTextColor(...C.mut); doc.text(sc.toFixed(0), M + 300, y + 9, { align: "right" });
+      doc.setFont("helvetica", "bold"); doc.setTextColor(...hexToRgb(adv.color));
+      doc.text(adv.label, M + CONTENT_W - 6, y + 9, { align: "right" });
+      doc.setDrawColor(...C.border); doc.setLineWidth(0.3); doc.line(M, y + rowH, M + CONTENT_W, y + rowH);
+      y += rowH;
+    });
+    y += 8;
   }
 
   // ── How Each Score Is Calculated (per-index methodology) ────────────────

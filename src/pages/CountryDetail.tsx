@@ -252,6 +252,11 @@ const TIER_INFO: Record<number, { label: string; color: string; desc: string }> 
   4: { label: "Avoid / Embargo", color: "text-red-400 border-red-400/30 bg-red-400/10", desc: "Critical rights violations. Not recommended for investment." },
 };
 
+/* Countries with sub-national (state) safety data: ISO → API name */
+const SUBNATIONAL_SAFETY: Record<string, string> = {
+  IND: "india", USA: "usa", BRA: "brazil", NGA: "nigeria", MEX: "mexico", PAK: "pakistan",
+};
+
 export default function CountryDetail() {
   const { iso } = useParams<{ iso: string }>();
   const navigate = useNavigate();
@@ -311,6 +316,15 @@ export default function CountryDetail() {
     staleTime: 30 * 60 * 1000,
   });
 
+  /* ── State-level safety data, for countries that have sub-national scores ── */
+  const subSafetyName = country ? SUBNATIONAL_SAFETY[country.iso_code] : undefined;
+  const { data: statesRes } = useQuery({
+    queryKey: ["wei-states", subSafetyName],
+    queryFn: () => api.wei.states(subSafetyName!),
+    enabled: !!subSafetyName,
+    staleTime: 30 * 60 * 1000,
+  });
+
   /* ── Fetch all 7 external index scores for this country ── */
   const indexQueries = useQueries({
     queries: INDEX_STRIP.map((idx) => ({
@@ -361,8 +375,9 @@ export default function CountryDetail() {
       provenance: provenance?.indexes,
       performanceSummary: performanceBlurb(country),
       violence: { score: country.violence_penalty_score ?? 0, label: vs.label, context: vs.context },
-      trend: chartData.filter((d): d is { year: number; score: number } =>
-        typeof d.year === "number" && typeof d.score === "number"),
+      states: (statesRes?.data ?? []).map((s) => ({
+        state: s.state, safety_justice_score: s.safety_justice_score ?? 0, wei_score: s.wei_score,
+      })),
       lifepath: (lifepath?.stages ?? []).map((s) => ({
         age_band: s.age_band, headline: s.headline, cohort: s.cohort,
         detail: s.detail, felt: s.felt, source: s.source,

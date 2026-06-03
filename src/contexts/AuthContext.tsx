@@ -99,6 +99,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function signOut() {
     await supabase.auth.signOut();
+    // Return to the home page with a clean, logged-out state.
+    window.location.assign("/");
   }
 
   async function signInWithGoogle() {

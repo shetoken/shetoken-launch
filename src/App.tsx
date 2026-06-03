@@ -1,6 +1,9 @@
+import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import { useAuth } from "@/contexts/AuthContext";
+import { trackPageview } from "@/lib/analytics";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,8 +20,16 @@ import Compare from "./pages/Compare.tsx";
 import SHEconomy from "./pages/SHEconomy.tsx";
 import SheClock from "./pages/SheClock.tsx";
 import SafetyHotspots from "./pages/SafetyHotspots.tsx";
-import AdminDownloads from "./pages/AdminDownloads.tsx";
+import AdminConsole from "./pages/AdminConsole.tsx";
 import NotFound from "./pages/NotFound.tsx";
+
+/** Records a page view on every route change (best-effort). */
+function PageTracker() {
+  const { pathname } = useLocation();
+  const { user } = useAuth();
+  useEffect(() => { void trackPageview(pathname, user?.id); }, [pathname, user?.id]);
+  return null;
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,6 +50,7 @@ const App = () => (
           <AuthProvider>
             {/* Global auth modal — openable from any component via useAuth().openAuth() */}
             <AuthModal />
+            <PageTracker />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/dashboard" element={<Dashboard />} />
@@ -51,7 +63,8 @@ const App = () => (
               <Route path="/sheconomy" element={<SHEconomy />} />
               <Route path="/she-clock" element={<SheClock />} />
               <Route path="/safety" element={<SafetyHotspots />} />
-              <Route path="/admin/downloads" element={<AdminDownloads />} />
+              <Route path="/admin" element={<AdminConsole />} />
+              <Route path="/admin/downloads" element={<Navigate to="/admin?tab=downloads" replace />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

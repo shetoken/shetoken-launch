@@ -105,8 +105,8 @@ export function Nav() {
                 </DropdownMenuItem>
                 {profile?.is_admin && (
                   <DropdownMenuItem asChild>
-                    <Link to="/admin/downloads" className="cursor-pointer">
-                      <Download className="h-4 w-4 mr-2" /> Downloads (admin)
+                    <Link to="/admin" className="cursor-pointer">
+                      <Download className="h-4 w-4 mr-2" /> Admin Console
                     </Link>
                   </DropdownMenuItem>
                 )}

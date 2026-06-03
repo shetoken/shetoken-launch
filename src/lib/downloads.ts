@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
  * Best-effort coarse geolocation (country / city / region) from the visitor's IP.
  * Tries a couple of free, CORS-enabled, key-less services. Never throws.
  */
-async function coarseGeo(): Promise<{ country?: string; city?: string; region?: string }> {
+export async function coarseGeo(): Promise<{ country?: string; city?: string; region?: string }> {
   // ipwho.is — free, CORS, no key
   try {
     const r = await fetch("https://ipwho.is/", { signal: AbortSignal.timeout(4000) });

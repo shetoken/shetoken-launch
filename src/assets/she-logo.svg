@@ -27,8 +27,8 @@
   <circle cx="256" cy="256" r="212" fill="none" stroke="url(#rose)" stroke-width="4"/>
   <circle cx="256" cy="256" r="150" fill="none" stroke="url(#rose)" stroke-width="4"/>
 
-  <path id="topArc" d="M 34 256 A 222 222 0 0 1 478 256" fill="none"/>
-  <text font-family="Georgia, 'Times New Roman', serif" font-size="46" letter-spacing="10"
+  <path id="topArc" d="M 38 256 A 218 218 0 0 1 474 256" fill="none"/>
+  <text font-family="Georgia, 'Times New Roman', serif" font-size="31" letter-spacing="6"
         fill="url(#gold)" text-anchor="middle">
     <textPath href="#topArc" startOffset="50%">SHE  TOKEN</textPath>
   </text>

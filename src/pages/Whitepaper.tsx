@@ -34,6 +34,17 @@ const ORG_TYPES = [
   "Other",
 ];
 
+const USE_CASES = [
+  "ESG / impact-investment due diligence",
+  "Academic or research use",
+  "Policy / government analysis",
+  "Journalism / media",
+  "NGO / programme design",
+  "Corporate / CSR strategy",
+  "Personal interest",
+  "Other",
+];
+
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return <h2 className="text-2xl font-bold mt-10 mb-4 text-gradient">{children}</h2>;
 }
@@ -256,6 +267,17 @@ export default function Whitepaper() {
     setErrors((e) => ({ ...e, [field]: undefined }));
   }
 
+  // "Intended use" = a category dropdown + an optional free-text detail,
+  // combined into the single intended_use field.
+  const [useCat, setUseCat] = useState("");
+  const [useDetail, setUseDetail] = useState("");
+  function setIntendedUse(cat: string, detail: string) {
+    setUseCat(cat);
+    setUseDetail(detail);
+    const combined = [cat, detail.trim()].filter(Boolean).join(" — ");
+    handleChange("intended_use", combined);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const result = formSchema.safeParse(form);
@@ -435,16 +457,25 @@ export default function Whitepaper() {
                   {errors.country && <p className="text-red-400 text-xs mt-1">{errors.country}</p>}
                 </div>
 
-                {/* Intended Use */}
+                {/* Intended Use — category dropdown + optional detail */}
                 <div className="sm:col-span-2">
                   <label className="text-sm font-medium mb-1.5 block">How do you intend to use this information? *</label>
-                  <textarea
-                    placeholder="e.g. Due diligence for ESG investment, academic research, policy analysis…"
-                    value={form.intended_use ?? ""}
-                    onChange={(e) => handleChange("intended_use", e.target.value)}
-                    rows={3}
-                    className="w-full rounded-md border border-border/60 bg-background/60 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
-                  />
+                  <div className="grid sm:grid-cols-2 gap-2">
+                    <select
+                      value={useCat}
+                      onChange={(e) => setIntendedUse(e.target.value, useDetail)}
+                      className="w-full h-10 rounded-md border border-border/60 bg-background/60 px-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                    >
+                      <option value="">Select a use…</option>
+                      {USE_CASES.map((u) => <option key={u} value={u}>{u}</option>)}
+                    </select>
+                    <Input
+                      placeholder="Add a detail (optional)"
+                      value={useDetail}
+                      onChange={(e) => setIntendedUse(useCat, e.target.value)}
+                      className="bg-background/60 border-border/60"
+                    />
+                  </div>
                   {errors.intended_use && <p className="text-red-400 text-xs mt-1">{errors.intended_use}</p>}
                 </div>
 

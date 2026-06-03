@@ -8,13 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { parseCsv } from "@/lib/csv";
+import { AdminLibrary } from "@/components/AdminLibrary";
 import { Lock, Globe, Users, Download, Activity, Clock, FileText, Eye, BarChart3, Heart, Upload, Plus, HeartHandshake, CheckCircle2, GraduationCap, Award, Star, Trash2 } from "lucide-react";
 
 interface EventRow { session_id: string | null; user_id: string | null; path: string | null; country: string | null; city: string | null; created_at: string; }
 interface ProfileRow { id: string; email: string | null; display_name: string | null; region: string | null; created_at: string; }
 interface DownloadRow { id: string; doc_type: string; doc_ref: string | null; user_email: string | null; country: string | null; city: string | null; created_at: string; }
 
-const TABS = ["overview", "users", "engagement", "downloads", "partners", "drives", "ngos", "initiatives", "marketplace"] as const;
+const TABS = ["overview", "users", "engagement", "downloads", "partners", "drives", "ngos", "initiatives", "marketplace", "library"] as const;
 type Tab = typeof TABS[number];
 const tabLabel = (t: Tab) => (t === "ngos" ? "NGOs" : t);
 interface NgoRow { id: string; name: string; country: string | null; city: string | null; focus_area: string | null; website: string | null; contact_email: string | null; verified: boolean | null; created_at: string; }
@@ -666,6 +667,9 @@ export default function AdminConsole() {
                     </div>
                   </div>
                 )}
+
+                {/* LIBRARY — admin document & media store */}
+                {tab === "library" && <AdminLibrary />}
               </>
             )}
           </>

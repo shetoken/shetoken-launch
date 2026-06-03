@@ -14,10 +14,11 @@ interface EventRow { session_id: string | null; user_id: string | null; path: st
 interface ProfileRow { id: string; email: string | null; display_name: string | null; region: string | null; created_at: string; }
 interface DownloadRow { id: string; doc_type: string; doc_ref: string | null; user_email: string | null; country: string | null; city: string | null; created_at: string; }
 
-const TABS = ["overview", "users", "engagement", "downloads", "ngos"] as const;
+const TABS = ["overview", "users", "engagement", "downloads", "ngos", "marketplace"] as const;
 type Tab = typeof TABS[number];
 const tabLabel = (t: Tab) => (t === "ngos" ? "NGOs" : t);
 interface NgoRow { id: string; name: string; country: string | null; city: string | null; focus_area: string | null; website: string | null; contact_email: string | null; verified: boolean | null; created_at: string; }
+interface BizRow { id: string; name: string; owner_name: string | null; category: string | null; country: string | null; city: string | null; status: string; created_at: string; }
 
 const tally = <T,>(arr: T[], key: (r: T) => string | null | undefined): [string, number][] => {
   const m = new Map<string, number>();
@@ -87,8 +88,20 @@ export default function AdminConsole() {
       if (error) throw error; return (data ?? []) as NgoRow[];
     },
   });
+  const biz = useQuery({
+    queryKey: ["admin-businesses"], enabled: isAdmin, staleTime: 30_000,
+    queryFn: async (): Promise<BizRow[]> => {
+      const { data, error } = await supabase.from("she_businesses").select("id,name,owner_name,category,country,city,status,created_at").order("created_at", { ascending: false }).limit(2000);
+      if (error) throw error; return (data ?? []) as BizRow[];
+    },
+  });
 
-  const ev = events.data ?? [], pf = profiles.data ?? [], dl = downloads.data ?? [], ng = ngos.data ?? [];
+  const ev = events.data ?? [], pf = profiles.data ?? [], dl = downloads.data ?? [], ng = ngos.data ?? [], bz = biz.data ?? [];
+
+  async function setBizStatus(id: string, status: string) {
+    const { error } = await supabase.from("she_businesses").update({ status, verified: status === "approved" }).eq("id", id);
+    if (error) toast.error("Could not update."); else { toast.success(`Marked ${status}.`); biz.refetch(); }
+  }
 
   const [ngoForm, setNgoForm] = useState({ name: "", country: "", city: "", focus_area: "", website: "", contact_email: "" });
   const [savingNgo, setSavingNgo] = useState(false);
@@ -360,6 +373,41 @@ export default function AdminConsole() {
                             </tr>
                           ))}
                           {ng.length === 0 && <tr><td colSpan={6} className="px-4 py-6 text-center text-muted-foreground">No NGOs yet — add one or import a CSV.</td></tr>}
+                        </tbody>
+                      </table></div>
+                    </div>
+                  </div>
+                )}
+
+                {/* MARKETPLACE moderation */}
+                {tab === "marketplace" && (
+                  <div className="space-y-6">
+                    <div className="grid sm:grid-cols-3 gap-4">
+                      <StatCard icon={<Heart className="h-3.5 w-3.5" />} label="Total shops" value={bz.length} />
+                      <StatCard icon={<Clock className="h-3.5 w-3.5" />} label="Pending review" value={bz.filter((b) => b.status === "pending").length} />
+                      <StatCard icon={<Globe className="h-3.5 w-3.5" />} label="Approved" value={bz.filter((b) => b.status === "approved").length} />
+                    </div>
+                    <div className="rounded-2xl border border-border/40 bg-gradient-card shadow-card overflow-hidden">
+                      <div className="px-5 py-3 border-b border-border/40"><h3 className="text-sm font-semibold">Women-owned shops</h3></div>
+                      <div className="overflow-x-auto"><table className="w-full text-xs">
+                        <thead className="bg-card/60 text-muted-foreground"><tr>{["Shop", "Owner", "Category", "Location", "Status", "Action"].map((h) => <th key={h} className="text-left px-4 py-2 font-medium">{h}</th>)}</tr></thead>
+                        <tbody>
+                          {bz.map((b) => (
+                            <tr key={b.id} className="border-t border-border/20">
+                              <td className="px-4 py-2 font-medium">{b.name}</td>
+                              <td className="px-4 py-2">{b.owner_name ?? "—"}</td>
+                              <td className="px-4 py-2">{b.category ?? "—"}</td>
+                              <td className="px-4 py-2">{[b.city, b.country].filter(Boolean).join(", ") || "—"}</td>
+                              <td className="px-4 py-2"><span className={b.status === "approved" ? "text-emerald-400" : b.status === "rejected" ? "text-red-400" : "text-yellow-400"}>{b.status}</span></td>
+                              <td className="px-4 py-2">
+                                <div className="flex gap-1.5">
+                                  {b.status !== "approved" && <button onClick={() => setBizStatus(b.id, "approved")} className="text-[11px] text-emerald-400 border border-emerald-400/40 hover:bg-emerald-400/10 rounded px-2 py-0.5">Approve</button>}
+                                  {b.status !== "rejected" && <button onClick={() => setBizStatus(b.id, "rejected")} className="text-[11px] text-red-400 border border-red-400/40 hover:bg-red-400/10 rounded px-2 py-0.5">Reject</button>}
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                          {bz.length === 0 && <tr><td colSpan={6} className="px-4 py-6 text-center text-muted-foreground">No shops yet.</td></tr>}
                         </tbody>
                       </table></div>
                     </div>

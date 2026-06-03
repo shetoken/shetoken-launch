@@ -21,6 +21,7 @@ import SHEconomy from "./pages/SHEconomy.tsx";
 import SheClock from "./pages/SheClock.tsx";
 import SafetyHotspots from "./pages/SafetyHotspots.tsx";
 import AdminConsole from "./pages/AdminConsole.tsx";
+import Marketplace from "./pages/Marketplace.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 /** Records a page view on every route change (best-effort). */
@@ -60,7 +61,9 @@ const App = () => (
               <Route path="/community" element={<Community />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/compare" element={<Compare />} />
-              <Route path="/sheconomy" element={<SHEconomy />} />
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/simulator" element={<SHEconomy />} />
+              <Route path="/sheconomy" element={<Navigate to="/simulator" replace />} />
               <Route path="/she-clock" element={<SheClock />} />
               <Route path="/safety" element={<SafetyHotspots />} />
               <Route path="/admin" element={<AdminConsole />} />

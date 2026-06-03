@@ -120,16 +120,16 @@ export default function SHEconomy() {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="SHEconomy — Risk-Free Crypto Trading Simulator"
-        description="Practice investing in crypto risk-free with SHEconomy. Trade $SHE, Bitcoin and Ethereum with virtual money and compete against SHE-Bot. A financial-literacy game from SHEtoken."
-        url="https://www.shetoken.org/sheconomy"
+        title="$SHE Simulator — Risk-Free Crypto Trading Simulator"
+        description="Practice investing in crypto risk-free with the $SHE Simulator. Trade $SHE, Bitcoin and Ethereum with virtual money and compete against SHE-Bot. A financial-literacy game from SHEtoken."
+        url="https://www.shetoken.org/simulator"
       />
       <Nav />
       <main className="pt-24 pb-20 container max-w-5xl">
         {/* Header */}
         <div className="mb-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/30 bg-accent/10 text-accent text-xs mb-3">
-            <Coins className="h-3 w-3" /> SHEconomy · Practice Trading Floor
+            <Coins className="h-3 w-3" /> $SHE Simulator · Practice Trading Floor
           </div>
           <h1 className="text-3xl md:text-4xl font-bold">Learn to invest — risk-free.</h1>
           <p className="text-sm text-muted-foreground mt-2 max-w-2xl">

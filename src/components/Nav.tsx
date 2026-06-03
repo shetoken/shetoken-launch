@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowRight, BarChart2, Clock, Coins, Download, FileText, LogOut, ShieldAlert, User, Users } from "lucide-react";
+import { ArrowRight, BarChart2, Clock, Download, FileText, LogOut, ShieldAlert, Store, User, Users } from "lucide-react";
 import logo from "@/assets/she-logo.svg";
 
 function UserAvatar({ name, email }: { name: string | null; email: string | null }) {
@@ -30,7 +30,7 @@ export function Nav() {
     { to: "/why",       label: "Why $SHE" },
     { to: "/community", label: "Community", icon: <Users className="h-3.5 w-3.5" /> },
     { to: "/dashboard", label: "Live Data", icon: <BarChart2 className="h-3.5 w-3.5" /> },
-    { to: "/sheconomy", label: "SHEconomy", icon: <Coins className="h-3.5 w-3.5" /> },
+    { to: "/marketplace", label: "Marketplace", icon: <Store className="h-3.5 w-3.5" /> },
     { to: "/she-clock", label: "She-Clock", icon: <Clock className="h-3.5 w-3.5" /> },
     { to: "/safety", label: "Safety", icon: <ShieldAlert className="h-3.5 w-3.5" /> },
   ];

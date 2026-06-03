@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { SEO } from "@/lib/seo";
 import { Nav } from "@/components/Nav";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, TrendingUp, Shield, Globe2, Coins, AlertCircle, CheckCircle, XCircle } from "lucide-react";
+import { ArrowRight, TrendingUp, Shield, Globe2, Coins, AlertCircle, CheckCircle, XCircle, Activity, Store, Users } from "lucide-react";
 
 function Stat({ value, label, source, href }: { value: string; label: string; source: string; href?: string }) {
   return (
@@ -43,8 +43,8 @@ export default function Why() {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Why the World Needs Impact Tokens — $SHE"
-        description="Aid doesn't scale. ESG scores aren't transparent. Traditional crypto has no mission. SHEtoken is the third way — a token whose value is mathematically tied to real-world women's empowerment outcomes."
+        title="Why $SHE — The First Asset Backed by the Advancement of Women"
+        description="SHEtoken makes women's empowerment measurable, investable and economically active. One system, four parts: the Live Data index (the backing), the $SHE token (outcome-priced capital), SHEconomy (the women-owned marketplace) and SHE Community (the people)."
         url="https://www.shetoken.org/why"
       />
       <Nav />
@@ -65,6 +65,7 @@ export default function Why() {
             SHEtoken is a third way — a financial instrument mathematically tied to real outcomes,
             built from independent data, auditable by anyone.
           </p>
+          <p className="text-base md:text-lg font-semibold text-foreground mt-6">The first asset backed by the advancement of women.</p>
         </section>
 
         {/* THE NUMBERS */}
@@ -176,6 +177,38 @@ export default function Why() {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* THE SYSTEM — FOUR-PILLAR FLYWHEEL */}
+        <section className="py-20 container max-w-5xl">
+          <div className="text-center mb-4">
+            <p className="text-xs uppercase tracking-widest text-accent mb-3">The system</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Measure. Invest. Build. <span className="text-gradient">Belong.</span></h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              $SHE isn't backed by gold — it's backed by the <strong className="text-foreground">measured advancement of women</strong>.
+              Four parts, one flywheel: as the community and the women's economy create real progress, the index rises — and the asset rises with it.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-5 mt-12">
+            {[
+              { n: "01", verb: "Measure", icon: Activity, title: "Live Data — the Women's Empowerment Index", desc: "You can't value what you can't measure. The WEI scores women's empowerment across 105 countries, updated weekly from UN, WHO and World Bank data. This is what $SHE is backed by.", to: "/dashboard", cta: "Explore the data" },
+              { n: "02", verb: "Invest", icon: Coins, title: "$SHE — outcome-priced capital", desc: "When women's lives improve, $SHE is minted; when they deteriorate, it's burned. Progress for women becomes financial value — so investing in women becomes investing in $SHE.", to: "/simulator", cta: "Try the $SHE Simulator" },
+              { n: "03", verb: "Build", icon: Store, title: "SHEconomy — the women-owned marketplace", desc: "Real women-owned businesses, real income. The marketplace is where empowerment is produced — turning the index from a number into livelihoods.", to: "/marketplace", cta: "Visit SHEconomy" },
+              { n: "04", verb: "Belong", icon: Users, title: "SHE Community — the people behind the data", desc: "The verified women who power it all — sellers, members, supporters. A private, women-first space built for support and solidarity.", to: "/community", cta: "Join SHE Community" },
+            ].map((p) => (
+              <div key={p.verb} className="bg-gradient-card border border-border/40 rounded-2xl p-6 shadow-card flex flex-col">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-accent mb-2">{p.n} · {p.verb}</span>
+                <div className="flex items-center gap-2 mb-2"><p.icon className="h-6 w-6 text-accent shrink-0" /><h3 className="text-lg font-bold leading-tight">{p.title}</h3></div>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">{p.desc}</p>
+                <Link to={p.to} className="inline-flex items-center gap-1 text-sm text-accent hover:gap-1.5 transition-all">{p.cta} <ArrowRight className="h-4 w-4" /></Link>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-8 text-center text-sm text-muted-foreground bg-card/30 border border-border/40 rounded-2xl p-5 leading-relaxed">
+            <span className="text-accent font-semibold">The flywheel:</span> SHE Community + SHEconomy create real economic progress for women → the WEI rises → $SHE (backed by the WEI) appreciates → capital flows back into women's businesses and programs → progress compounds.
           </div>
         </section>
 

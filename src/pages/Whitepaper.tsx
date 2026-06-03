@@ -8,7 +8,8 @@ import { Nav } from "@/components/Nav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Lock, CheckCircle, ExternalLink, FileText } from "lucide-react";
+import { Lock, CheckCircle, ExternalLink, FileText, Download } from "lucide-react";
+import { downloadWhitepaper } from "@/lib/whitepaperPdf";
 
 const formSchema = z.object({
   full_name: z.string().min(2, "Please enter your full name"),
@@ -355,7 +356,21 @@ export default function Whitepaper() {
 
         {/* GATE or CONTENT */}
         {unlocked ? (
-          <WhitepaperContent />
+          <>
+            <div className="flex items-center justify-between gap-3 flex-wrap mb-6 p-4 rounded-2xl border border-accent/20 bg-accent/5">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <CheckCircle className="h-4 w-4 text-emerald-400 shrink-0" />
+                Full access unlocked. Read below or download a copy to keep and share.
+              </div>
+              <Button
+                onClick={() => { downloadWhitepaper(); toast.success("Downloading the SHEtoken whitepaper…"); }}
+                className="bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90"
+              >
+                <Download className="h-4 w-4 mr-1.5" /> Download PDF
+              </Button>
+            </div>
+            <WhitepaperContent />
+          </>
         ) : (
           <div className="bg-gradient-card border border-border/40 rounded-2xl shadow-card overflow-hidden">
             {/* Locked preview */}

@@ -1,6 +1,6 @@
 import { jsPDF } from "jspdf";
 import type { CountryWEI } from "@/lib/api";
-import { PW, M, C, hexToRgb, paintBackground, headerBand, pageFooter, panel, getLogoDataUrl } from "@/lib/pdfTheme";
+import { PW, M, C, hexToRgb, paintBackground, headerBand, pageFooter, panel, getLogoDataUrl, coverPage } from "@/lib/pdfTheme";
 
 export interface ReportIndexTile { code: string; label: string; accent: string; score: number | null; }
 export interface ReportTrendPoint { year: number; score: number; }
@@ -32,6 +32,19 @@ export async function downloadCountryReport(opts: {
   const logo = await getLogoDataUrl();
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   let y = 0;
+
+  // ── Cover sheet ─────────────────────────────────────────────────────────
+  coverPage(doc, {
+    logo,
+    eyebrow: "WOMEN'S EMPOWERMENT INDEX · COUNTRY REPORT",
+    title: "SHEtoken",
+    subtitle: "The world's first data-backed gender-accountability token",
+    about: [
+      "SHEtoken ($SHE) ties the value of a cryptocurrency to real-world progress for women, governed by the Women's Empowerment Index (WEI) — a composite 0–100 score across 8 weighted pillars for 105 countries, built from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data.",
+      `This report summarises the WEI profile for ${c.country}: pillar breakdown, the eight sub-indices, trend and life-path outlook.`,
+    ],
+  });
+  doc.addPage();
 
   // ── Dark page + branded header band ─────────────────────────────────────
   paintBackground(doc);

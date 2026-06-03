@@ -115,9 +115,80 @@ export function headerBand(doc: jsPDF, subtitle: string, logo?: string | null): 
     PW - M, 30, { align: "right" }
   );
   doc.setTextColor(...C.gold);
-  doc.text("shetoken.org", PW - M, 47, { align: "right" });
+  doc.text("shetoken.org  ·  contact@shetoken.org", PW - M, 47, { align: "right" });
 
   return 64;
+}
+
+/**
+ * Full-page branded cover sheet: big coin, eyebrow, title, subtitle, a short
+ * "what SHEtoken is" hero paragraph, and a partnering / contact card.
+ * Drawn on the document's current page; the caller adds the next page after.
+ */
+export function coverPage(
+  doc: jsPDF,
+  opts: { logo?: string | null; eyebrow: string; title: string; subtitle: string; about: string[] }
+) {
+  paintBackground(doc);
+  const cx = PW / 2;
+
+  // big centered coin
+  const L = 150;
+  if (opts.logo) { try { doc.addImage(opts.logo, "PNG", cx - L / 2, 96, L, L); } catch { /* ignore */ } }
+
+  let y = 96 + L + 40;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9.5);
+  doc.setTextColor(...C.gold);
+  doc.text(opts.eyebrow, cx, y, { align: "center", charSpace: 2 });
+
+  y += 34;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(42);
+  doc.setTextColor(...C.ink);
+  doc.text(opts.title, cx, y, { align: "center" });
+
+  y += 24;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(13);
+  doc.setTextColor(...C.gold);
+  doc.text(opts.subtitle, cx, y, { align: "center" });
+
+  y += 26;
+  doc.setDrawColor(...C.gold);
+  doc.setLineWidth(1);
+  doc.line(cx - 70, y, cx + 70, y);
+
+  y += 28;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10.5);
+  doc.setTextColor(...C.mut);
+  const wrapW = PW - 220;
+  opts.about.forEach((p) => {
+    const lines = doc.splitTextToSize(p, wrapW);
+    lines.forEach((ln: string) => { doc.text(ln, cx, y, { align: "center" }); y += 16.5; });
+    y += 9;
+  });
+
+  // partnering / contact card near the bottom
+  const cardW = PW - 2 * (M + 50);
+  const by = PH - 150;
+  panel(doc, M + 50, by, cardW, 66, C.card);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11.5);
+  doc.setTextColor(...C.gold);
+  doc.text("Interested in partnering?", cx, by + 22, { align: "center" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(...C.mut);
+  doc.text("We welcome impact investors, NGOs, government partners, and Web3 infrastructure providers.", cx, by + 39, { align: "center" });
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10.5);
+  doc.setTextColor(...C.ink);
+  doc.text("contact@shetoken.org", cx, by + 56, { align: "center" });
+
+  pageFooter(doc, "© 2026 SHE Foundation · Informational only — not financial advice.", "shetoken.org");
 }
 
 /** Hairline footer at the bottom of the page. */

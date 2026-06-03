@@ -1,5 +1,5 @@
 import { jsPDF } from "jspdf";
-import { PW, PH, M, C, type RGB, paintBackground, headerBand, pageFooter, panel, drawTable, getLogoDataUrl } from "@/lib/pdfTheme";
+import { PW, PH, M, C, type RGB, paintBackground, headerBand, pageFooter, panel, drawTable, getLogoDataUrl, coverPage } from "@/lib/pdfTheme";
 
 const SUBTITLE = "Whitepaper · v2.0 · May 2026 · $SHE";
 const CONTENT_W = PW - 2 * M;
@@ -9,14 +9,12 @@ const BOTTOM = PH - 46; // keep clear of the footer
 export async function downloadWhitepaper() {
   const logo = await getLogoDataUrl();
   const doc = new jsPDF({ unit: "pt", format: "a4" });
-  let page = 1;
+  let page = 0;
   let y = 0;
 
-  const startPage = (first = false) => {
-    if (!first) {
-      doc.addPage();
-      page += 1;
-    }
+  const startPage = () => {
+    doc.addPage();
+    page += 1;
     paintBackground(doc);
     headerBand(doc, SUBTITLE, logo);
     pageFooter(doc, "© 2026 SHE Foundation · Informational only — not financial advice.", `shetoken.org  ·  p.${page}`);
@@ -94,26 +92,20 @@ export async function downloadWhitepaper() {
   };
 
   // ════════════════════════════════════════════════════════════════════════
-  startPage(true);
+  // Cover sheet
+  coverPage(doc, {
+    logo,
+    eyebrow: "WHITEPAPER · VERSION 2.0 · MAY 2026 · $SHE",
+    title: "SHEtoken",
+    subtitle: "The world's first data-backed gender-accountability token",
+    about: [
+      "SHEtoken ($SHE) ties the value of a cryptocurrency to real-world progress for women. Its supply is governed by the Women's Empowerment Index (WEI) — a composite 0–100 score across 8 weighted pillars for 105 countries, built from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data.",
+      "When women's conditions improve, tokens are minted; when they deteriorate, tokens are burned. The mission: to make the advancement of women's rights financially measurable, publicly transparent, and globally investable.",
+    ],
+  });
 
-  // Title block
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(26);
-  doc.setTextColor(...C.ink);
-  doc.text("The SHEtoken Whitepaper", M, y + 12);
-  y += 30;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10.5);
-  doc.setTextColor(...C.mut);
-  para("The world's first data-backed gender-accountability token — methodology, tokenomics, and investment framework.", C.mut, { size: 10.5, gap: 10 });
-
-  // Version banner
-  panel(doc, M, y, CONTENT_W, 26, C.cardTop);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.setTextColor(...C.gold);
-  doc.text("SHEtoken Whitepaper · Version 2.0 · May 2026 · Ticker: $SHE", M + 12, y + 17);
-  y += 38;
+  // Content begins on the next page
+  startPage();
 
   heading("", "Abstract");
   para(
@@ -270,21 +262,6 @@ export async function downloadWhitepaper() {
     "qualified financial advisor before making any investment decisions.",
     C.mut, { size: 8.5 }
   );
-
-  // Partner CTA
-  ensure(60);
-  y += 6;
-  panel(doc, M, y, CONTENT_W, 48, C.card);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.setTextColor(...C.gold);
-  doc.text("Interested in partnering?", PW / 2, y + 18, { align: "center" });
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8.5);
-  doc.setTextColor(...C.mut);
-  doc.text("We welcome impact investors, NGOs, government partners, and Web3 infrastructure providers.", PW / 2, y + 31, { align: "center" });
-  doc.setTextColor(...C.ink);
-  doc.text("contact@shetoken.org", PW / 2, y + 42, { align: "center" });
 
   doc.save("SHEtoken-Whitepaper-v2.0.pdf");
 }

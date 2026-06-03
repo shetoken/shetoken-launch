@@ -1,6 +1,9 @@
 {
   "rewrites": [
     { "source": "/country/:iso", "destination": "/country/:iso.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
+  "crons": [
+    { "path": "/api/pull-feeds", "schedule": "0 7 * * *" }
   ]
 }

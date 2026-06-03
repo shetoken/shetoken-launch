@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import {
   Folder, FolderPlus, Upload, Trash2, Download, ExternalLink, Link2, Plus,
   FileText, Image as ImageIcon, Video, FileSpreadsheet, File as FileIcon, Instagram,
+  Rss, Inbox, Circle, CheckCheck,
 } from "lucide-react";
 
 const BUCKET = "library";
@@ -15,10 +16,14 @@ interface FolderRow { id: string; name: string; created_at: string; }
 interface ItemRow {
   id: string; folder_id: string | null; kind: string; title: string;
   file_path: string | null; mime: string | null; size: number | null;
-  url: string | null; source_type: string | null; notes: string | null; created_at: string;
+  url: string | null; source_type: string | null; notes: string | null;
+  feed_url: string | null; tags: string[] | null; status: string | null; last_checked: string | null;
+  created_at: string;
 }
+interface FeedRow { id: string; source_id: string | null; title: string | null; link: string | null; summary: string | null; published_at: string | null; seen: boolean; created_at: string; }
 
 const SOURCE_TYPES = ["Instagram", "X / Twitter", "Facebook", "TikTok", "YouTube", "LinkedIn", "News article", "Website", "Other"];
+const splitTags = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean);
 
 function fmtSize(n: number | null) {
   if (!n) return "";
@@ -42,7 +47,8 @@ export function AdminLibrary() {
   const [newFolder, setNewFolder] = useState("");
   const [uploading, setUploading] = useState(false);
   const [linkOpen, setLinkOpen] = useState(false);
-  const [link, setLink] = useState({ url: "", title: "", source_type: "Instagram", notes: "" });
+  const [link, setLink] = useState({ url: "", title: "", source_type: "Instagram", notes: "", feed_url: "", tags: "", status: "active" });
+  const [view, setView] = useState<"lib" | "inbox">("lib");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const folders = useQuery({
@@ -59,6 +65,26 @@ export function AdminLibrary() {
       if (error) throw error; return (data ?? []) as ItemRow[];
     },
   });
+  const feed = useQuery({
+    queryKey: ["library-feed"], staleTime: 15_000,
+    queryFn: async (): Promise<FeedRow[]> => {
+      const { data, error } = await supabase.from("she_feed_items").select("*").order("published_at", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false }).limit(500);
+      if (error) throw error; return (data ?? []) as FeedRow[];
+    },
+  });
+  const unseen = (feed.data ?? []).filter((f) => !f.seen).length;
+  const srcName = (id: string | null) => (items.data ?? []).find((i) => i.id === id)?.title ?? "Source";
+
+  async function markSeen(id: string, seen: boolean) {
+    const { error } = await supabase.from("she_feed_items").update({ seen }).eq("id", id);
+    if (!error) feed.refetch();
+  }
+  async function markAllSeen() {
+    const ids = (feed.data ?? []).filter((f) => !f.seen).map((f) => f.id);
+    if (!ids.length) return;
+    const { error } = await supabase.from("she_feed_items").update({ seen: true }).in("id", ids);
+    if (error) toast.error("Could not update."); else feed.refetch();
+  }
 
   const activeFolder = folderId === "ALL" ? null : folderId;
   const shown = useMemo(() => {
@@ -111,8 +137,9 @@ export function AdminLibrary() {
       folder_id: activeFolder, kind: "link",
       title: link.title.trim() || link.url.trim(), url: link.url.trim(),
       source_type: link.source_type, notes: link.notes.trim() || null,
+      feed_url: link.feed_url.trim() || null, tags: splitTags(link.tags), status: link.status,
     });
-    if (error) toast.error("Could not save link."); else { toast.success("Link saved."); setLink({ url: "", title: "", source_type: "Instagram", notes: "" }); setLinkOpen(false); items.refetch(); }
+    if (error) toast.error("Could not save link."); else { toast.success("Link saved."); setLink({ url: "", title: "", source_type: "Instagram", notes: "", feed_url: "", tags: "", status: "active" }); setLinkOpen(false); items.refetch(); }
   }
 
   async function openFile(item: ItemRow) {
@@ -156,6 +183,17 @@ export function AdminLibrary() {
 
       {/* Content */}
       <div className="lg:col-span-3 space-y-4">
+        {/* View toggle */}
+        <div className="flex gap-1 border-b border-border/40">
+          <button onClick={() => setView("lib")} className={`px-3 py-1.5 text-sm border-b-2 -mb-px ${view === "lib" ? "border-accent text-foreground font-medium" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
+            Files &amp; links
+          </button>
+          <button onClick={() => setView("inbox")} className={`px-3 py-1.5 text-sm border-b-2 -mb-px flex items-center gap-1.5 ${view === "inbox" ? "border-accent text-foreground font-medium" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
+            <Inbox className="h-3.5 w-3.5" /> Inbox {unseen > 0 && <span className="text-[10px] bg-accent/20 text-accent rounded-full px-1.5">{unseen}</span>}
+          </button>
+        </div>
+
+      {view === "lib" && (<>
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-2">
           <input ref={fileRef} type="file" multiple onChange={onFiles} className="hidden" />
@@ -176,6 +214,14 @@ export function AdminLibrary() {
             <Input value={link.title} onChange={(e) => setLink({ ...link, title: e.target.value })} placeholder="Title / label" className="bg-background/60 border-border/60" />
             <select value={link.source_type} onChange={(e) => setLink({ ...link, source_type: e.target.value })} className="h-10 rounded-md border border-border/60 bg-background/60 px-3 text-sm">
               {SOURCE_TYPES.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+            <div className="sm:col-span-2">
+              <Input value={link.feed_url} onChange={(e) => setLink({ ...link, feed_url: e.target.value })} placeholder="RSS / Atom feed URL (optional — enables auto-tracking)" className="bg-background/60 border-border/60" />
+              <p className="text-[10px] text-muted-foreground mt-1">News sites have an RSS link; YouTube channels: youtube.com/feeds/videos.xml?channel_id=… ; whole-web: make a Google Alert and choose “Deliver to → RSS feed”.</p>
+            </div>
+            <Input value={link.tags} onChange={(e) => setLink({ ...link, tags: e.target.value })} placeholder="Tags (comma-separated)" className="bg-background/60 border-border/60" />
+            <select value={link.status} onChange={(e) => setLink({ ...link, status: e.target.value })} className="h-10 rounded-md border border-border/60 bg-background/60 px-3 text-sm">
+              <option value="active">Active</option><option value="watch">Watch</option><option value="archived">Archived</option>
             </select>
             <Input value={link.notes} onChange={(e) => setLink({ ...link, notes: e.target.value })} placeholder="Notes (optional)" className="bg-background/60 border-border/60 sm:col-span-2" />
             <div className="sm:col-span-2"><Button type="submit" className="bg-gradient-primary text-primary-foreground border-0"><Plus className="mr-2 h-4 w-4" /> Save link</Button></div>
@@ -201,7 +247,10 @@ export function AdminLibrary() {
                       {isInsta ? <Instagram className="h-5 w-5 text-pink-400 shrink-0 mt-0.5" /> : <Link2 className="h-5 w-5 text-accent shrink-0 mt-0.5" />}
                       <div className="min-w-0 flex-1">
                         <a href={href} target="_blank" rel="noreferrer" className="text-sm font-semibold hover:underline flex items-center gap-1 truncate">{item.title} <ExternalLink className="h-3 w-3 shrink-0" /></a>
-                        <div className="text-[10px] text-muted-foreground">{item.source_type}</div>
+                        <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+                          {item.source_type}
+                          {item.feed_url && <span className="text-accent flex items-center gap-0.5"><Rss className="h-2.5 w-2.5" /> tracked</span>}
+                        </div>
                         {item.notes && <div className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{item.notes}</div>}
                       </div>
                       <button onClick={() => deleteItem(item)} className="opacity-0 group-hover:opacity-100 text-red-400" title="Remove"><Trash2 className="h-3.5 w-3.5" /></button>
@@ -228,6 +277,46 @@ export function AdminLibrary() {
             })}
           </div>
         )}
+      </>)}
+
+      {view === "inbox" && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">Latest items pulled from your RSS / Google-Alert / YouTube feeds. Updated daily.</p>
+            {unseen > 0 && <Button size="sm" variant="outline" onClick={markAllSeen} className="border-border/60 bg-card/40 text-xs"><CheckCheck className="mr-1.5 h-3.5 w-3.5" /> Mark all read</Button>}
+          </div>
+          {feed.isLoading ? (
+            <p className="text-muted-foreground text-sm">Loading…</p>
+          ) : (feed.data ?? []).length === 0 ? (
+            <div className="rounded-2xl border border-border/40 bg-gradient-card p-10 text-center shadow-card text-sm text-muted-foreground">
+              No feed items yet. Add a link with an RSS feed URL, then the daily job (or a manual run) fills this inbox.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {(feed.data ?? []).map((f) => {
+                const href = f.link ? (f.link.startsWith("http") ? f.link : `https://${f.link}`) : null;
+                return (
+                  <div key={f.id} className={`rounded-xl border p-3 shadow-card flex items-start gap-3 ${f.seen ? "border-border/30 bg-card/20 opacity-70" : "border-accent/30 bg-card/40"}`}>
+                    <button onClick={() => markSeen(f.id, !f.seen)} className="mt-0.5 shrink-0" title={f.seen ? "Mark unread" : "Mark read"}>
+                      {f.seen ? <Circle className="h-3.5 w-3.5 text-muted-foreground" /> : <Circle className="h-3.5 w-3.5 text-accent fill-accent" />}
+                    </button>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[10px] font-medium text-accent flex items-center gap-1"><Rss className="h-2.5 w-2.5" /> {srcName(f.source_id)}</span>
+                        {f.published_at && <span className="text-[10px] text-muted-foreground">{new Date(f.published_at).toLocaleString()}</span>}
+                      </div>
+                      {href
+                        ? <a href={href} target="_blank" rel="noreferrer" onClick={() => markSeen(f.id, true)} className="text-sm font-semibold hover:underline flex items-center gap-1">{f.title || href} <ExternalLink className="h-3 w-3 shrink-0" /></a>
+                        : <span className="text-sm font-semibold">{f.title}</span>}
+                      {f.summary && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{f.summary}</p>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
       </div>
     </div>
   );

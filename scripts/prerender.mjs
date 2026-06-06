@@ -188,6 +188,25 @@ function simplePage(template, { path, title, desc, bodyHtml }) {
     .replace(/<div id="root"><\/div>/, snapshot);
 }
 
+function whyBackShePage(template) {
+  return simplePage(template, {
+    path: "/why-back-she",
+    title: "Why Back SHE — Funders, ESG Investors & Token Participants | SHEtoken",
+    desc: "Why capital should back the SHE Score: independent, continuous, comparable measurement of women's outcomes across 105 countries, with a financial instrument attached. Three audiences — funders, impact/ESG investors, and token participants (mechanics only).",
+    bodyHtml:
+      `<h1>Back the measurement that moves capital toward women.</h1>` +
+      `<p>The SHE Score is independent, continuous, comparable measurement of women's outcomes — across 105 countries and sub-nationally.</p>` +
+      `<h2>Funders & Philanthropy</h2>` +
+      `<p>One grant funds the instrument that makes every program measurable. The SHE Score is the measurement layer all programs can be held to; because it is wired to a financial instrument, philanthropic capital recruits market capital behind the same outcomes.</p>` +
+      `<h2>Impact & ESG Investors</h2>` +
+      `<p>The metric gender-lens investing has been missing: a quantified, third-party-sourced, continuously tracked measure built from UN Women, World Bank, WHO and UNODC data. SHE Score Impact Bonds let capital take a position on a specific government's programs succeeding, with verified data deciding the outcome.</p>` +
+      `<h2>Token Participants (mechanics only)</h2>` +
+      `<p>When the published SHE Score rises by one point, 10,000,000 SHE units are minted to the Impact Fund; when it falls by one point, 10,000,000 units are burned from the reserve. Holders can lock SHE for a fixed term and accrue rewards from a defined pool; holders hold governance rights over Impact Fund allocations, methodology ratification and emergency protocols. Impact Bonds settle on the verified change in a jurisdiction's SHE Score.</p>` +
+      `<p><strong>Risk disclosure:</strong> volatility; data lag; regulatory; early stage; oracle risk. Informational only — not financial or legal advice. The protocol is pre-launch and no token has been issued.</p>` +
+      `<p>Right now, the only people financially exposed to women's progress are women. Everyone else participates morally. $SHE exists to change which side capital is on.</p>`,
+  });
+}
+
 function whitepaperPage(template) {
   return simplePage(template, {
     path: "/whitepaper",
@@ -294,9 +313,10 @@ async function main() {
   try {
     writeFileSync(resolve(DIST, "whitepaper.html"), whitepaperPage(template), "utf8");
     writeFileSync(resolve(DIST, "dashboard.html"), dashboardPage(template), "utf8");
-    console.log("[prerender] wrote → dist/whitepaper.html, dist/dashboard.html");
+    writeFileSync(resolve(DIST, "why-back-she.html"), whyBackShePage(template), "utf8");
+    console.log("[prerender] wrote → dist/whitepaper.html, dist/dashboard.html, dist/why-back-she.html");
   } catch (e) {
-    console.warn(`[prerender] whitepaper/dashboard snapshot failed (${e})`);
+    console.warn(`[prerender] whitepaper/dashboard/why-back-she snapshot failed (${e})`);
   }
 
   let countries = [];

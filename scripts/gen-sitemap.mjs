@@ -14,6 +14,7 @@ const today = new Date().toISOString().slice(0, 10);
 const STATIC = [
   { loc: "/", priority: "1.0", freq: "daily" },
   { loc: "/dashboard", priority: "0.9", freq: "daily" },
+  { loc: "/why-back-she", priority: "0.8", freq: "monthly" },
   { loc: "/index-landscape", priority: "0.7", freq: "monthly" },
   { loc: "/methodology", priority: "0.7", freq: "monthly" },
   { loc: "/whitepaper", priority: "0.7", freq: "monthly" },

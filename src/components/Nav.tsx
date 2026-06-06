@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowRight, BarChart2, Download, FileText, FlaskConical, Layers, LogOut, User, Users } from "lucide-react";
+import { ArrowRight, BarChart2, Download, FileText, FlaskConical, HeartHandshake, Layers, LogOut, User, Users } from "lucide-react";
 import logo from "@/assets/she-logo.svg";
 
 function UserAvatar({ name, email }: { name: string | null; email: string | null }) {
@@ -27,6 +27,7 @@ export function Nav() {
   const { user, profile, signOut, openAuth } = useAuth();
 
   const links = [
+    { to: "/why-back-she", label: "Why Back SHE", icon: <HeartHandshake className="h-3.5 w-3.5" /> },
     { to: "/dashboard", label: "Dashboard", icon: <BarChart2 className="h-3.5 w-3.5" /> },
     { to: "/index-landscape", label: "The Landscape", icon: <Layers className="h-3.5 w-3.5" /> },
     { to: "/methodology", label: "Methodology", icon: <FlaskConical className="h-3.5 w-3.5" /> },

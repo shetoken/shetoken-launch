@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { SEO } from "@/lib/seo";
 import { Nav } from "@/components/Nav";
+import { BackSheCTA } from "@/components/BackSheCTA";
 import { HeartHandshake, LineChart, Cog, ShieldAlert, ArrowRight } from "lucide-react";
 
 /* Phase 3 Task 1 — investor-facing page. Three audience sections.
@@ -57,8 +58,8 @@ export default function WhyBackShe() {
               changes what the market measures.
             </p>
           </div>
-          {/* Segmented CTA (Task 3) is placed below this section, preselecting "Fund the index". */}
         </section>
+        <div className="mb-12"><BackSheCTA source="why-back-she" preselect="funders" /></div>
 
         {/* Section 2 — Impact & ESG Investors */}
         <section className="mb-12 rounded-2xl border border-border/40 bg-gradient-card p-6 md:p-8 shadow-card">
@@ -80,8 +81,8 @@ export default function WhyBackShe() {
               the issuer's narrative.
             </p>
           </div>
-          {/* Segmented CTA (Task 3) is placed below this section, preselecting "Register a program or government". */}
         </section>
+        <div className="mb-12"><BackSheCTA source="why-back-she" preselect="registrants" /></div>
 
         {/* Section 3 — Token Participants (MECHANICS ONLY) */}
         <section className="mb-12 rounded-2xl border border-border/40 bg-card/40 p-6 md:p-8 shadow-card">
@@ -141,6 +142,7 @@ export default function WhyBackShe() {
             </p>
           </div>
         </section>
+        <div className="mb-12"><BackSheCTA source="why-back-she" preselect="token_interest" /></div>
 
         {/* Page close */}
         <div className="rounded-2xl border border-accent/25 bg-accent/5 p-6 md:p-8 text-center">

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { SEO } from "@/lib/seo";
 import { Nav } from "@/components/Nav";
 import { PHASE_LABEL } from "@/config/site";
+import { BackSheCTA } from "@/components/BackSheCTA";
 import { AlertTriangle, RotateCcw, Sparkles, Flame } from "lucide-react";
 
 /* ── Published v2 formula + documented constants ──────────────────────────
@@ -167,6 +168,11 @@ export default function Simulator() {
         <div className="mt-6 flex flex-wrap gap-4 text-sm">
           <Link to="/methodology" className="text-accent hover:underline">Read the methodology →</Link>
           <Link to="/why-back-she" className="text-accent hover:underline">Why back the SHE Score →</Link>
+        </div>
+
+        {/* Segmented CTA (Phase 3 Task 3) */}
+        <div className="mt-10">
+          <BackSheCTA source="simulator" />
         </div>
       </main>
     </div>

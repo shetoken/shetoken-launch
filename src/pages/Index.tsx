@@ -12,8 +12,8 @@ import {
   Globe2, Coins, Flame, Lock, HandHeart, Wifi, Sprout, Users,
   Star, Building2, Gem, ExternalLink
 } from "lucide-react";
+import { BackSheCTA } from "@/components/BackSheCTA";
 import heroBg from "@/assets/hero-bg.jpg";
-import logo from "@/assets/she-logo.svg";
 
 const emailSchema = z.string().trim().email({ message: "Enter a valid email" }).max(255);
 
@@ -256,6 +256,13 @@ const Index = () => {
               <Link to="/dashboard">See live scores for 105 countries <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
           </div>
+        </div>
+      </section>
+
+      {/* BACK THE SHE SCORE — segmented CTA (Phase 3 Task 3) */}
+      <section className="py-12">
+        <div className="container max-w-4xl">
+          <BackSheCTA source="homepage" />
         </div>
       </section>
 

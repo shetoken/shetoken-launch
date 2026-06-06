@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { api, isApiFallback, CountryWEI, IndexScore } from "@/lib/api";
 import { ApiVersionSelect, ShadowBanner } from "@/components/ApiVersionSelect";
 import { useApiVersion } from "@/config/apiVersion";
+import { applyVersionList, meanScore, PILLAR_WEIGHT_TABLE } from "@/lib/scoring";
 import { SEO } from "@/lib/seo";
 import { Nav } from "@/components/Nav";
 import { Button } from "@/components/ui/button";
@@ -173,19 +174,19 @@ const INDEX_CONFIGS: IndexConfig[] = [
 ];
 
 /* SHE Score methodology shown when the v3 SHADOW preview is selected — the five
-   LIVE pillars plus the four candidate pillars in validation (weights TBD). */
+   five live pillars REWEIGHTED, plus four candidate pillars still in validation. */
 const V3_SHE_FORMULA: { label: string; weight?: string }[] = [
-  { label: "Empowerment",                 weight: "×25% · LIVE" },
-  { label: "Education & Literacy",        weight: "×20% · LIVE" },
-  { label: "Economic Inclusion",          weight: "×20% · LIVE" },
+  { label: "Empowerment",                 weight: "×20% · was 25%" },
+  { label: "Education & Literacy",        weight: "×15% · was 20%" },
+  { label: "Economic Inclusion",          weight: "×25% · was 20%" },
   { label: "Health & Survival",           weight: "×15% · LIVE" },
-  { label: "− Safety (Crime Penalty)",    weight: "×20% · LIVE" },
+  { label: "− Safety (Crime Penalty)",    weight: "×25% · was 20%" },
   { label: "Bodily Autonomy",             weight: "TBD · v3" },
   { label: "Dignity & Welfare",           weight: "TBD · v3" },
   { label: "Digital & Social",            weight: "TBD · v3" },
   { label: "Safety & Justice (expanded)", weight: "TBD · v3" },
 ];
-const V3_SHE_NOTE = "v3 SHADOW expansion: the five LIVE pillars plus four candidate pillars in validation (weights TBD on activation). The v3 pillars do not yet affect published scores or $SHE supply mechanics.";
+const V3_SHE_NOTE = "v3 SHADOW reweights the five live pillars — heavier Economic Inclusion and Safety (Crime Penalty), lighter Empowerment and Education — so scores shift versus v2. It uses only existing pillar data; nothing is imputed. The four candidate pillars are still gathering data and contribute nothing yet. v3 does not affect published scores or $SHE supply mechanics.";
 
 /* ── Distribution curve types ── */
 interface DistPillar { label: string; color: string; width: number; }
@@ -277,11 +278,15 @@ export default function Dashboard() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const countries = countriesRes?.data ?? [];
-  // A3 — graceful fallback when the live data API is unavailable.
-  const apiDown = !loadingCountries && countries.length === 0;
-  const usingBaseline = !loadingCountries && countries.length > 0 && isApiFallback();
   const { version } = useApiVersion();
+  const rawCountries = countriesRes?.data ?? [];
+  // v3 (SHADOW) reweights the five live pillars; v2 is the published score.
+  const countries = applyVersionList(rawCountries, version);
+  // A3 — graceful fallback when the live data API is unavailable.
+  const apiDown = !loadingCountries && rawCountries.length === 0;
+  const usingBaseline = !loadingCountries && rawCountries.length > 0 && isApiFallback();
+  // Global SHE Score average reflects the selected version.
+  const globalShe = version === "v3" ? meanScore(countries) : (summary?.global_she_score ?? null);
 
   /* ── Lazy-loaded non-SHE Score index data ── */
   const { data: activeIndexData, isLoading: loadingIndex } = useQuery({
@@ -411,9 +416,15 @@ export default function Dashboard() {
   /* ── Selected country's score for the active index ── */
   const selectedIndexScore = useMemo<number | null>(() => {
     if (!selectedCountry) return null;
-    if (isWEI) return selectedCountry.she_score;
+    if (isWEI) return (countries.find((c) => c.iso_code === selectedCountry.iso_code) ?? selectedCountry).she_score;
     return scoreOverride?.get(selectedCountry.iso_code) ?? null;
-  }, [selectedCountry, isWEI, scoreOverride]);
+  }, [selectedCountry, isWEI, scoreOverride, countries]);
+
+  /* Selected country re-resolved against the versioned list so its SHE Score
+     reflects v2/v3 (pillar fields are version-independent). */
+  const selectedDisplay = selectedCountry
+    ? (countries.find((c) => c.iso_code === selectedCountry.iso_code) ?? selectedCountry)
+    : null;
 
   /* ── Side list for the map view (country ranked tiles) ── */
   const sideListItems = useMemo<SideListItem[]>(() => {
@@ -451,7 +462,7 @@ export default function Dashboard() {
       (q) => q.data as IndexScore[] | undefined
     );
     return {
-      "SHE Score":      summary?.global_she_score          ?? null,
+      "SHE Score":      globalShe,
       GPI:        summary?.gpi_global_avg            ?? avgScore(gpiD,  "gpi_score"),
       SVI:        summary?.svi_global_avg            ?? avgScore(sviD,  "svi_score"),
       WADI:       summary?.wadi_global_avg           ?? avgScore(wadiD, "wadi_score"),
@@ -460,7 +471,7 @@ export default function Dashboard() {
       WVI:        summary?.wvi_global_avg            ?? avgScore(wviD,  "wvi_score"),
       Compliance: summary?.compliance_global_avg     ?? avgScore(compD, "compliance_score"),
     };
-  }, [summary, allIndexQueries]);
+  }, [summary, allIndexQueries, globalShe]);
 
   /* ── Tier distribution data for the bar chart ── */
   const tierDistData = useMemo(() => [
@@ -538,9 +549,12 @@ export default function Dashboard() {
                 {loadingSummary ? (
                   <span className="text-muted-foreground">loading…</span>
                 ) : (
-                  <span className="text-gradient">{summary?.global_she_score}</span>
+                  <span className={version === "v3" ? "text-amber-300" : "text-gradient"}>{globalShe ?? "…"}</span>
                 )}
                 <span className="text-muted-foreground font-normal text-xl ml-2">/ 100</span>
+                {version === "v3" && (
+                  <span className="ml-2 align-middle text-[10px] font-bold uppercase tracking-widest text-amber-300 border border-amber-400/40 rounded px-1.5 py-0.5">v3 shadow</span>
+                )}
               </h1>
               <p className="text-xs text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
                 SHE Score ·{" "}
@@ -923,8 +937,8 @@ export default function Dashboard() {
 
                       {/* SHE Score */}
                       <div className="flex items-baseline gap-2 mb-1">
-                        <span className={`font-bold text-gradient leading-none ${!isWEI ? "text-3xl" : "text-5xl"}`}>
-                          {selectedCountry.she_score.toFixed(1)}
+                        <span className={`font-bold leading-none ${!isWEI ? "text-3xl" : "text-5xl"} ${version === "v3" ? "text-amber-300" : "text-gradient"}`}>
+                          {(selectedDisplay ?? selectedCountry).she_score.toFixed(1)}
                         </span>
                         <span className="text-muted-foreground text-sm">
                           {!isWEI ? "SHE Score" : ""} / 100

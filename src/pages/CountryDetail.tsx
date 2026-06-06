@@ -3,6 +3,9 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { api, CountryWEI } from "@/lib/api";
 import { Nav } from "@/components/Nav";
+import { ApiVersionSelect } from "@/components/ApiVersionSelect";
+import { useApiVersion } from "@/config/apiVersion";
+import { v3Score, PILLAR_WEIGHT_TABLE } from "@/lib/scoring";
 import { CountrySEO } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +14,7 @@ import {
 } from "recharts";
 import {
   ArrowLeft, ArrowRight, BarChart2, TrendingUp, TrendingDown,
-  Info, AlertCircle, Users, ShieldAlert, ExternalLink, Cpu, Download, Clock
+  Info, AlertCircle, Users, ShieldAlert, ExternalLink, Cpu, Download, Clock, FlaskConical
 } from "lucide-react";
 import { PerformanceSource } from "@/lib/api";
 import { MethodologyPanel } from "@/components/MethodologyPanel";
@@ -32,6 +35,93 @@ function ExtTile({ name, value, meta }: { name: string; value: string; meta: str
       <div className="text-lg font-bold text-foreground">{value}</div>
       <div className="text-[10px] text-muted-foreground mt-1">{meta}</div>
     </div>
+  );
+}
+
+/* v3 SHADOW preview panel (Track C).
+   Computes the v3 reweighted score LOCALLY from the country's real pillar values
+   (no API dependency — always works, online or on the baseline fallback). v3
+   reweights the five live pillars; it never affects published scores or $SHE
+   supply. Rendered in a distinct dashed/amber "shadow" style. */
+function V3PreviewPanel({ country }: { country: CountryWEI }) {
+  const official = country.she_score ?? 0;
+  const shadow = v3Score(country);
+  const divergence = shadow - official;
+  const near = Math.abs(divergence) < 0.05;
+
+  return (
+    <section className="mb-10">
+      <div className="rounded-2xl border-2 border-dashed border-amber-400/40 bg-amber-400/[0.03] p-5 shadow-card">
+        <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
+          <div className="flex items-center gap-2">
+            <FlaskConical className="h-4 w-4 text-amber-300" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-amber-300">
+              The Lab · v3 shadow preview
+            </span>
+          </div>
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30">
+            SHADOW — does not affect published scores or $SHE supply
+          </span>
+        </div>
+
+        <div className="grid sm:grid-cols-[auto_auto_1fr] gap-x-8 gap-y-3 items-center mb-4">
+          <div>
+            <div className="text-2xl font-bold text-foreground/80 font-mono">{official.toFixed(1)}</div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">v2 official / 100</div>
+          </div>
+          <div>
+            {/* shadow score: outlined/ghosted amber */}
+            <div className="text-4xl font-bold text-amber-300/90 font-mono border border-amber-400/30 rounded-lg px-3 py-1 inline-block">
+              {shadow.toFixed(1)}
+            </div>
+            <div className="text-[11px] text-muted-foreground mt-1">v3 shadow / 100</div>
+          </div>
+          <div className="text-sm text-muted-foreground">
+            {near ? (
+              <p>
+                <span className="text-foreground font-medium">≈ identical here (±0.0).</span>{" "}
+                {country.country}'s pillar mix happens to be neutral to v3's reweighting.
+              </p>
+            ) : (
+              <p>
+                <span className="text-foreground font-medium">{divergence > 0 ? "+" : ""}{divergence.toFixed(1)} vs. v2</span>{" "}
+                — v3 weights Economic Inclusion and the Safety (Crime) penalty more heavily, and Empowerment /
+                Education less.
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* weight comparison */}
+        <div className="rounded-xl border border-amber-400/15 bg-background/30 p-3 mb-3">
+          <table className="w-full text-xs">
+            <thead className="text-muted-foreground"><tr>
+              <th className="text-left font-medium py-1">Pillar</th>
+              <th className="text-right font-medium py-1">v2</th>
+              <th className="text-right font-medium py-1">v3</th>
+            </tr></thead>
+            <tbody>
+              {PILLAR_WEIGHT_TABLE.map((p) => {
+                const changed = p.v2 !== p.v3;
+                return (
+                  <tr key={p.label} className="border-t border-border/20">
+                    <td className="py-1 text-foreground/80">{p.label}</td>
+                    <td className="py-1 text-right font-mono text-muted-foreground">{(p.v2 * 100).toFixed(0)}%</td>
+                    <td className={`py-1 text-right font-mono ${changed ? "text-amber-300 font-semibold" : "text-muted-foreground"}`}>{(p.v3 * 100).toFixed(0)}%</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="text-[11px] text-muted-foreground/70">
+          v3 reweights the same five real pillars — no new data, nothing imputed. Four further candidate pillars are
+          still gathering data and contribute nothing yet.{" "}
+          <Link to="/lab" className="text-amber-300 hover:underline">See how v3 is validated in the Lab →</Link>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -277,6 +367,7 @@ export default function CountryDetail() {
   const { iso } = useParams<{ iso: string }>();
   const navigate = useNavigate();
   const { user, openAuth } = useAuth();
+  const { version } = useApiVersion();
   const [openMethod, setOpenMethod] = useState<string | null>(null);
   const [lifeModalOpen, setLifeModalOpen] = useState(false);
 
@@ -464,7 +555,8 @@ export default function CountryDetail() {
           >
             <ArrowLeft className="h-4 w-4" /> Back
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <ApiVersionSelect />
             <button
               onClick={handleDownloadPdf}
               disabled={!country}
@@ -510,8 +602,15 @@ export default function CountryDetail() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-7xl font-bold text-gradient">{country.she_score?.toFixed(1)}</div>
-                  <div className="text-muted-foreground text-sm">SHE Score / 100</div>
+                  <div className={`text-7xl font-bold ${version === "v3" ? "text-amber-300" : "text-gradient"}`}>
+                    {(version === "v3" ? v3Score(country) : (country.she_score ?? 0)).toFixed(1)}
+                  </div>
+                  <div className="text-muted-foreground text-sm">
+                    SHE Score / 100{version === "v3" && <span className="ml-1 text-amber-300 font-semibold">· v3 shadow</span>}
+                  </div>
+                  {version === "v3" && (
+                    <div className="text-[11px] text-muted-foreground/70 mt-0.5">v2 official: {country.she_score?.toFixed(1)}</div>
+                  )}
                   {country.weekly_delta !== 0 && (
                     <div className={`flex items-center justify-end gap-1 mt-1 text-sm ${country.weekly_delta > 0 ? "text-emerald-400" : "text-red-400"}`}>
                       {country.weekly_delta > 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
@@ -528,6 +627,9 @@ export default function CountryDetail() {
                 </div>
               )}
             </section>
+
+            {/* v3 SHADOW preview (Track C) — shown only in v3 mode; computed locally, never affects published scores */}
+            {country && version === "v3" && <V3PreviewPanel country={country} />}
 
             {/* SAFETY + LIVE CLOCK cross-links */}
             {country && (

@@ -216,9 +216,31 @@ export interface MethodologyProvenance {
   indexes: Record<string, Record<string, IndicatorProvenance>>;
 }
 
+/* v3 SHADOW preview (Track C). Consumes ONLY the shadow endpoint — never falls
+   back to v2 data. Throws if unavailable so the Lab/country panel can show their
+   own "shadow data unavailable" state. */
+export interface V3PreviewRow {
+  iso_code: string; country: string; version: string; status: string; score: number;
+  coverage?: { used: number; weighted: number; missing: string[] };
+  candidate_pillars_with_data?: Record<string, boolean>;
+}
+export interface V3PreviewResponse {
+  version: string; status: string; notice: string; count: number;
+  pillar_coverage: Record<string, string>; data: V3PreviewRow[];
+}
+
 export const api = {
   summary: () => apiFetch<Summary>('/v1/summary').then(normSummary)
     .catch(async () => { markFallback(); const f = await loadFallback(); return normSummary(f.summary); }),
+
+  // SHADOW only — no v2 fallback (Track C C4).
+  v3Preview: () => apiFetch<V3PreviewResponse>('/api/v3-preview/scores'),
+  v3PreviewCountry: (iso: string) =>
+    apiFetch<V3PreviewResponse>('/api/v3-preview/scores').then((r) => {
+      const row = (r.data ?? []).find((x) => x.iso_code?.toUpperCase() === iso.toUpperCase());
+      if (!row) throw new Error("no shadow score");
+      return { row, pillar_coverage: r.pillar_coverage, notice: r.notice };
+    }),
 
   wei: {
     countries: (limit = 105) =>

@@ -179,6 +179,13 @@ export default function SheClock() {
       <main className="pt-24 pb-20 container max-w-5xl">
         <div className="flex justify-end mb-3"><ApiVersionSelect /></div>
         {version === "v3" && <ShadowBanner />}
+        {version === "v3" && (
+          <div className="mb-6 rounded-xl border border-amber-400/20 bg-amber-400/[0.04] px-4 py-2.5 text-xs text-muted-foreground">
+            Note: the She-Clock shows <span className="text-foreground">vital statistics</span> (births, marriages, violence, maternal loss) — raw counts that are identical in v2 and v3.
+            v3's reweighting only affects the composite SHE Score; see it on the{" "}
+            <Link to="/dashboard" className="text-amber-300 hover:underline">Dashboard</Link>.
+          </div>
+        )}
         {vitalDown && (
           <div className="mb-6 rounded-2xl border border-amber-400/30 bg-amber-400/5 p-4 text-sm text-muted-foreground text-center">
             <span className="font-semibold text-foreground">Live vital-statistics data is temporarily unavailable</span> while the data API is upgraded.

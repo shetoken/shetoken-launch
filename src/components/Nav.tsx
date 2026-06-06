@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useApiVersion } from "@/config/apiVersion";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowRight, BarChart2, BookOpen, Download, FileText, FlaskConical, Layers, LogOut, Sparkles, User, Users } from "lucide-react";
+import { ArrowRight, BarChart2, BookOpen, ChevronDown, Download, FileText, FlaskConical, Layers, LogOut, Sparkles, User, Users } from "lucide-react";
 import logo from "@/assets/she-logo.svg";
 
 function UserAvatar({ name, email }: { name: string | null; email: string | null }) {
@@ -25,16 +26,19 @@ function UserAvatar({ name, email }: { name: string | null; email: string | null
 export function Nav() {
   const { pathname } = useLocation();
   const { user, profile, signOut, openAuth } = useAuth();
+  const { version } = useApiVersion();
 
-  const links = [
+  // The Lab lives under the Methodology dropdown (both are methodology pages).
+  const linksBefore = [
     { to: "/why", label: "Why $SHE", icon: <Sparkles className="h-3.5 w-3.5" /> },
     { to: "/dashboard", label: "Dashboard", icon: <BarChart2 className="h-3.5 w-3.5" /> },
-    { to: "/lab", label: "The Lab", icon: <FlaskConical className="h-3.5 w-3.5" /> },
     { to: "/index-landscape", label: "The Landscape", icon: <Layers className="h-3.5 w-3.5" /> },
-    { to: "/methodology", label: "Methodology", icon: <BookOpen className="h-3.5 w-3.5" /> },
+  ];
+  const linksAfter = [
     { to: "/whitepaper", label: "Whitepaper", icon: <FileText className="h-3.5 w-3.5" /> },
     { to: "/community", label: "Community", icon: <Users className="h-3.5 w-3.5" /> },
   ];
+  const methodologyActive = pathname === "/methodology" || pathname === "/lab";
 
   // Show "Work with us" only on home page nav
   const showWorkWithUs = pathname === "/";
@@ -50,7 +54,52 @@ export function Nav() {
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-          {links.map(({ to, label, icon }) => (
+          {linksBefore.map(({ to, label, icon }) => (
+            <Link
+              key={to}
+              to={to}
+              className={`hover:text-foreground transition-smooth flex items-center gap-1 ${
+                pathname === to ? "text-foreground font-medium" : ""
+              }`}
+            >
+              {icon} {label}
+            </Link>
+          ))}
+
+          {/* Methodology ▾ — groups Methodology + The Lab */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className={`hover:text-foreground transition-smooth flex items-center gap-1 outline-none ${
+                  methodologyActive ? "text-foreground font-medium" : ""
+                } ${version === "v3" ? "text-amber-300 hover:text-amber-200" : ""}`}
+                title={version === "v3" ? "v3 shadow scores are active — managed in The Lab" : undefined}
+              >
+                <BookOpen className="h-3.5 w-3.5" /> Methodology
+                {version === "v3" && (
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" aria-label="v3 shadow active" />
+                )}
+                <ChevronDown className="h-3 w-3 opacity-60" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56 bg-card border-border/60">
+              <DropdownMenuItem asChild>
+                <Link to="/methodology" className="cursor-pointer">
+                  <BookOpen className="h-4 w-4 mr-2" /> Methodology
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/lab" className="cursor-pointer">
+                  <FlaskConical className="h-4 w-4 mr-2" /> The Lab
+                  {version === "v3" && (
+                    <span className="ml-auto text-[10px] font-bold text-amber-300 border border-amber-400/40 rounded px-1.5 py-0.5">v3</span>
+                  )}
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {linksAfter.map(({ to, label, icon }) => (
             <Link
               key={to}
               to={to}

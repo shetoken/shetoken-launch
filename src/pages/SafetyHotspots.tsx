@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api, type CountryWEI, type IndexScore } from "@/lib/api";
 import { SEO } from "@/lib/seo";
@@ -160,6 +161,14 @@ export default function SafetyHotspots() {
       <main className="pt-24 pb-20 container max-w-7xl">
         <div className="flex justify-end mb-3"><ApiVersionSelect /></div>
         {version === "v3" && <ShadowBanner />}
+        {version === "v3" && (
+          <div className="mb-5 rounded-xl border border-amber-400/20 bg-amber-400/[0.04] px-4 py-2.5 text-xs text-muted-foreground">
+            Note: this advisory map uses the underlying <span className="text-foreground">safety data</span>, which is identical in v2 and v3.
+            v3 only changes how heavily safety is <em>weighted in the overall SHE Score</em> (Crime Penalty ×20%→×25%) — see that effect on the{" "}
+            <Link to="/dashboard" className="text-amber-300 hover:underline">Dashboard</Link> or any{" "}
+            <Link to="/lab" className="text-amber-300 hover:underline">country page</Link>.
+          </div>
+        )}
         <div className="mb-5">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/30 bg-accent/10 text-accent text-xs mb-3">
             <ShieldAlert className="h-3 w-3" /> Women's Travel Safety Advisory

@@ -37,16 +37,44 @@ export default function Methodology() {
           {methodology.formula}
         </div>
 
-        {/* Pillars */}
-        <h2 className="text-2xl font-bold mb-4">The eight pillars</h2>
-        <div className="space-y-2.5 mb-10">
-          {methodology.pillars.map((p) => (
+        {/* LIVE pillars */}
+        <div className="flex items-center gap-2 mb-4">
+          <h2 className="text-2xl font-bold">The five LIVE pillars</h2>
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-400/15 text-emerald-400 border border-emerald-400/30">LIVE · v2</span>
+        </div>
+        <div className="space-y-2.5 mb-6">
+          {methodology.livePillars.map((p) => (
             <div key={p.name} className="flex items-start gap-3 rounded-xl border border-border/40 bg-gradient-card p-4 shadow-card">
               <span className="text-sm font-bold text-accent shrink-0 w-12 text-right tabular-nums">{p.weight}</span>
               <div>
                 <div className="font-semibold text-sm">{p.name}</div>
                 <div className="text-xs text-muted-foreground">{p.desc}</div>
               </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Activation disclaimer */}
+        <div className="rounded-2xl border border-border/40 bg-card/40 p-4 mb-10 text-xs text-muted-foreground leading-relaxed">
+          {methodology.activationDisclaimer}
+        </div>
+
+        {/* v3 Expansion Pillars */}
+        <div className="flex items-center gap-2 mb-4">
+          <h2 className="text-2xl font-bold">v3 Expansion Pillars</h2>
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-400 border border-amber-400/30">IN VALIDATION</span>
+        </div>
+        <p className="text-sm text-muted-foreground mb-4">Part of the full framework, but not yet affecting published scores or $SHE supply. Each activates when it meets the data standard (independent institutional source, ≥80% country coverage, published within two years).</p>
+        <div className="space-y-2.5 mb-10">
+          {methodology.v3Pillars.map((p) => (
+            <div key={p.name} className="rounded-xl border border-amber-400/20 bg-amber-400/[0.03] p-4">
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <div className="font-semibold text-sm">{p.name}</div>
+                <span className="text-[10px] text-amber-400 shrink-0">weight TBD on activation</span>
+              </div>
+              <div className="text-xs text-muted-foreground"><span className="text-foreground/80">Candidate indicators:</span> {p.indicators}</div>
+              <div className="text-xs text-muted-foreground"><span className="text-foreground/80">Candidate source:</span> {p.source}</div>
+              <div className="text-xs text-muted-foreground"><span className="text-foreground/80">Blocking gap:</span> {p.gap}</div>
             </div>
           ))}
         </div>
@@ -63,6 +91,12 @@ export default function Methodology() {
             <div className="flex items-center gap-2 text-sm font-semibold mb-3"><Calendar className="h-4 w-4 text-accent" /> How often it updates</div>
             <p className="text-xs text-muted-foreground leading-relaxed">{methodology.cadence}</p>
           </div>
+        </div>
+
+        {/* Future research — signal layer, clearly not part of scoring */}
+        <div className="rounded-2xl border border-border/30 border-dashed bg-card/20 p-4 mb-10">
+          <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-1">Future research</div>
+          <p className="text-xs text-muted-foreground leading-relaxed">{methodology.futureResearch}</p>
         </div>
 
         {/* FAQ */}

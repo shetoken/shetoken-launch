@@ -36,15 +36,15 @@ const PILLARS = [
 
 /* Homepage pillar copy — mirrors src/pages/Index.tsx so crawlers see the same descriptions. */
 const HOME_PILLARS = [
-  ["Empowerment", "15%", "Parliamentary seats, ministerial roles, legal rights, freedom of movement"],
-  ["Bodily Autonomy", "15%", "Reproductive rights, child marriage, FGM, period poverty"],
-  ["Safety & Justice", "14%", "DV laws, femicide, honour-based violence, legal aid, police responsiveness"],
-  ["Education", "12%", "Literacy, enrollment, STEM, menstrual barriers to attendance"],
-  ["Economic Inclusion", "12%", "Pay gap, formal employment, banking access, property rights"],
-  ["Health & Survival", "12%", "Maternal mortality, life expectancy, anaemia, cancer screening"],
-  ["Dignity & Welfare", "10%", "Widow rights, caregiver burden, food insecurity, mental health"],
-  ["Digital & Social", "10%", "Online harassment, internet & mobile gender gaps"],
-  ["Violence Penalty", "-10%", "Rape, acid attacks, dowry violence, femicide — subtracted from score"],
+  ["Empowerment", "25% · LIVE", "Parliamentary seats, ministerial roles, legal rights, freedom of movement"],
+  ["Education & Literacy", "20% · LIVE", "Literacy, enrollment, STEM participation, completion rates"],
+  ["Economic Inclusion", "20% · LIVE", "Pay gap, formal employment, banking access, property rights"],
+  ["Health & Survival", "15% · LIVE", "Maternal mortality, life expectancy, anaemia, cancer screening"],
+  ["Safety (Crime Penalty)", "-20% · LIVE", "Rape, femicide, dowry violence — subtracted from the composite score"],
+  ["Bodily Autonomy", "weight TBD · v3 IN VALIDATION", "Reproductive rights, child marriage, FGM, period poverty"],
+  ["Dignity & Welfare", "weight TBD · v3 IN VALIDATION", "Widow rights, caregiver burden, food insecurity, mental health"],
+  ["Digital & Social", "weight TBD · v3 IN VALIDATION", "Online harassment, internet & mobile gender gaps"],
+  ["Safety & Justice (expanded)", "weight TBD · v3 IN VALIDATION", "Police responsiveness, legal aid, honour-based violence"],
 ];
 
 /* Inject a crawler-only static snapshot of the homepage into #root.
@@ -60,11 +60,14 @@ function homepage(template) {
     `<p>World's first data-backed gender accountability token</p>` +
     `<h1>She was always the currency. We just never measured it. Until now.</h1>` +
     `<p>$SHE is tied to the SHE Score — built from UN, World Bank, WHO, UNESCO and UNODC data across 105 countries. ` +
-    `When women's lives improve, the index rises. When the index rises, $SHE rises.</p>` +
-    `<h2>Nine pillars. One score.</h2>` +
-    `<p>A women's empowerment index that prices conditions many indices omit — period poverty, FGM, dowry violence, ` +
-    `caregiver burden and digital harassment. Weighted pillars, one auditable score, published annually from independent institutional data.</p>` +
+    `When the index rises, token supply mechanics respond — minting to the Impact Fund on progress, burning on regression.</p>` +
+    `<h2>Nine pillars. One vision. Five compute the score today.</h2>` +
+    `<p>A women's empowerment index built for accountability — measuring dimensions most indices treat as footnotes, ` +
+    `with a direct penalty for violence against women.</p>` +
     `<ul>${pillarLis}</ul>` +
+    `<p>The SHE Score (v2) is computed from the five LIVE pillars using the published formula. The four v3 pillars ` +
+    `(Bodily Autonomy, Dignity & Welfare, Digital & Social, and the expanded Safety & Justice indicators) are part of the ` +
+    `full framework but do not yet affect published scores or $SHE supply mechanics.</p>` +
     `<p><a href="/dashboard">See live scores for 105 countries</a> · <a href="/why">Why this matters</a> · <a href="/index-landscape">The Landscape</a> · <a href="/methodology">Methodology</a></p>` +
     `<footer><p>SHE Score — the index (0–100, per country/state). $SHE — the token that tracks it. SHE Foundation — the publisher.</p>` +
     `<p>The SHE Score is an independent project and is not affiliated with, endorsed by, or derived from the UNDP/UN Women Women's Empowerment Index, the SHE Index powered by EY, or any other index referenced on this site.</p></footer>` +
@@ -128,22 +131,26 @@ function methodologyPage(template) {
 
   const url = `${BASE}/methodology`;
   const title = "Methodology — How the SHE Score Is Built | SHEtoken";
-  const desc = "How the SHE Score is built: eight weighted pillars minus a violence penalty, normalised 0–100 from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data. Published annually, quarterly for registered governments. Independent.";
+  const desc = "How the SHE Score (v2) is built: five LIVE weighted pillars (the published formula) plus four v3 pillars in validation. Normalised 0–100 from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data. Published annually, quarterly for registered governments. Independent.";
 
-  const pillars = data.pillars.map((p) => `<li><strong>${esc(p.name)} (${esc(p.weight)}):</strong> ${esc(p.desc)}</li>`).join("");
+  const live = data.livePillars.map((p) => `<li><strong>${esc(p.name)} (${esc(p.weight)}, LIVE):</strong> ${esc(p.desc)}</li>`).join("");
+  const v3 = data.v3Pillars.map((p) => `<li><strong>${esc(p.name)} (weight TBD on activation):</strong> indicators — ${esc(p.indicators)}; candidate source — ${esc(p.source)}; blocking gap — ${esc(p.gap)}</li>`).join("");
   const sources = data.sources.map((s) => `<li>${esc(s)}</li>`).join("");
   const faq = data.faq.map((f) => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}${f.link ? ` <a href="${esc(f.link)}">${esc(f.linkText)}</a>` : ""}</p>`).join("");
 
   const snapshot =
     `<div id="root"><main style="max-width:820px;margin:40px auto;padding:0 16px;font-family:system-ui,sans-serif;line-height:1.5;color:#1e1b26">` +
-    `<nav><a href="/">SHEtoken</a> · <a href="/dashboard">Live Data</a> · <a href="/index-landscape">The Landscape</a> · <a href="/methodology">Methodology</a> · <a href="/whitepaper">Whitepaper</a></nav>` +
+    `<nav><a href="/">SHEtoken</a> · <a href="/dashboard">Dashboard</a> · <a href="/index-landscape">The Landscape</a> · <a href="/methodology">Methodology</a> · <a href="/whitepaper">Whitepaper</a></nav>` +
     `<h1>How the SHE Score is built</h1>` +
     data.intro.map((p) => `<p>${esc(p)}</p>`).join("") +
     `<p><strong>Independence:</strong> ${esc(data.disclaimer)}</p>` +
-    `<h2>The formula</h2><pre>${esc(data.formula)}</pre>` +
-    `<h2>The eight pillars</h2><ul>${pillars}</ul>` +
+    `<h2>The formula (v2 — five LIVE pillars)</h2><pre>${esc(data.formula)}</pre>` +
+    `<h2>The five LIVE pillars</h2><ul>${live}</ul>` +
+    `<p>${esc(data.activationDisclaimer)}</p>` +
+    `<h2>v3 Expansion Pillars (in validation)</h2><ul>${v3}</ul>` +
     `<h2>Data sources</h2><ul>${sources}</ul>` +
     `<h2>How often it updates</h2><p>${esc(data.cadence)}</p>` +
+    `<h2>Future research</h2><p>${esc(data.futureResearch)}</p>` +
     `<h2>Frequently asked</h2>${faq}` +
     `</main></div>`;
 

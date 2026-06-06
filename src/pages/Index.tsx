@@ -92,15 +92,17 @@ const Index = () => {
   ];
 
   const pillars = [
-    { icon: Scale, title: "Empowerment", weight: "15%", desc: "Parliamentary seats, ministerial roles, legal rights, freedom of movement" },
-    { icon: Sprout, title: "Bodily Autonomy", weight: "15%", desc: "Reproductive rights, child marriage, FGM, period poverty — new in v3.0" },
-    { icon: Shield, title: "Safety & Justice", weight: "14%", desc: "DV laws, femicide, honour-based violence, legal aid, police responsiveness" },
-    { icon: GraduationCap, title: "Education", weight: "12%", desc: "Literacy, enrollment, STEM, menstrual barriers to attendance" },
-    { icon: Coins, title: "Economic Inclusion", weight: "12%", desc: "Pay gap, formal employment, banking access, property rights" },
-    { icon: Heart, title: "Health & Survival", weight: "12%", desc: "Maternal mortality, life expectancy, anaemia, cancer screening" },
-    { icon: HandHeart, title: "Dignity & Welfare", weight: "10%", desc: "Widow rights, caregiver burden, food insecurity, mental health" },
-    { icon: Wifi, title: "Digital & Social", weight: "10%", desc: "Online harassment, internet & mobile gender gaps — new in v3.0" },
-    { icon: Flame, title: "Violence Penalty", weight: "−10%", desc: "Rape, acid attacks, dowry violence, femicide — subtracted from score" },
+    // LIVE (v2) — the five pillars that compute the published score
+    { icon: Scale, title: "Empowerment", weight: "25%", status: "LIVE", desc: "Parliamentary seats, ministerial roles, legal rights, freedom of movement" },
+    { icon: GraduationCap, title: "Education & Literacy", weight: "20%", status: "LIVE", desc: "Literacy, enrollment, STEM participation, completion rates" },
+    { icon: Coins, title: "Economic Inclusion", weight: "20%", status: "LIVE", desc: "Pay gap, formal employment, banking access, property rights" },
+    { icon: Heart, title: "Health & Survival", weight: "15%", status: "LIVE", desc: "Maternal mortality, life expectancy, anaemia, cancer screening" },
+    { icon: Flame, title: "Safety (Crime Penalty)", weight: "−20%", status: "LIVE", desc: "Rape, femicide, dowry violence — subtracted from the composite score" },
+    // v3 — IN VALIDATION — part of the full framework; not yet in the published score
+    { icon: Sprout, title: "Bodily Autonomy", weight: "TBD", status: "v3", desc: "Reproductive rights, child marriage, FGM, period poverty" },
+    { icon: HandHeart, title: "Dignity & Welfare", weight: "TBD", status: "v3", desc: "Widow rights, caregiver burden, food insecurity, mental health" },
+    { icon: Wifi, title: "Digital & Social", weight: "TBD", status: "v3", desc: "Online harassment, internet & mobile gender gaps" },
+    { icon: Shield, title: "Safety & Justice (expanded)", weight: "TBD", status: "v3", desc: "Police responsiveness, legal aid, honour-based violence" },
   ];
 
   const COMMUNITY_PREVIEW = [
@@ -212,27 +214,42 @@ const Index = () => {
       <section id="index" className="py-28">
         <div className="container max-w-6xl">
           <div className="text-center mb-16">
-            <p className="text-accent text-sm uppercase tracking-widest mb-4">The SHE Score Formula · v3.0</p>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">Nine pillars. <span className="text-gradient">One score.</span></h2>
+            <p className="text-accent text-sm uppercase tracking-widest mb-4">The SHE Score Formula · v2 (LIVE)</p>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">Nine pillars. One vision. <span className="text-gradient">Five compute the score today.</span></h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              A women's empowerment index that prices conditions many indices omit — period poverty, FGM,
-              dowry violence, caregiver burden and digital harassment.
-              Weighted pillars, one auditable score, published annually from independent institutional data.
+              A women's empowerment index built for accountability — measuring dimensions most indices treat as
+              footnotes, with a direct penalty for violence against women.
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {pillars.map((p) => (
-              <div key={p.title} className="group bg-gradient-card border border-border/40 rounded-2xl p-7 shadow-card hover:border-primary/40 transition-smooth">
+              <div key={p.title} className={`group bg-gradient-card border rounded-2xl p-7 shadow-card transition-smooth ${p.status === "LIVE" ? "border-border/40 hover:border-primary/40" : "border-amber-400/20"}`}>
                 <div className="flex items-center justify-between mb-5">
                   <div className="h-12 w-12 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow">
                     <p.icon className="h-6 w-6 text-primary-foreground" />
                   </div>
-                  <span className="text-2xl font-bold text-accent">{p.weight}</span>
+                  {p.status === "LIVE"
+                    ? <span className="text-2xl font-bold text-accent">{p.weight}</span>
+                    : <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-400 border border-amber-400/30">v3 · IN VALIDATION</span>}
                 </div>
-                <h3 className="text-xl font-semibold mb-2">{p.title}</h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <h3 className="text-xl font-semibold">{p.title}</h3>
+                  {p.status === "LIVE" && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-400/15 text-emerald-400 border border-emerald-400/30">LIVE</span>}
+                </div>
                 <p className="text-sm text-muted-foreground">{p.desc}</p>
+                {p.status === "v3" && <p className="text-[10px] text-amber-400 mt-2">weight TBD on activation</p>}
               </div>
             ))}
+          </div>
+
+          {/* Activation disclaimer (Phase 2.1 Task 1c) */}
+          <div className="mt-8 mx-auto max-w-3xl rounded-2xl border border-border/40 bg-card/40 p-5 text-xs text-muted-foreground leading-relaxed">
+            The SHE Score (v2) is computed from the five LIVE pillars using the published formula. The four v3 pillars —
+            Bodily Autonomy, Dignity &amp; Welfare, Digital &amp; Social, and the expanded Safety &amp; Justice indicators —
+            are part of the full SHE framework but do not yet affect published scores or $SHE supply mechanics. They will be
+            activated individually when each meets our data standard: an independent institutional source covering ≥80% of
+            scored countries, published within two years.{" "}
+            <Link to="/methodology" className="text-accent hover:underline">Track activation status on the methodology page.</Link>
           </div>
           <div className="text-center mt-12">
             <Button asChild variant="outline" className="border-border/60 bg-card/40">

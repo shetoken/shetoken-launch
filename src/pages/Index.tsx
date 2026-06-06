@@ -480,6 +480,8 @@ const Index = () => {
           </div>
           <div className="flex flex-wrap gap-6 justify-center">
             <Link to="/why" className="hover:text-foreground transition-smooth">Why $SHE</Link>
+            <Link to="/index-landscape" className="hover:text-foreground transition-smooth">The Landscape</Link>
+            <Link to="/methodology" className="hover:text-foreground transition-smooth">Methodology</Link>
             <Link to="/community" className="hover:text-foreground transition-smooth">Community</Link>
             <Link to="/dashboard" className="hover:text-foreground transition-smooth">Live Data</Link>
             <Link to="/whitepaper" className="hover:text-foreground transition-smooth">Whitepaper</Link>
@@ -487,6 +489,13 @@ const Index = () => {
             <a href="mailto:contact@shetoken.org" className="hover:text-foreground transition-smooth">Contact</a>
             <a href="https://github.com/shetoken" className="hover:text-foreground transition-smooth">GitHub</a>
           </div>
+        </div>
+        {/* Independence disclaimer (Task 5) */}
+        <div className="container mt-8">
+          <p className="mx-auto max-w-3xl text-center text-[11px] text-muted-foreground/60 leading-relaxed">
+            The SHE Score is an independent project and is not affiliated with, endorsed by, or derived from the
+            UNDP/UN Women Women's Empowerment Index, the SHE Index powered by EY, or any other index referenced on this site.
+          </p>
         </div>
       </footer>
     </div>

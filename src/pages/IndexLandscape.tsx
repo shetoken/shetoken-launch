@@ -101,7 +101,7 @@ export default function IndexLandscape() {
           <p className="text-base md:text-lg text-foreground/90 leading-relaxed">{landscape.closing}</p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Link to="/dashboard" className="text-sm text-accent hover:underline">Explore the SHE Score for 105 countries →</Link>
-            <Link to="/whitepaper" className="text-sm text-accent hover:underline">Read the methodology →</Link>
+            <Link to="/methodology" className="text-sm text-accent hover:underline">Read the methodology →</Link>
           </div>
         </div>
       </main>

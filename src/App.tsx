@@ -25,6 +25,7 @@ import Marketplace from "./pages/Marketplace.tsx";
 import Drives from "./pages/Drives.tsx";
 import Initiatives from "./pages/Initiatives.tsx";
 import IndexLandscape from "./pages/IndexLandscape.tsx";
+import Methodology from "./pages/Methodology.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 /** Records a page view on every route change (best-effort). */
@@ -68,6 +69,7 @@ const App = () => (
               <Route path="/drives" element={<Drives />} />
               <Route path="/initiatives" element={<Initiatives />} />
               <Route path="/index-landscape" element={<IndexLandscape />} />
+              <Route path="/methodology" element={<Methodology />} />
               <Route path="/simulator" element={<SHEconomy />} />
               <Route path="/sheconomy" element={<Navigate to="/marketplace" replace />} />
               <Route path="/she-clock" element={<SheClock />} />

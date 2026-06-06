@@ -6,6 +6,7 @@
   "rewrites": [
     { "source": "/country/:iso", "destination": "/country/:iso.html" },
     { "source": "/index-landscape", "destination": "/index-landscape.html" },
+    { "source": "/methodology", "destination": "/methodology.html" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "crons": [

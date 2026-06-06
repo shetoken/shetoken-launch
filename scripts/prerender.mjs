@@ -65,7 +65,9 @@ function homepage(template) {
     `<p>The most comprehensive women's empowerment index ever published — the only one that prices period poverty, FGM, dowry violence, ` +
     `caregiver burden and digital harassment. Nine weighted pillars, one auditable score, updated annually from independent institutional data.</p>` +
     `<ul>${pillarLis}</ul>` +
-    `<p><a href="/dashboard">See live scores for 105 countries</a> · <a href="/why">Why this matters</a></p>` +
+    `<p><a href="/dashboard">See live scores for 105 countries</a> · <a href="/why">Why this matters</a> · <a href="/index-landscape">The Landscape</a> · <a href="/methodology">Methodology</a></p>` +
+    `<footer><p>SHE Score — the index (0–100, per country/state). $SHE — the token that tracks it. SHE Foundation — the publisher.</p>` +
+    `<p>The SHE Score is an independent project and is not affiliated with, endorsed by, or derived from the UNDP/UN Women Women's Empowerment Index, the SHE Index powered by EY, or any other index referenced on this site.</p></footer>` +
     `</main></div>`;
 
   return template.replace(/<div id="root"><\/div>/, snapshot);
@@ -104,6 +106,45 @@ function landscapePage(template) {
     cards +
     `<h2>At a glance</h2><table border="1" cellpadding="6"><thead><tr><th>Index</th><th>Publisher</th><th>Coverage</th><th>Frequency</th><th>Investable?</th></tr></thead><tbody>${rows}</tbody></table>` +
     `<p>${esc(data.closing)}</p>` +
+    `</main></div>`;
+
+  return template
+    .replace(/<title>[\s\S]*?<\/title>/, `<title>${esc(title)}</title>`)
+    .replace(/(<meta name="description" content=")[\s\S]*?(">)/, `$1${esc(desc)}$2`)
+    .replace(/(<link rel="canonical" href=")[\s\S]*?(")/, `$1${url}$2`)
+    .replace(/(<meta property="og:url" content=")[\s\S]*?(")/, `$1${url}$2`)
+    .replace(/(<meta property="og:title" content=")[\s\S]*?(">)/, `$1${esc(title)}$2`)
+    .replace(/(<meta name="twitter:title" content=")[\s\S]*?(">)/, `$1${esc(title)}$2`)
+    .replace(/(<meta property="og:description" content=")[\s\S]*?(">)/, `$1${esc(desc)}$2`)
+    .replace(/(<meta name="twitter:description" content=")[\s\S]*?(">)/, `$1${esc(desc)}$2`)
+    .replace(/<div id="root"><\/div>/, snapshot);
+}
+
+/* Static snapshot for /methodology (Task 1 & 5) — from the shared JSON. */
+function methodologyPage(template) {
+  let data;
+  try { data = JSON.parse(readFileSync(resolve(ROOT, "src/data/methodology.json"), "utf8")); }
+  catch (e) { console.warn(`[prerender] methodology json read failed (${e}); skipping`); return null; }
+
+  const url = `${BASE}/methodology`;
+  const title = "Methodology — How the SHE Score Is Built | SHEtoken";
+  const desc = "How the SHE Score is built: eight weighted pillars minus a violence penalty, normalised 0–100 from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data. Published annually, quarterly for registered governments. Independent.";
+
+  const pillars = data.pillars.map((p) => `<li><strong>${esc(p.name)} (${esc(p.weight)}):</strong> ${esc(p.desc)}</li>`).join("");
+  const sources = data.sources.map((s) => `<li>${esc(s)}</li>`).join("");
+  const faq = data.faq.map((f) => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}${f.link ? ` <a href="${esc(f.link)}">${esc(f.linkText)}</a>` : ""}</p>`).join("");
+
+  const snapshot =
+    `<div id="root"><main style="max-width:820px;margin:40px auto;padding:0 16px;font-family:system-ui,sans-serif;line-height:1.5;color:#1e1b26">` +
+    `<nav><a href="/">SHEtoken</a> · <a href="/dashboard">Live Data</a> · <a href="/index-landscape">The Landscape</a> · <a href="/methodology">Methodology</a> · <a href="/whitepaper">Whitepaper</a></nav>` +
+    `<h1>How the SHE Score is built</h1>` +
+    data.intro.map((p) => `<p>${esc(p)}</p>`).join("") +
+    `<p><strong>Independence:</strong> ${esc(data.disclaimer)}</p>` +
+    `<h2>The formula</h2><pre>${esc(data.formula)}</pre>` +
+    `<h2>The eight pillars</h2><ul>${pillars}</ul>` +
+    `<h2>Data sources</h2><ul>${sources}</ul>` +
+    `<h2>How often it updates</h2><p>${esc(data.cadence)}</p>` +
+    `<h2>Frequently asked</h2>${faq}` +
     `</main></div>`;
 
   return template
@@ -185,6 +226,12 @@ async function main() {
     if (lp) { writeFileSync(resolve(DIST, "index-landscape.html"), lp, "utf8"); console.log("[prerender] wrote → dist/index-landscape.html"); }
   } catch (e) {
     console.warn(`[prerender] landscape snapshot failed (${e})`);
+  }
+  try {
+    const mp = methodologyPage(template);
+    if (mp) { writeFileSync(resolve(DIST, "methodology.html"), mp, "utf8"); console.log("[prerender] wrote → dist/methodology.html"); }
+  } catch (e) {
+    console.warn(`[prerender] methodology snapshot failed (${e})`);
   }
 
   let countries = [];

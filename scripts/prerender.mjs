@@ -71,6 +71,53 @@ function homepage(template) {
   return template.replace(/<div id="root"><\/div>/, snapshot);
 }
 
+/* Static snapshot for /index-landscape (Task 4) — read from the shared JSON
+   so it never drifts from the React page. Crawler-only; React replaces #root. */
+function landscapePage(template) {
+  let data;
+  try { data = JSON.parse(readFileSync(resolve(ROOT, "src/data/landscape.json"), "utf8")); }
+  catch (e) { console.warn(`[prerender] landscape json read failed (${e}); skipping`); return null; }
+
+  const url = `${BASE}/index-landscape`;
+  const title = "The Index Landscape — SHE Score vs. the World's Gender Indices | SHEtoken";
+  const desc = "How the SHE Score relates to the world's leading gender indices — UNDP/UN Women WEI, WEF Global Gender Gap, Georgetown WPS, EIGE, OECD SIGI, IFPRI WEAI, the EY SHE Index, World Bank WBL and UNDP GII. The one difference: the SHE Score is investable.";
+
+  const cards = data.indices.map((idx, i) =>
+    `<article><h2>${i + 1}. <a href="${esc(idx.sourceUrl)}">${esc(idx.title)}</a></h2>` +
+    `<p><em>${esc(idx.facts)}</em></p>` +
+    `<p>${esc(idx.description)}</p>` +
+    `<p><strong>How the SHE Score relates:</strong> ${esc(idx.relates)}</p>` +
+    `<p>Official source: <a href="${esc(idx.sourceUrl)}">${esc(idx.sourceName)}</a></p></article>`
+  ).join("");
+
+  const rows = data.table.map((r) =>
+    `<tr><td>${esc(r.index)}</td><td>${esc(r.publisher)}</td><td>${esc(r.coverage)}</td>` +
+    `<td>${esc(r.frequency)}</td><td>${esc(r.investable)}</td></tr>`
+  ).join("");
+
+  const snapshot =
+    `<div id="root"><main style="max-width:820px;margin:40px auto;padding:0 16px;font-family:system-ui,sans-serif;line-height:1.5;color:#1e1b26">` +
+    `<nav><a href="/">SHEtoken</a> · <a href="/dashboard">Live Data</a> · <a href="/index-landscape">The Landscape</a> · <a href="/whitepaper">Whitepaper</a></nav>` +
+    `<h1>The Index Landscape</h1>` +
+    data.intro.map((p) => `<p>${esc(p)}</p>`).join("") +
+    `<p><strong>Independence disclaimer:</strong> ${esc(data.disclaimer)}</p>` +
+    cards +
+    `<h2>At a glance</h2><table border="1" cellpadding="6"><thead><tr><th>Index</th><th>Publisher</th><th>Coverage</th><th>Frequency</th><th>Investable?</th></tr></thead><tbody>${rows}</tbody></table>` +
+    `<p>${esc(data.closing)}</p>` +
+    `</main></div>`;
+
+  return template
+    .replace(/<title>[\s\S]*?<\/title>/, `<title>${esc(title)}</title>`)
+    .replace(/(<meta name="description" content=")[\s\S]*?(">)/, `$1${esc(desc)}$2`)
+    .replace(/(<link rel="canonical" href=")[\s\S]*?(")/, `$1${url}$2`)
+    .replace(/(<meta property="og:url" content=")[\s\S]*?(")/, `$1${url}$2`)
+    .replace(/(<meta property="og:title" content=")[\s\S]*?(">)/, `$1${esc(title)}$2`)
+    .replace(/(<meta name="twitter:title" content=")[\s\S]*?(">)/, `$1${esc(title)}$2`)
+    .replace(/(<meta property="og:description" content=")[\s\S]*?(">)/, `$1${esc(desc)}$2`)
+    .replace(/(<meta name="twitter:description" content=")[\s\S]*?(">)/, `$1${esc(desc)}$2`)
+    .replace(/<div id="root"><\/div>/, snapshot);
+}
+
 function pageFor(template, c) {
   const iso = c.iso_code, name = c.country, score = Number(c.wei_score ?? 0).toFixed(1);
   const url = `${BASE}/country/${iso}`;
@@ -126,12 +173,18 @@ async function main() {
   // per-country pages reuse this in-memory copy as their template.
   const template = readFileSync(tmplPath, "utf8");
 
-  // Homepage crawlability (Task 1) — independent of the country API, so it always runs.
+  // Static pages (Task 1 & 4) — independent of the country API, so they always run.
   try {
     writeFileSync(tmplPath, homepage(template), "utf8");
     console.log("[prerender] wrote homepage snapshot → dist/index.html");
   } catch (e) {
     console.warn(`[prerender] homepage snapshot failed (${e}); leaving SPA index.html untouched`);
+  }
+  try {
+    const lp = landscapePage(template);
+    if (lp) { writeFileSync(resolve(DIST, "index-landscape.html"), lp, "utf8"); console.log("[prerender] wrote → dist/index-landscape.html"); }
+  } catch (e) {
+    console.warn(`[prerender] landscape snapshot failed (${e})`);
   }
 
   let countries = [];

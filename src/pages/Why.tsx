@@ -132,7 +132,7 @@ export default function Why() {
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Measure. Invest. Build. <span className="text-gradient">Belong.</span></h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               $SHE isn't backed by gold — it's backed by the <strong className="text-foreground">measured advancement of women</strong>.
-              Four parts, one flywheel: as the community and the women's economy create real progress, the index rises — and the asset rises with it.
+              Four parts, one flywheel: as the community and the women's economy create real progress, the index rises — and $SHE supply responds, minting to the Impact Fund on progress and burning on regression.
             </p>
           </div>
 

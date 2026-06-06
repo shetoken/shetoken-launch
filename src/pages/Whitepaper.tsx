@@ -174,7 +174,7 @@ function WhitepaperContent() {
         rows={[
           ["Global Index", "$SHE", "Tracks worldwide SHE Score. One token, whole world", "Year 1"],
           ["Country Sub-Token", "$SHE-IND, $SHE-NGA, $SHE-USA", "Each country pegged to its own national SHE Score", "Year 2"],
-          ["State / Province Token", "$SHE-WB, $SHE-KL, $SHE-MH", "State-level tokens. Profit directly from local programs", "Year 3"],
+          ["State / Province Token", "$SHE-WB, $SHE-KL, $SHE-MH", "State-level tokens whose supply tracks local-program outcomes", "Year 3"],
         ]}
       />
 

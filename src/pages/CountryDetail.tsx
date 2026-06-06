@@ -21,6 +21,19 @@ import { downloadCountryReport } from "@/lib/countryReport";
 import { trackDownload } from "@/lib/downloads";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+// DISPLAY-ONLY third-party index reference data (Task 6). Sample/placeholder.
+// Hard rule: this is NEVER read into any score/oracle/token calculation.
+import EXTERNAL_INDICES from "../../data/external-indices.json";
+
+function ExtTile({ name, value, meta }: { name: string; value: string; meta: string }) {
+  return (
+    <div className="rounded-xl border border-border/40 bg-card/40 p-4">
+      <div className="text-xs text-muted-foreground">{name}</div>
+      <div className="text-lg font-bold text-foreground">{value}</div>
+      <div className="text-[10px] text-muted-foreground mt-1">{meta}</div>
+    </div>
+  );
+}
 
 /* ── Pillar definitions with global-average and improvement lever ── */
 const PILLAR_COLS: Array<{
@@ -611,6 +624,38 @@ export default function CountryDetail() {
                 />
               )}
             </section>
+
+            {/* HOW THE WORLD'S INDICES SEE THIS COUNTRY — display-only reference (Task 6) */}
+            {(() => {
+              const ext = (EXTERNAL_INDICES as Record<string, { wef_gggi?: { score: number; rank: number; year: number }; wps_index?: { score: number; rank: number; edition: string }; sigi?: { category: string; year: number } }>)[country.iso_code];
+              if (!ext) return null;
+              return (
+                <section className="mb-10">
+                  <div className="bg-gradient-card border border-border/40 rounded-2xl p-6 shadow-card">
+                    <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
+                      <h2 className="text-sm font-semibold uppercase tracking-widest text-accent">
+                        How the world's indices see {country.country}
+                      </h2>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-400 border border-amber-400/30">Sample data</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-4">For reference alongside the SHE Score. Each value shows its source and year.</p>
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      <div className="rounded-xl border border-amber-400/30 bg-amber-400/5 p-4">
+                        <div className="text-xs text-muted-foreground">SHE Score</div>
+                        <div className="text-lg font-bold text-accent">{(country.wei_score ?? 0).toFixed(1)} <span className="text-xs text-muted-foreground">/100</span></div>
+                        <div className="text-[10px] text-muted-foreground mt-1">SHE Foundation · 2026</div>
+                      </div>
+                      {ext.wef_gggi && <ExtTile name="WEF Global Gender Gap" value={`${ext.wef_gggi.score} · rank #${ext.wef_gggi.rank}`} meta={`World Economic Forum · ${ext.wef_gggi.year}`} />}
+                      {ext.wps_index && <ExtTile name="Georgetown WPS Index" value={`${ext.wps_index.score} · rank #${ext.wps_index.rank}`} meta={`Georgetown GIWPS · ${ext.wps_index.edition}`} />}
+                      {ext.sigi && <ExtTile name="OECD SIGI" value={ext.sigi.category} meta={`OECD · ${ext.sigi.year}`} />}
+                    </div>
+                    <p className="text-[11px] text-muted-foreground/60 mt-4">
+                      Third-party scores shown for reference only. They are not inputs to the SHE Score or to $SHE token supply mechanics.
+                    </p>
+                  </div>
+                </section>
+              );
+            })()}
 
             {/* PERFORMANCE SUMMARY — SLM blurb when available, template fallback */}
             <section className="mb-10">

@@ -15,7 +15,7 @@ interface EventRow { session_id: string | null; user_id: string | null; path: st
 interface ProfileRow { id: string; email: string | null; display_name: string | null; region: string | null; created_at: string; }
 interface DownloadRow { id: string; doc_type: string; doc_ref: string | null; user_email: string | null; country: string | null; city: string | null; created_at: string; }
 
-const TABS = ["overview", "users", "engagement", "downloads", "partners", "drives", "ngos", "initiatives", "marketplace", "library"] as const;
+const TABS = ["overview", "validation", "users", "engagement", "downloads", "partners", "drives", "ngos", "initiatives", "marketplace", "library"] as const;
 type Tab = typeof TABS[number];
 const tabLabel = (t: Tab) => (t === "ngos" ? "NGOs" : t);
 interface NgoRow { id: string; name: string; country: string | null; city: string | null; focus_area: string | null; website: string | null; contact_email: string | null; verified: boolean | null; created_at: string; }
@@ -132,7 +132,38 @@ export default function AdminConsole() {
     },
   });
 
+  const signups = useQuery({
+    queryKey: ["admin-signups"], enabled: isAdmin, staleTime: 30_000,
+    queryFn: async (): Promise<{ list: string; source_page: string | null; email: string | null; created_at: string }[]> => {
+      const { data, error } = await supabase.from("she_signups").select("list,source_page,email,created_at").order("created_at", { ascending: false }).limit(50000);
+      if (error) throw error; return (data ?? []) as { list: string; source_page: string | null; email: string | null; created_at: string }[];
+    },
+  });
+  const petitionQ = useQuery({
+    queryKey: ["admin-petition-count"], enabled: isAdmin, staleTime: 30_000,
+    queryFn: async (): Promise<number> => {
+      const { count, error } = await supabase.from("she_petition").select("*", { count: "exact", head: true });
+      if (error) throw error; return count ?? 0;
+    },
+  });
+  const simEvents = useQuery({
+    queryKey: ["admin-sim-events"], enabled: isAdmin, staleTime: 30_000,
+    queryFn: async (): Promise<{ event: string }[]> => {
+      const { data, error } = await supabase.from("she_sim_events").select("event").limit(100000);
+      if (error) throw error; return (data ?? []) as { event: string }[];
+    },
+  });
+
   const ev = events.data ?? [], pf = profiles.data ?? [], dl = downloads.data ?? [], ng = ngos.data ?? [], bz = biz.data ?? [], pt = partners.data ?? [], dr = drives.data ?? [], da = driveApps.data ?? [], it = inits.data ?? [];
+  const su = signups.data ?? [], petitionCount = petitionQ.data ?? 0, sev = simEvents.data ?? [];
+
+  function downloadSignupsCsv() {
+    const cols = ["created_at", "list", "source_page", "email"];
+    const cell = (v: unknown) => { const s = v == null ? "" : String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+    const csv = [cols.join(","), ...su.map((r) => cols.map((c) => cell((r as Record<string, unknown>)[c])).join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "signups.csv"; a.click(); URL.revokeObjectURL(a.href);
+  }
 
   async function setBizStatus(id: string, status: string) {
     const { error } = await supabase.from("she_businesses").update({ status, verified: status === "approved" }).eq("id", id);
@@ -326,6 +357,42 @@ export default function AdminConsole() {
                     </div>
                   </div>
                 )}
+
+                {/* VALIDATION (Phase 3 Task 6) */}
+                {tab === "validation" && (() => {
+                  const byList = tally(su, (r) => r.list);
+                  const bySource = tally(su, (r) => r.source_page);
+                  const total = su.length;
+                  const funders = su.filter((r) => r.list === "funders").length;
+                  const registrants = su.filter((r) => r.list === "registrants").length;
+                  const tokenInterest = su.filter((r) => r.list === "token_interest").length;
+                  const sliderMoved = sev.filter((e) => e.event === "slider_moved").length;
+                  const crisisFired = sev.filter((e) => e.event === "crisis_fired").length;
+                  return (
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between gap-3 flex-wrap">
+                        <p className="text-sm text-muted-foreground">Demand validation — signups by list & source, petition, and anonymous simulator engagement.</p>
+                        <Button onClick={downloadSignupsCsv} className="bg-gradient-primary text-primary-foreground border-0"><Download className="h-4 w-4 mr-2" /> Export signups CSV</Button>
+                      </div>
+                      <div className="grid sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                        <StatCard icon={<Users className="h-3.5 w-3.5" />} label="Total signups" value={total} />
+                        <StatCard icon={<HeartHandshake className="h-3.5 w-3.5" />} label="Funders" value={funders} sub={total ? `${Math.round((funders / total) * 100)}% of list` : ""} />
+                        <StatCard icon={<Activity className="h-3.5 w-3.5" />} label="Token interest" value={tokenInterest} />
+                        <StatCard icon={<GraduationCap className="h-3.5 w-3.5" />} label="Registrants" value={registrants} />
+                        <StatCard icon={<CheckCircle2 className="h-3.5 w-3.5" />} label="Petition" value={petitionCount} />
+                        <StatCard icon={<Activity className="h-3.5 w-3.5" />} label="Sim: sliders moved" value={sliderMoved} sub={`${crisisFired} fired crisis`} />
+                      </div>
+                      <div className="grid lg:grid-cols-2 gap-4">
+                        <RankTable title="Signups by list" rows={byList} icon={<BarChart3 className="h-3.5 w-3.5 text-accent" />} />
+                        <RankTable title="Signups by source page" rows={bySource} icon={<Globe className="h-3.5 w-3.5 text-accent" />} />
+                      </div>
+                      <p className="text-[11px] text-muted-foreground/60">
+                        Also available as a token-protected endpoint: <code className="text-foreground">/api/validation?token=…</code> (JSON) ·
+                        <code className="text-foreground"> ?csv=signups</code> · <code className="text-foreground">?csv=petition</code>.
+                      </p>
+                    </div>
+                  );
+                })()}
 
                 {/* USERS */}
                 {tab === "users" && (

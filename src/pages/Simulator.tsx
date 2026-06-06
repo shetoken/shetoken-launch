@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { SEO } from "@/lib/seo";
 import { Nav } from "@/components/Nav";
@@ -32,6 +32,13 @@ const SLIDERS: { key: keyof Pillars; label: string; weight: string; penalty?: bo
 
 const fmtUnits = (n: number) => Math.round(Math.abs(n)).toLocaleString("en-US");
 
+/* Anonymous engagement counter — fires each event at most once per session,
+   stores no user/IP data. */
+function fireOnce(sessionKey: string, event: string) {
+  try { if (sessionStorage.getItem(sessionKey)) return; sessionStorage.setItem(sessionKey, "1"); } catch { /* ignore */ }
+  fetch("/api/sim-event", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ event }) }).catch(() => {});
+}
+
 export default function Simulator() {
   const [p, setP] = useState<Pillars>({ ...BASELINE });
 
@@ -42,7 +49,10 @@ export default function Simulator() {
   const supply = START_SUPPLY + supplyDelta;
   const crisis = p.C > CRISIS_THRESHOLD;
 
-  const set = (key: keyof Pillars, v: number) => setP((prev) => ({ ...prev, [key]: v }));
+  const set = (key: keyof Pillars, v: number) => { fireOnce("sim_slider_moved", "slider_moved"); setP((prev) => ({ ...prev, [key]: v })); };
+
+  // Record the first time the crisis trigger fires this session (anonymous).
+  useEffect(() => { if (crisis) fireOnce("sim_crisis_fired", "crisis_fired"); }, [crisis]);
 
   return (
     <div className="min-h-screen bg-background">

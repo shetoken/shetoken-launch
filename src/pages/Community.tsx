@@ -568,7 +568,7 @@ export default function Community() {
                 {loading ? "…" : done ? "Subscribed ✓" : "Subscribe"}
               </Button>
             </form>
-            <p className="text-[11px] text-muted-foreground mt-2">SHE Score reports, safety signals and early-access invites. No spam — unsubscribe anytime.</p>
+            <p className="text-[11px] text-muted-foreground mt-2">SHE Score reports, safety signals and early-access invites. No spam — unsubscribe anytime. See our <Link to="/privacy" className="text-accent hover:underline">privacy policy</Link>.</p>
           </div>
         </section>
 

@@ -29,6 +29,7 @@ import IndexLandscape from "./pages/IndexLandscape.tsx";
 import Methodology from "./pages/Methodology.tsx";
 import WhyBackShe from "./pages/WhyBackShe.tsx";
 import Petition from "./pages/Petition.tsx";
+import Privacy from "./pages/Privacy.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 /** Records a page view on every route change (best-effort). */
@@ -75,6 +76,7 @@ const App = () => (
               <Route path="/methodology" element={<Methodology />} />
               <Route path="/why-back-she" element={<WhyBackShe />} />
               <Route path="/petition" element={<Petition />} />
+              <Route path="/privacy" element={<Privacy />} />
               <Route path="/simulator" element={<Simulator />} />
               <Route path="/sheconomy" element={<Navigate to="/marketplace" replace />} />
               <Route path="/she-clock" element={<SheClock />} />

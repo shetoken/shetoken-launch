@@ -17,6 +17,7 @@ const STATIC = [
   { loc: "/why-back-she", priority: "0.8", freq: "monthly" },
   { loc: "/simulator", priority: "0.7", freq: "monthly" },
   { loc: "/petition", priority: "0.7", freq: "weekly" },
+  { loc: "/privacy", priority: "0.3", freq: "yearly" },
   { loc: "/index-landscape", priority: "0.7", freq: "monthly" },
   { loc: "/methodology", priority: "0.7", freq: "monthly" },
   { loc: "/whitepaper", priority: "0.7", freq: "monthly" },

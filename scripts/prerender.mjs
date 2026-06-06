@@ -188,6 +188,19 @@ function simplePage(template, { path, title, desc, bodyHtml }) {
     .replace(/<div id="root"><\/div>/, snapshot);
 }
 
+function privacyPage(template) {
+  return simplePage(template, {
+    path: "/privacy",
+    title: "Privacy Policy | SHEtoken",
+    desc: "What SHEtoken collects (email, list tag, optional organization fields, petition signatures), why, how long we keep it, how to be removed, and our no-sale-of-data commitment.",
+    bodyHtml:
+      `<h1>Privacy Policy</h1>` +
+      `<p>SHEtoken / SHE Foundation. We collect your email when you join a list, the list/topic and page you signed up from, optional organization fields (name, country/state, program type) for program registrants, and — for the petition — your name (published as first name + last initial only), country and an optional reviewed reason. We also record anonymous usage analytics (page views and an approximate country/city from your IP).</p>` +
+      `<p>We use it to send the updates you asked for, understand demand for the SHE Score, and operate the site. Marketing email is sent only with your consent. We are putting double opt-in in place; until then your email is stored as unconfirmed.</p>` +
+      `<p>We never sell, rent or trade your personal data. We keep it until you ask us to remove it. To access or delete your data, or to unsubscribe, email contact@shetoken.org.</p>`,
+  });
+}
+
 function petitionPage(template) {
   return simplePage(template, {
     path: "/petition",
@@ -343,7 +356,8 @@ async function main() {
     writeFileSync(resolve(DIST, "why-back-she.html"), whyBackShePage(template), "utf8");
     writeFileSync(resolve(DIST, "simulator.html"), simulatorPage(template), "utf8");
     writeFileSync(resolve(DIST, "petition.html"), petitionPage(template), "utf8");
-    console.log("[prerender] wrote → whitepaper, dashboard, why-back-she, simulator, petition .html");
+    writeFileSync(resolve(DIST, "privacy.html"), privacyPage(template), "utf8");
+    console.log("[prerender] wrote → whitepaper, dashboard, why-back-she, simulator, petition, privacy .html");
   } catch (e) {
     console.warn(`[prerender] whitepaper/dashboard/why-back-she snapshot failed (${e})`);
   }

@@ -481,7 +481,7 @@ const Index = () => {
               {loading ? "..." : "Subscribe"}
             </Button>
           </form>
-          <p className="text-xs text-muted-foreground mt-5">No spam. Unsubscribe anytime.</p>
+          <p className="text-xs text-muted-foreground mt-5">No spam. Unsubscribe anytime. See our <Link to="/privacy" className="text-accent hover:underline">privacy policy</Link>.</p>
         </div>
       </section>
       {/* Footer is rendered globally via <SiteFooter /> in App.tsx (Phase 2.1 Task 6c) */}

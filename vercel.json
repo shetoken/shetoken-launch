@@ -12,6 +12,7 @@
     { "source": "/why-back-she", "destination": "/why-back-she.html" },
     { "source": "/simulator", "destination": "/simulator.html" },
     { "source": "/petition", "destination": "/petition.html" },
+    { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "crons": [

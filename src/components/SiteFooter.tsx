@@ -31,6 +31,7 @@ export function SiteFooter() {
           <Link to="/petition" className="hover:text-foreground transition-smooth">Petition</Link>
           <Link to="/marketplace" className="hover:text-foreground transition-smooth">SHEconomy</Link>
           <Link to="/community" className="hover:text-foreground transition-smooth">Community</Link>
+          <Link to="/privacy" className="hover:text-foreground transition-smooth">Privacy</Link>
           <a href="mailto:contact@shetoken.org" className="hover:text-foreground transition-smooth">Contact</a>
         </div>
       </div>

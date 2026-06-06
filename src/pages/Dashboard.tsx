@@ -51,7 +51,7 @@ const INDEX_CONFIGS: IndexConfig[] = [
   {
     label: "SHE Score", desc: "Women's Empowerment",
     tailwind: "text-amber-400  border-amber-400/30  bg-amber-400/5",
-    accent: "#f59e0b", scoreField: "wei_score",
+    accent: "#f59e0b", scoreField: "she_score",
     title: "SHE Score",
     formula: [
       { label: "Empowerment",      weight: "×15%" },
@@ -227,7 +227,7 @@ function ScoreBar({ value, color = "" }: { value: number; color?: string }) {
   );
 }
 
-type SortKey = "rank" | "wei_score" | "country";
+type SortKey = "rank" | "she_score" | "country";
 type ViewMode = "map" | "table";
 
 /* ── Global average helper ── */
@@ -259,7 +259,7 @@ export default function Dashboard() {
   });
 
   const { data: countriesRes, isLoading: loadingCountries } = useQuery({
-    queryKey: ["wei-countries"],
+    queryKey: ["she-countries"],
     queryFn:  () => api.wei.countries(105),
     staleTime: 5 * 60 * 1000,
   });
@@ -353,7 +353,7 @@ export default function Dashboard() {
       // Build a dataset per index (only those with loaded data)
       type DS = { label: string; values: number[] };
       const datasets: DS[] = [
-        { label: "SHE Score", values: countries.map(c => c.wei_score).filter(v => v > 0) },
+        { label: "SHE Score", values: countries.map(c => c.she_score).filter(v => v > 0) },
       ];
 
       const extras = [
@@ -394,7 +394,7 @@ export default function Dashboard() {
   /* ── Selected country's score for the active index ── */
   const selectedIndexScore = useMemo<number | null>(() => {
     if (!selectedCountry) return null;
-    if (isWEI) return selectedCountry.wei_score;
+    if (isWEI) return selectedCountry.she_score;
     return scoreOverride?.get(selectedCountry.iso_code) ?? null;
   }, [selectedCountry, isWEI, scoreOverride]);
 
@@ -404,7 +404,7 @@ export default function Dashboard() {
       return [...countries]
         .sort((a, b) => a.rank - b.rank)
         .slice(0, 30)
-        .map((c) => ({ iso: c.iso_code, country: c.country, score: c.wei_score, weiData: c }));
+        .map((c) => ({ iso: c.iso_code, country: c.country, score: c.she_score, weiData: c }));
     }
     if (!activeIndexData?.length) return [];
     const weiMap = new Map(countries.map((c) => [c.iso_code, c]));
@@ -434,7 +434,7 @@ export default function Dashboard() {
       (q) => q.data as IndexScore[] | undefined
     );
     return {
-      "SHE Score":      summary?.global_wei_score          ?? null,
+      "SHE Score":      summary?.global_she_score          ?? null,
       GPI:        summary?.gpi_global_avg            ?? avgScore(gpiD,  "gpi_score"),
       SVI:        summary?.svi_global_avg            ?? avgScore(sviD,  "svi_score"),
       WADI:       summary?.wadi_global_avg           ?? avgScore(wadiD, "wadi_score"),
@@ -502,7 +502,7 @@ export default function Dashboard() {
                 {loadingSummary ? (
                   <span className="text-muted-foreground">loading…</span>
                 ) : (
-                  <span className="text-gradient">{summary?.global_wei_score}</span>
+                  <span className="text-gradient">{summary?.global_she_score}</span>
                 )}
                 <span className="text-muted-foreground font-normal text-xl ml-2">/ 100</span>
               </h1>
@@ -883,7 +883,7 @@ export default function Dashboard() {
                       {/* SHE Score */}
                       <div className="flex items-baseline gap-2 mb-1">
                         <span className={`font-bold text-gradient leading-none ${!isWEI ? "text-3xl" : "text-5xl"}`}>
-                          {selectedCountry.wei_score.toFixed(1)}
+                          {selectedCountry.she_score.toFixed(1)}
                         </span>
                         <span className="text-muted-foreground text-sm">
                           {!isWEI ? "SHE Score" : ""} / 100
@@ -1141,7 +1141,7 @@ export default function Dashboard() {
                       <th className="text-left px-4 py-3 text-muted-foreground font-medium hidden md:table-cell">Region</th>
                       <th className="text-left px-4 py-3 text-muted-foreground font-medium hidden md:table-cell">Ticker</th>
                       <th className="text-left px-4 py-3 text-muted-foreground font-medium">
-                        <button onClick={() => toggleSort("wei_score")} className="flex items-center gap-1 hover:text-foreground">
+                        <button onClick={() => toggleSort("she_score")} className="flex items-center gap-1 hover:text-foreground">
                           SHE Score <ArrowUpDown className="h-3 w-3" />
                         </button>
                       </th>
@@ -1174,7 +1174,7 @@ export default function Dashboard() {
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          <ScoreBar value={c.wei_score} />
+                          <ScoreBar value={c.she_score} />
                         </td>
                         <td className="px-4 py-3 hidden lg:table-cell">
                           {c.weekly_delta === 0 ? (

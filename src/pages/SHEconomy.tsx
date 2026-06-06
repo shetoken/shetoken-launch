@@ -31,7 +31,7 @@ function Spark({ data, color }: { data: number[]; color: string }) {
 
 export default function SHEconomy() {
   const { data: summary } = useQuery({ queryKey: ["summary"], queryFn: api.summary, staleTime: 5 * 60 * 1000 });
-  const globalWEI = summary?.global_wei_score ?? 53.8;
+  const globalWEI = summary?.global_she_score ?? 53.8;
   const weiRef = useRef(globalWEI);
   weiRef.current = globalWEI;
 

@@ -338,13 +338,13 @@ export default function CountryDetail() {
 
   /* ── All countries (for the report's world map + SHE Score distribution) ── */
   const { data: allCountriesRes } = useQuery({
-    queryKey: ["wei-countries", 105], queryFn: () => api.wei.countries(105), staleTime: 10 * 60 * 1000,
+    queryKey: ["she-countries", 105], queryFn: () => api.wei.countries(105), staleTime: 10 * 60 * 1000,
   });
 
   /* ── State-level safety data, for countries that have sub-national scores ── */
   const subSafetyName = country ? SUBNATIONAL_SAFETY[country.iso_code] : undefined;
   const { data: statesRes } = useQuery({
-    queryKey: ["wei-states", subSafetyName],
+    queryKey: ["she-states", subSafetyName],
     queryFn: () => api.wei.states(subSafetyName!),
     enabled: !!subSafetyName,
     staleTime: 30 * 60 * 1000,
@@ -363,7 +363,7 @@ export default function CountryDetail() {
 
   const chartData = history?.data?.map((row) => ({
     year: row.year,
-    score: row.wei_score ?? row.score,
+    score: row.she_score ?? row.score,
   })).filter((r) => r.score != null) ?? [];
 
   const tierInfo = country ? TIER_INFO[country.tier] : null;
@@ -377,7 +377,7 @@ export default function CountryDetail() {
       return;
     }
     const indexes = [
-      { code: "SHE Score", label: "Women's Empowerment", accent: "#f59e0b", score: country.wei_score ?? null },
+      { code: "SHE Score", label: "Women's Empowerment", accent: "#f59e0b", score: country.she_score ?? null },
       ...INDEX_STRIP.map((idx, i) => {
         const raw = indexQueries[i].data as Record<string, unknown> | undefined;
         const score = raw
@@ -406,21 +406,21 @@ export default function CountryDetail() {
       performanceSummary: performanceBlurb(country),
       violence: { score: country.violence_penalty_score ?? 0, label: vs.label, context: vs.context },
       states: (statesRes?.data ?? []).map((s) => ({
-        state: s.state, safety_justice_score: s.safety_justice_score ?? 0, wei_score: s.wei_score,
+        state: s.state, safety_justice_score: s.safety_justice_score ?? 0, she_score: s.she_score,
       })),
       global: summary ? {
-        weiAvg: summary.global_wei_score,
+        weiAvg: summary.global_she_score,
         countriesScored: summary.countries_scored,
         highest: { country: summary.highest_country, score: summary.highest_score },
         lowest: { country: summary.lowest_country, score: summary.lowest_score },
         tiers: [summary.tier_1_count, summary.tier_2_count, summary.tier_3_count, summary.tier_4_count] as [number, number, number, number],
         indexAvgs: {
-          "SHE Score": summary.global_wei_score, GPI: summary.gpi_global_avg, SVI: summary.svi_global_avg,
+          "SHE Score": summary.global_she_score, GPI: summary.gpi_global_avg, SVI: summary.svi_global_avg,
           WADI: summary.wadi_global_avg, WEVI: summary.wevi_global_avg, WHI: summary.whi_global_avg,
           WVI: summary.wvi_global_avg, Compliance: summary.compliance_global_avg,
         },
       } : undefined,
-      allCountries: (allCountriesRes?.data ?? []).map((x) => ({ iso_code: x.iso_code, wei_score: x.wei_score ?? 0 })),
+      allCountries: (allCountriesRes?.data ?? []).map((x) => ({ iso_code: x.iso_code, she_score: x.she_score ?? 0 })),
       lifepath: (lifepath?.stages ?? []).map((s) => ({
         age_band: s.age_band, headline: s.headline, cohort: s.cohort,
         detail: s.detail, felt: s.felt, source: s.source,
@@ -448,7 +448,7 @@ export default function CountryDetail() {
         <CountrySEO
           country={country.country}
           iso={country.iso_code}
-          score={Number(country.wei_score?.toFixed(1) ?? 0)}
+          score={Number(country.she_score?.toFixed(1) ?? 0)}
           region={country.region}
         />
       )}
@@ -510,7 +510,7 @@ export default function CountryDetail() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-7xl font-bold text-gradient">{country.wei_score?.toFixed(1)}</div>
+                  <div className="text-7xl font-bold text-gradient">{country.she_score?.toFixed(1)}</div>
                   <div className="text-muted-foreground text-sm">SHE Score / 100</div>
                   {country.weekly_delta !== 0 && (
                     <div className={`flex items-center justify-end gap-1 mt-1 text-sm ${country.weekly_delta > 0 ? "text-emerald-400" : "text-red-400"}`}>
@@ -569,7 +569,7 @@ export default function CountryDetail() {
                   }`}
                 >
                   <div className="text-[10px] font-bold font-mono text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded px-1.5 py-0.5 inline-block mb-2">SHE Score</div>
-                  <div className="text-2xl font-bold text-gradient leading-none mb-1">{country.wei_score?.toFixed(1)}</div>
+                  <div className="text-2xl font-bold text-gradient leading-none mb-1">{country.she_score?.toFixed(1)}</div>
                   <div className="text-[10px] text-muted-foreground leading-tight">Women's<br />Empowerment</div>
                 </button>
 
@@ -642,7 +642,7 @@ export default function CountryDetail() {
                     <div className="grid sm:grid-cols-2 gap-3">
                       <div className="rounded-xl border border-amber-400/30 bg-amber-400/5 p-4">
                         <div className="text-xs text-muted-foreground">SHE Score</div>
-                        <div className="text-lg font-bold text-accent">{(country.wei_score ?? 0).toFixed(1)} <span className="text-xs text-muted-foreground">/100</span></div>
+                        <div className="text-lg font-bold text-accent">{(country.she_score ?? 0).toFixed(1)} <span className="text-xs text-muted-foreground">/100</span></div>
                         <div className="text-[10px] text-muted-foreground mt-1">SHE Foundation · 2026</div>
                       </div>
                       {ext.wef_gggi && <ExtTile name="WEF Global Gender Gap" value={`${ext.wef_gggi.score} · rank #${ext.wef_gggi.rank}`} meta={`World Economic Forum · ${ext.wef_gggi.year}`} />}

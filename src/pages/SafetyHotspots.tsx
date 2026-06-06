@@ -99,7 +99,7 @@ export default function SafetyHotspots() {
   const [stateSort, setStateSort] = useState<"least" | "safest" | "name">("least");
 
   const { data: countriesRes, isLoading } = useQuery({
-    queryKey: ["wei-countries"], queryFn: () => api.wei.countries(105), staleTime: 10 * 60 * 1000,
+    queryKey: ["she-countries"], queryFn: () => api.wei.countries(105), staleTime: 10 * 60 * 1000,
   });
   const countries = useMemo(() => countriesRes?.data ?? [], [countriesRes]);
 
@@ -134,7 +134,7 @@ export default function SafetyHotspots() {
   // Sub-national (state) drill-down for supported countries
   const subName = sel ? SUBNATIONAL[sel.iso_code] : undefined;
   const { data: statesRes, isLoading: loadingStates } = useQuery({
-    queryKey: ["wei-states", subName],
+    queryKey: ["she-states", subName],
     queryFn: () => api.wei.states(subName!),
     enabled: !!subName,
     staleTime: 30 * 60 * 1000,

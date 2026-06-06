@@ -80,7 +80,7 @@ export default function Compare() {
 
   /* ── All SHE Score countries (for picker autocomplete) ── */
   const { data: countriesRes } = useQuery({
-    queryKey: ["wei-countries"],
+    queryKey: ["she-countries"],
     queryFn: () => api.wei.countries(105),
     staleTime: 5 * 60 * 1000,
   });
@@ -244,7 +244,7 @@ export default function Compare() {
                       <Plus className="h-3.5 w-3.5 text-accent shrink-0" />
                       <span className="flex-1">{c.country}</span>
                       <span className="text-xs text-muted-foreground font-mono">{c.iso_code}</span>
-                      <span className="text-xs font-bold text-gradient">{c.wei_score.toFixed(1)}</span>
+                      <span className="text-xs font-bold text-gradient">{c.she_score.toFixed(1)}</span>
                     </button>
                   ))}
                 </div>
@@ -403,7 +403,7 @@ export default function Compare() {
                       </div>
                       <div className="text-right">
                         <div className="text-4xl font-bold" style={{ color }}>
-                          {c.wei_score.toFixed(1)}
+                          {c.she_score.toFixed(1)}
                         </div>
                         <div className="text-xs text-muted-foreground">/ 100</div>
                         {c.weekly_delta !== 0 && (
@@ -499,7 +499,7 @@ export default function Compare() {
                 </thead>
                 <tbody>
                   {[
-                    { label: "SHE Score",         fn: (c: CountryWEI) => c.wei_score.toFixed(1) },
+                    { label: "SHE Score",         fn: (c: CountryWEI) => c.she_score.toFixed(1) },
                     { label: "Global Rank",        fn: (c: CountryWEI) => `#${c.rank}` },
                     { label: "Tier",               fn: (c: CountryWEI) => `${c.tier} — ${TIER_LABELS[c.tier]?.label}` },
                     { label: "Empowerment",        fn: (c: CountryWEI) => (c.empowerment_score ?? 0).toFixed(1) },

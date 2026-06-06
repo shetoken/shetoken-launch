@@ -82,7 +82,7 @@ interface WorldMapProps {
   /**
    * When a non-SHE Score index is active, supply a map of iso_code → score.
    * Countries missing from this map are rendered grey (no data).
-   * When undefined, falls back to each country's wei_score.
+   * When undefined, falls back to each country's she_score.
    */
   scoreOverride?: Map<string, number>;
   /** Index name shown in the tooltip, e.g. "SVI". Defaults to "SHE Score". */
@@ -139,7 +139,7 @@ export function WorldMap({
       if (scoreOverride) {
         return scoreOverride.get(iso3) ?? null;   // null = grey, not in index
       }
-      return scoreMap.get(iso3)?.wei_score ?? null;
+      return scoreMap.get(iso3)?.she_score ?? null;
     },
     [scoreOverride, scoreMap]
   );

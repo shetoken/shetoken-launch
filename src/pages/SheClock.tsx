@@ -139,7 +139,7 @@ export default function SheClock() {
     return () => clearInterval(id);
   }, []);
 
-  const { data: countriesRes } = useQuery({ queryKey: ["wei-countries"], queryFn: () => api.wei.countries(105), staleTime: 30 * 60 * 1000 });
+  const { data: countriesRes } = useQuery({ queryKey: ["she-countries"], queryFn: () => api.wei.countries(105), staleTime: 30 * 60 * 1000 });
   const list = useMemo(() => (countriesRes?.data ?? []).map((c) => ({ iso_code: c.iso_code, country: c.country }))
     .sort((a, b) => a.country.localeCompare(b.country)), [countriesRes]);
 

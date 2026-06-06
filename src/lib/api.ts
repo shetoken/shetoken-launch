@@ -6,6 +6,19 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json();
 }
 
+/* ── Field adapter ────────────────────────────────────────────────────────
+   The backend API still emits `wei_score` / `global_wei_score`. The frontend
+   speaks `she_score` / `global_she_score`. We normalise once, here, at the API
+   boundary — every component downstream uses the SHE-named fields. (The raw
+   `wei_score` is preserved on the object too, so backend-shaped field
+   accessors keep working.) Renaming the API itself is a separate backend
+   decision; the `/v1/wei/*` URLs are unchanged. */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+const normCountry = (c: any): CountryWEI => ({ ...c, she_score: c.she_score ?? c.wei_score });
+const normState = (s: any): StateScore => ({ ...s, she_score: s.she_score ?? s.wei_score });
+const normSummary = (s: any): Summary => ({ ...s, global_she_score: s.global_she_score ?? s.global_wei_score });
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
 /** Weekly scan stats emitted by the SHEtoken data agent. */
 export interface ScanStats {
   week: string;
@@ -24,7 +37,7 @@ export interface ScanStats {
 }
 
 export interface Summary {
-  global_wei_score: number;
+  global_she_score: number;
   countries_scored: number;
   india_wei: number;
   tier_1_count: number;
@@ -68,7 +81,7 @@ export interface CountryWEI {
   region: string;
   tier: number;
   population_millions: number;
-  wei_score: number;
+  she_score: number;
   weekly_delta: number;
   empowerment_score: number;
   education_score: number;
@@ -95,7 +108,7 @@ export interface StateScore {
   state: string;
   state_code: string;
   region?: string;
-  wei_score: number;
+  she_score: number;
   safety_justice_score?: number;
   [key: string]: unknown;
 }
@@ -188,13 +201,14 @@ export interface MethodologyProvenance {
 }
 
 export const api = {
-  summary: () => apiFetch<Summary>('/v1/summary'),
+  summary: () => apiFetch<Summary>('/v1/summary').then(normSummary),
 
   wei: {
     countries: (limit = 105) =>
-      apiFetch<CountryListResponse>(`/v1/wei/countries?limit=${limit}&sort=wei_score&order=desc`),
+      apiFetch<CountryListResponse>(`/v1/wei/countries?limit=${limit}&sort=wei_score&order=desc`)
+        .then((r) => ({ ...r, data: (r.data ?? []).map(normCountry) })),
     country: (iso: string) =>
-      apiFetch<CountryWEI>(`/v1/wei/countries/${iso}`),
+      apiFetch<CountryWEI>(`/v1/wei/countries/${iso}`).then(normCountry),
     history: (iso: string) =>
       apiFetch<CountryHistory>(`/v1/wei/history/country/${iso}`),
     globalTrend: () =>
@@ -202,9 +216,10 @@ export const api = {
     allHistory: () =>
       apiFetch<AllCountryHistory>('/v1/wei/history/all-countries'),
     leaderboard: (limit = 10) =>
-      apiFetch<CountryWEI[]>(`/v1/wei/leaderboard?limit=${limit}`),
+      apiFetch<CountryWEI[]>(`/v1/wei/leaderboard?limit=${limit}`).then((a) => (a ?? []).map(normCountry)),
     states: (country: string) =>
-      apiFetch<StateListResponse>(`/v1/wei/states/${country}`),
+      apiFetch<StateListResponse>(`/v1/wei/states/${country}`)
+        .then((r) => ({ ...r, data: (r.data ?? []).map(normState) })),
   },
 
   gpi: {

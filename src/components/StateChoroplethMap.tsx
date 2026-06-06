@@ -71,7 +71,7 @@ export function StateChoroplethMap({
                   onMouseEnter={(e) => { setHover({
                     name: st?.state ?? gname,
                     score: st ? (st.safety_justice_score ?? 0) : null,
-                    wei: st ? (st.wei_score ?? 0) : null,
+                    wei: st ? (st.she_score ?? 0) : null,
                     advisory: adv, ...pos(e),
                   }); onHoverKey?.(gkey); }}
                   onMouseLeave={() => { setHover(null); onHoverKey?.(null); }}

@@ -12,7 +12,7 @@ export interface ReportTrendPoint { year: number; score: number; }
 export interface ReportLifeStage { age_band: string; headline: string; cohort?: string; detail?: string; felt?: string; source?: string; }
 export interface ReportMilestone { label: string; reached: number; }
 export interface ReportViolence { score: number; label: string; context: string; }
-export interface ReportState { state: string; safety_justice_score: number; wei_score?: number; }
+export interface ReportState { state: string; safety_justice_score: number; she_score?: number; }
 export interface ReportGlobal {
   weiAvg: number;
   countriesScored: number;
@@ -45,7 +45,7 @@ export async function downloadCountryReport(opts: {
   milestones?: ReportMilestone[];
   states?: ReportState[];
   global?: ReportGlobal;
-  allCountries?: { iso_code: string; wei_score: number }[];
+  allCountries?: { iso_code: string; she_score: number }[];
   methodRows?: Record<string, Record<string, unknown> | undefined>;
   provenance?: ProvByCode;
 }) {
@@ -55,11 +55,11 @@ export async function downloadCountryReport(opts: {
   const global = opts.global;
   const methodRows = opts.methodRows;
   const provenance = opts.provenance;
-  const distribution = (opts.allCountries ?? []).map((x) => x.wei_score).filter((v) => typeof v === "number");
+  const distribution = (opts.allCountries ?? []).map((x) => x.she_score).filter((v) => typeof v === "number");
   const logo = await getLogoDataUrl();
   const mapPng = opts.allCountries?.length
     ? await getCountryMapPng({
-        scoreByIso: Object.fromEntries(opts.allCountries.map((x) => [x.iso_code, x.wei_score])),
+        scoreByIso: Object.fromEntries(opts.allCountries.map((x) => [x.iso_code, x.she_score])),
         selectedIso: c.iso_code,
       })
     : null;
@@ -131,7 +131,7 @@ export async function downloadCountryReport(opts: {
   doc.text(c.country, M, y + 12);
   doc.setTextColor(...C.gold);
   doc.setFontSize(32);
-  doc.text(`${c.wei_score?.toFixed(1)}`, PW - M, y + 14, { align: "right" });
+  doc.text(`${c.she_score?.toFixed(1)}`, PW - M, y + 14, { align: "right" });
   doc.setTextColor(...C.mut);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
@@ -270,7 +270,7 @@ export async function downloadCountryReport(opts: {
       doc.setDrawColor(...C.mut); doc.setLineWidth(0.7); doc.line(px(ga), y0 + 4, px(ga), y0 + ch - 6);
       doc.setFontSize(6.5); doc.setTextColor(...C.mut); doc.text(`global avg ${ga.toFixed(1)}`, px(ga) + 3, y0 + 12);
       // this country marker (gold dashed)
-      const cs = c.wei_score ?? 0;
+      const cs = c.she_score ?? 0;
       doc.setDrawColor(...C.gold); doc.setLineWidth(1); doc.setLineDashPattern([2, 2], 0);
       doc.line(px(cs), y0 + 4, px(cs), y0 + ch - 6);
       doc.setLineDashPattern([], 0);
@@ -285,7 +285,7 @@ export async function downloadCountryReport(opts: {
     // Snapshot — 4 cells (2 × 2)
     const cells: [string, string, RGB][] = [
       ["Global SHE Score average", `${global.weiAvg.toFixed(1)} / 100`, C.gold],
-      [`${c.country} · rank #${c.rank} of ${global.countriesScored}`, `${(c.wei_score ?? 0).toFixed(1)} / 100`, C.ink],
+      [`${c.country} · rank #${c.rank} of ${global.countriesScored}`, `${(c.she_score ?? 0).toFixed(1)} / 100`, C.ink],
       ["Highest", `${global.highest.country} · ${global.highest.score.toFixed(1)}`, C.emerald],
       ["Lowest", `${global.lowest.country} · ${global.lowest.score.toFixed(1)}`, C.red],
     ];

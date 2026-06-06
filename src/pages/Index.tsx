@@ -253,7 +253,7 @@ const Index = () => {
           </div>
           <div className="text-center mt-12">
             <Button asChild variant="outline" className="border-border/60 bg-card/40">
-              <Link to="/dashboard">See live scores for 105 countries <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              <Link to="/dashboard">Explore the scores <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
           </div>
         </div>

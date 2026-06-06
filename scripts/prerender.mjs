@@ -188,6 +188,32 @@ function simplePage(template, { path, title, desc, bodyHtml }) {
     .replace(/<div id="root"><\/div>/, snapshot);
 }
 
+function communityPage(template) {
+  return simplePage(template, {
+    path: "/community",
+    title: "Join the SHEtoken Community — A Movement for Women | SHEtoken",
+    desc: "Be part of the SHEtoken movement: subscribe to the newsletter, join the women-first SHE Community, register as a partner or NGO, or open a shop on SHEconomy.",
+    bodyHtml:
+      `<h1>Be part of the SHEtoken community.</h1>` +
+      `<p>A movement to make women's empowerment measurable — and a private, women-first space built for women. Join as a member (women &amp; non-binary), a partner or sponsor, an NGO or nonprofit, or a women-owned business.</p>` +
+      `<p>Partners, foundations and individuals can also fund scholarship and microfinance drives, disbursed by vetted partner NGOs. Or just subscribe to the newsletter — WEI reports, safety signals and early-access invites, no account needed.</p>` +
+      `<p><a href="/drives">Scholarship &amp; microfinance drives</a> · <a href="/initiatives">Initiatives we celebrate</a> · <a href="/why">Why $SHE exists</a>.</p>`,
+  });
+}
+
+function labPage(template) {
+  return simplePage(template, {
+    path: "/lab",
+    title: "The Methodology Lab — v3 Shadow Scores in Validation | SHEtoken",
+    desc: "The Methodology Lab is where the next version of the SHE Score is validated in public. v3 candidate pillars are shadow-scored openly until they meet the published data standard. Shadow scores never affect published scores or $SHE supply mechanics.",
+    bodyHtml:
+      `<h1>The Methodology Lab</h1>` +
+      `<p>SHADOW — v3 in validation. Does not affect published scores or $SHE supply mechanics.</p>` +
+      `<p>The SHE Score ships conservatively: every pillar must meet the published data standard — an independent institutional source covering at least 80% of scored countries, published within two years — before it can affect official scores. The Lab is where v3 candidate pillars are shadow-scored in the open until they qualify.</p>` +
+      `<p>v3 expansion pillars in validation: Bodily Autonomy, Dignity &amp; Welfare, Digital &amp; Social, and the expanded Safety &amp; Justice indicators. <a href="/methodology">Read the methodology</a>.</p>`,
+  });
+}
+
 function privacyPage(template) {
   return simplePage(template, {
     path: "/privacy",
@@ -357,7 +383,9 @@ async function main() {
     writeFileSync(resolve(DIST, "simulator.html"), simulatorPage(template), "utf8");
     writeFileSync(resolve(DIST, "petition.html"), petitionPage(template), "utf8");
     writeFileSync(resolve(DIST, "privacy.html"), privacyPage(template), "utf8");
-    console.log("[prerender] wrote → whitepaper, dashboard, why-back-she, simulator, petition, privacy .html");
+    writeFileSync(resolve(DIST, "community.html"), communityPage(template), "utf8");
+    writeFileSync(resolve(DIST, "lab.html"), labPage(template), "utf8");
+    console.log("[prerender] wrote → whitepaper, dashboard, why-back-she, simulator, petition, privacy, community, lab .html");
   } catch (e) {
     console.warn(`[prerender] whitepaper/dashboard/why-back-she snapshot failed (${e})`);
   }

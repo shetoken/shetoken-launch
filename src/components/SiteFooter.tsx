@@ -31,9 +31,12 @@ export function SiteFooter() {
         </div>
         <div className="flex flex-wrap gap-x-6 gap-y-2 justify-center">
           <Link to="/dashboard" className="hover:text-foreground transition-smooth">Dashboard</Link>
+          <Link to="/lab" className="hover:text-foreground transition-smooth">The Lab</Link>
           <Link to="/index-landscape" className="hover:text-foreground transition-smooth">The Landscape</Link>
           <Link to="/methodology" className="hover:text-foreground transition-smooth">Methodology</Link>
           <Link to="/whitepaper" className="hover:text-foreground transition-smooth">Whitepaper</Link>
+          <Link to="/why-back-she" className="hover:text-foreground transition-smooth">Why Back SHE</Link>
+          <Link to="/simulator" className="hover:text-foreground transition-smooth">Simulator</Link>
           <Link to="/why" className="hover:text-foreground transition-smooth">Why $SHE</Link>
           <Link to="/petition" className="hover:text-foreground transition-smooth">Petition</Link>
           <Link to="/marketplace" className="hover:text-foreground transition-smooth">SHEconomy</Link>

@@ -265,6 +265,8 @@ export default function Dashboard() {
   });
 
   const countries = countriesRes?.data ?? [];
+  // A3 — graceful fallback when the live data API is unavailable.
+  const apiDown = !loadingCountries && countries.length === 0;
 
   /* ── Lazy-loaded non-SHE Score index data ── */
   const { data: activeIndexData, isLoading: loadingIndex } = useQuery({
@@ -489,6 +491,21 @@ export default function Dashboard() {
       <Nav />
 
       <main className="pt-24 pb-20 container max-w-7xl">
+
+        {/* ── LIVE-DATA FALLBACK (A3) ── */}
+        {apiDown && (
+          <div className="mb-7 rounded-2xl border border-amber-400/30 bg-amber-400/5 p-5 flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <div className="font-semibold text-foreground">Live data temporarily unavailable.</div>
+              <p className="text-muted-foreground mt-0.5">
+                The scoring API is being upgraded. The published methodology and the baseline dataset are available now —{" "}
+                <Link to="/methodology" className="text-accent hover:underline">read the methodology</Link>{" "}or browse the{" "}
+                <a href="https://github.com/shetoken/shetoken-launch/tree/main/data" target="_blank" rel="noreferrer" className="text-accent hover:underline">baseline data CSVs on GitHub</a>. Live country scores will return shortly.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* ── COMPACT HEADER ── */}
         <section className="mb-7">

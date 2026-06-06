@@ -43,6 +43,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://www.shetoken.org/lab</loc>
+    <lastmod>2026-06-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://www.shetoken.org/methodology</loc>
     <lastmod>2026-06-06</lastmod>
     <changefreq>monthly</changefreq>

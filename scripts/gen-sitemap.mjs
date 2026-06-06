@@ -19,6 +19,7 @@ const STATIC = [
   { loc: "/petition", priority: "0.7", freq: "weekly" },
   { loc: "/privacy", priority: "0.3", freq: "yearly" },
   { loc: "/index-landscape", priority: "0.7", freq: "monthly" },
+  { loc: "/lab", priority: "0.6", freq: "weekly" },
   { loc: "/methodology", priority: "0.7", freq: "monthly" },
   { loc: "/whitepaper", priority: "0.7", freq: "monthly" },
   { loc: "/why", priority: "0.6", freq: "monthly" },

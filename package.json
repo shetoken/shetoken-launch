@@ -7,7 +7,7 @@
     "dev": "vite",
     "prebuild": "node scripts/gen-sitemap.mjs",
     "build": "vite build",
-    "postbuild": "node scripts/prerender.mjs",
+    "postbuild": "node scripts/prerender.mjs && node scripts/check-banned.mjs",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",

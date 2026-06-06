@@ -27,6 +27,7 @@ import Drives from "./pages/Drives.tsx";
 import Initiatives from "./pages/Initiatives.tsx";
 import IndexLandscape from "./pages/IndexLandscape.tsx";
 import Methodology from "./pages/Methodology.tsx";
+import Lab from "./pages/Lab.tsx";
 import WhyBackShe from "./pages/WhyBackShe.tsx";
 import Petition from "./pages/Petition.tsx";
 import Privacy from "./pages/Privacy.tsx";
@@ -74,6 +75,7 @@ const App = () => (
               <Route path="/initiatives" element={<Initiatives />} />
               <Route path="/index-landscape" element={<IndexLandscape />} />
               <Route path="/methodology" element={<Methodology />} />
+              <Route path="/lab" element={<Lab />} />
               <Route path="/why-back-she" element={<WhyBackShe />} />
               <Route path="/petition" element={<Petition />} />
               <Route path="/privacy" element={<Privacy />} />

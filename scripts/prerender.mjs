@@ -188,6 +188,19 @@ function simplePage(template, { path, title, desc, bodyHtml }) {
     .replace(/<div id="root"><\/div>/, snapshot);
 }
 
+function petitionPage(template) {
+  return simplePage(template, {
+    path: "/petition",
+    title: "Sign the Petition — Demand the World Measure Women's Progress | SHEtoken",
+    desc: "Every major gender index is a report nobody is accountable to. Sign to support a public, auditable, continuously updated SHE Score — and an instrument that makes the number matter.",
+    bodyHtml:
+      `<h1>Demand the world measure women's progress.</h1>` +
+      `<p>Every major gender index is a report nobody is accountable to — published occasionally, read by a few, with no consequence attached to the number moving. Sign to support a public, auditable, continuously updated SHE Score: the same institutional data, scored sub-nationally, updated quarterly for registered governments, and wired to an instrument so that progress and regression both carry weight.</p>` +
+      `<p>We publish only your first name, last initial and country — never your full surname or email.</p>` +
+      `<p>Want to do more than sign? <a href="/why-back-she">See why capital should back the SHE Score</a>.</p>`,
+  });
+}
+
 function simulatorPage(template) {
   return simplePage(template, {
     path: "/simulator",
@@ -329,7 +342,8 @@ async function main() {
     writeFileSync(resolve(DIST, "dashboard.html"), dashboardPage(template), "utf8");
     writeFileSync(resolve(DIST, "why-back-she.html"), whyBackShePage(template), "utf8");
     writeFileSync(resolve(DIST, "simulator.html"), simulatorPage(template), "utf8");
-    console.log("[prerender] wrote → dist/whitepaper.html, dist/dashboard.html, dist/why-back-she.html, dist/simulator.html");
+    writeFileSync(resolve(DIST, "petition.html"), petitionPage(template), "utf8");
+    console.log("[prerender] wrote → whitepaper, dashboard, why-back-she, simulator, petition .html");
   } catch (e) {
     console.warn(`[prerender] whitepaper/dashboard/why-back-she snapshot failed (${e})`);
   }

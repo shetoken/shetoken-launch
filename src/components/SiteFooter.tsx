@@ -28,6 +28,7 @@ export function SiteFooter() {
           <Link to="/methodology" className="hover:text-foreground transition-smooth">Methodology</Link>
           <Link to="/whitepaper" className="hover:text-foreground transition-smooth">Whitepaper</Link>
           <Link to="/why" className="hover:text-foreground transition-smooth">Why $SHE</Link>
+          <Link to="/petition" className="hover:text-foreground transition-smooth">Petition</Link>
           <Link to="/marketplace" className="hover:text-foreground transition-smooth">SHEconomy</Link>
           <Link to="/community" className="hover:text-foreground transition-smooth">Community</Link>
           <a href="mailto:contact@shetoken.org" className="hover:text-foreground transition-smooth">Contact</a>

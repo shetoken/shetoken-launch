@@ -166,6 +166,57 @@ function methodologyPage(template) {
     .replace(/<div id="root"><\/div>/, snapshot);
 }
 
+/* Static snapshot for a simple route — sets unique title/desc/canonical and
+   injects a real content body so crawlers never see homepage content with a
+   mismatched canonical (Phase 2.1 Task 3). */
+function simplePage(template, { path, title, desc, bodyHtml }) {
+  const url = `${BASE}${path}`;
+  const snapshot =
+    `<div id="root"><main style="max-width:820px;margin:40px auto;padding:0 16px;font-family:system-ui,sans-serif;line-height:1.5;color:#1e1b26">` +
+    `<nav><a href="/">SHEtoken</a> · <a href="/dashboard">Dashboard</a> · <a href="/index-landscape">The Landscape</a> · <a href="/methodology">Methodology</a> · <a href="/whitepaper">Whitepaper</a> · <a href="/community">Community</a></nav>` +
+    bodyHtml +
+    `</main></div>`;
+  return template
+    .replace(/<title>[\s\S]*?<\/title>/, `<title>${esc(title)}</title>`)
+    .replace(/(<meta name="description" content=")[\s\S]*?(">)/, `$1${esc(desc)}$2`)
+    .replace(/(<link rel="canonical" href=")[\s\S]*?(")/, `$1${url}$2`)
+    .replace(/(<meta property="og:url" content=")[\s\S]*?(")/, `$1${url}$2`)
+    .replace(/(<meta property="og:title" content=")[\s\S]*?(">)/, `$1${esc(title)}$2`)
+    .replace(/(<meta name="twitter:title" content=")[\s\S]*?(">)/, `$1${esc(title)}$2`)
+    .replace(/(<meta property="og:description" content=")[\s\S]*?(">)/, `$1${esc(desc)}$2`)
+    .replace(/(<meta name="twitter:description" content=")[\s\S]*?(">)/, `$1${esc(desc)}$2`)
+    .replace(/<div id="root"><\/div>/, snapshot);
+}
+
+function whitepaperPage(template) {
+  return simplePage(template, {
+    path: "/whitepaper",
+    title: "SHEtoken Whitepaper — The SHE Score & $SHE Token | SHEtoken",
+    desc: "The SHEtoken whitepaper: how the SHE Score (v2) — five LIVE weighted pillars — governs $SHE token-supply mechanics, with the tier system, risk disclosures and roadmap. Independent; informational only, not financial advice.",
+    bodyHtml:
+      `<h1>SHEtoken Whitepaper</h1>` +
+      `<p>$SHE is a data-backed token whose supply is governed by the SHE Score — an independent 0–100 measure of women's outcomes across 105 countries, built from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data.</p>` +
+      `<h2>The SHE Score (v2) formula</h2>` +
+      `<pre>SHE Score (v2) = (Empowerment × 0.25) + (Education & Literacy × 0.20) + (Economic Inclusion × 0.20) + (Health & Survival × 0.15) − (Safety / Crime Penalty × 0.20)</pre>` +
+      `<p>Four further pillars (Bodily Autonomy, Dignity & Welfare, Digital & Social, expanded Safety & Justice) are part of the full framework but are in validation and do not yet affect published scores or $SHE supply mechanics.</p>` +
+      `<h2>Supply mechanics</h2>` +
+      `<p>When the score rises, $SHE is minted to the Impact Fund; when it falls, tokens are burned from reserve — 10,000,000 units per point of score change. This describes what the system does, not a price outcome.</p>` +
+      `<p>Informational only — not financial, investment, or legal advice. <a href="/whitepaper">Download the full whitepaper PDF</a> from the whitepaper page.</p>`,
+  });
+}
+
+function dashboardPage(template) {
+  return simplePage(template, {
+    path: "/dashboard",
+    title: "SHE Score Dashboard — Live Scores for 105 Countries | SHEtoken",
+    desc: "Explore the live SHE Score for 105 countries and Indian states: the five LIVE pillars, tier rankings, and comparison indexes — built from UN Women, World Bank, WHO and UNODC data.",
+    bodyHtml:
+      `<h1>SHE Score Dashboard</h1>` +
+      `<p>Live SHE Score for 105 countries and Indian states. The published score (v2) is computed from five LIVE pillars: Empowerment (25%), Education & Literacy (20%), Economic Inclusion (20%), Health & Survival (15%) and Safety (Crime Penalty, −20%).</p>` +
+      `<p>Browse every country's score, tier and pillar breakdown, and compare against reference indexes. <a href="/index-landscape">See how the SHE Score relates to other gender indices</a> or <a href="/methodology">read the methodology</a>.</p>`,
+  });
+}
+
 function pageFor(template, c) {
   const iso = c.iso_code, name = c.country, score = Number(c.wei_score ?? 0).toFixed(1);
   const url = `${BASE}/country/${iso}`;
@@ -239,6 +290,13 @@ async function main() {
     if (mp) { writeFileSync(resolve(DIST, "methodology.html"), mp, "utf8"); console.log("[prerender] wrote → dist/methodology.html"); }
   } catch (e) {
     console.warn(`[prerender] methodology snapshot failed (${e})`);
+  }
+  try {
+    writeFileSync(resolve(DIST, "whitepaper.html"), whitepaperPage(template), "utf8");
+    writeFileSync(resolve(DIST, "dashboard.html"), dashboardPage(template), "utf8");
+    console.log("[prerender] wrote → dist/whitepaper.html, dist/dashboard.html");
+  } catch (e) {
+    console.warn(`[prerender] whitepaper/dashboard snapshot failed (${e})`);
   }
 
   let countries = [];

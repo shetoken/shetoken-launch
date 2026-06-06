@@ -162,7 +162,7 @@ const Index = () => {
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
             $SHE is tied to the SHE Score — built from UN, World Bank, WHO, UNESCO and UNODC data across 105 nations.
-            When women's lives improve, the index rises. When the index rises, $SHE rises.
+            When the index rises, token supply mechanics respond — minting to the Impact Fund on progress, burning on regression.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90 text-base h-12 px-8">
@@ -324,7 +324,7 @@ const Index = () => {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { icon: TrendingUp, title: "Index-linked value", desc: "As the global SHE Score improves year on year, $SHE token supply expands and value appreciates. You hold accountability, not just currency." },
+              { icon: TrendingUp, title: "Index-linked supply", desc: "As the global SHE Score improves, $SHE is minted to the Impact Fund; when the score falls, tokens are burned from reserve. You hold accountability, not just currency." },
               { icon: Flame, title: "Regression burns tokens", desc: "When the SHE Score falls — when conditions worsen — tokens are permanently burned. Regression has a cost. Progress has a reward." },
               { icon: Lock, title: "Long-term commitment", desc: "Lock $SHE for 6–12 months and earn bonus tokens for sustained belief in the mission. We reward patience and conviction." },
             ].map((f) => (
@@ -350,7 +350,7 @@ const Index = () => {
           <h2 className="text-4xl md:text-5xl font-bold mb-6">Global index. <span className="text-gradient">Local accountability.</span></h2>
           <p className="text-muted-foreground max-w-2xl mx-auto mb-12">
             Track progress at the global level, drill into individual countries, or go deeper with state-level impact data.
-            The first accountability index that works at every scale.
+            An accountability index that works at every scale.
           </p>
           <div className="grid sm:grid-cols-3 gap-4 max-w-3xl mx-auto mb-10">
             {[
@@ -477,44 +477,7 @@ const Index = () => {
           <p className="text-xs text-muted-foreground mt-5">No spam. Unsubscribe anytime.</p>
         </div>
       </section>
-
-      {/* FOOTER */}
-      <footer className="border-t border-border/40 py-12">
-        {/* Naming key — keep the three terms unambiguous */}
-        <div className="container mb-8">
-          <div className="mx-auto max-w-3xl rounded-xl border border-border/40 bg-card/30 px-5 py-4 text-xs text-muted-foreground flex flex-col sm:flex-row sm:items-center sm:justify-center gap-x-6 gap-y-1.5 text-center">
-            <span><span className="font-semibold text-foreground">SHE Score</span> — the index (0–100, per country/state)</span>
-            <span className="hidden sm:inline text-border">·</span>
-            <span><span className="font-semibold text-accent">$SHE</span> — the token that tracks it</span>
-            <span className="hidden sm:inline text-border">·</span>
-            <span><span className="font-semibold text-foreground">SHE Foundation</span> — the publisher</span>
-          </div>
-        </div>
-        <div className="container flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <img src={logo} alt="SHEtoken coin logo" className="h-6 w-6 rounded-full object-cover" />
-            <span>© 2026 SHE Foundation · shetoken.org</span>
-          </div>
-          <div className="flex flex-wrap gap-6 justify-center">
-            <Link to="/why" className="hover:text-foreground transition-smooth">Why $SHE</Link>
-            <Link to="/index-landscape" className="hover:text-foreground transition-smooth">The Landscape</Link>
-            <Link to="/methodology" className="hover:text-foreground transition-smooth">Methodology</Link>
-            <Link to="/community" className="hover:text-foreground transition-smooth">Community</Link>
-            <Link to="/dashboard" className="hover:text-foreground transition-smooth">Live Data</Link>
-            <Link to="/whitepaper" className="hover:text-foreground transition-smooth">Whitepaper</Link>
-            <a href="#join" className="hover:text-foreground transition-smooth">Work with us</a>
-            <a href="mailto:contact@shetoken.org" className="hover:text-foreground transition-smooth">Contact</a>
-            <a href="https://github.com/shetoken" className="hover:text-foreground transition-smooth">GitHub</a>
-          </div>
-        </div>
-        {/* Independence disclaimer (Task 5) */}
-        <div className="container mt-8">
-          <p className="mx-auto max-w-3xl text-center text-[11px] text-muted-foreground/60 leading-relaxed">
-            The SHE Score is an independent project and is not affiliated with, endorsed by, or derived from the
-            UNDP/UN Women Women's Empowerment Index, the SHE Index powered by EY, or any other index referenced on this site.
-          </p>
-        </div>
-      </footer>
+      {/* Footer is rendered globally via <SiteFooter /> in App.tsx (Phase 2.1 Task 6c) */}
     </div>
   );
 };

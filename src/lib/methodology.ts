@@ -68,7 +68,7 @@ export const METHODOLOGY: Record<string, IndexMethodology> = {
     accent: "#f59e0b",
     kind: "weighted",
     scoreField: "wei_score",
-    formula: "SHE Score = Σ(pillar × weight) − (Violence Penalty × 0.10)",
+    formula: "SHE Score = Σ(pillar × weight) − (Safety (Crime Penalty) × 0.10)",
     components: [
       { label: "Empowerment", field: "empowerment_score", weight: 0.15, indicators: [
         { label: "% parliamentary seats held by women", weight: "30%", source: "IPU Parline" },
@@ -125,7 +125,7 @@ export const METHODOLOGY: Record<string, IndexMethodology> = {
         { label: "% women in tech workforce", weight: "25%", source: "ILO / UNESCO" },
         { label: "Mobile-phone ownership gap", weight: "20%", source: "GSMA" },
       ]},
-      { label: "− Violence Penalty", field: "violence_penalty_score", weight: -0.10, indicators: [
+      { label: "− Safety (Crime Penalty)", field: "violence_penalty_score", weight: -0.10, indicators: [
         { label: "Rape rate per 100k women", weight: "30%", source: "UNODC (+ WHO adj.)" },
         { label: "Domestic-violence prevalence", weight: "25%", source: "WHO / UN Women" },
         { label: "Femicide rate", weight: "20%", source: "UNODC" },

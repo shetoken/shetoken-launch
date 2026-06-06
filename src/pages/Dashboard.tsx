@@ -62,7 +62,7 @@ const INDEX_CONFIGS: IndexConfig[] = [
       { label: "Health",           weight: "×12%" },
       { label: "Dignity & Welfare",weight: "×10%" },
       { label: "Digital & Social", weight: "×10%" },
-      { label: "− Violence Penalty",weight: "×10%" },
+      { label: "− Safety (Crime Penalty)",weight: "×10%" },
     ],
     note: "SHEtoken's native index. 8 weighted pillars minus a violence penalty, all sub-scores normalised 0–100. The 7 cards to the right are external comparison indexes.",
   },
@@ -1251,12 +1251,12 @@ export default function Dashboard() {
               <div>
                 <p className="font-semibold text-foreground mb-1">SHE Score</p>
                 <p>
-                  SHEtoken's native composite index. Scores 105 countries across 8 pillars —
-                  Empowerment, Bodily Autonomy, Safety &amp; Justice, Education, Economic,
-                  Health, Dignity &amp; Welfare, and Digital &amp; Social — weighted and
-                  adjusted by a Violence Penalty. Published annually, quarterly for
-                  registered governments; signals are drawn from 100+ multilingual news
-                  sources, arXiv, PubMed, and GDELT.
+                  SHEtoken's native composite index. The published score (v2) is computed from
+                  five LIVE pillars — Empowerment (25%), Education &amp; Literacy (20%), Economic
+                  Inclusion (20%), Health &amp; Survival (15%) and Safety (Crime Penalty, −20%).
+                  Four further pillars (Bodily Autonomy, Dignity &amp; Welfare, Digital &amp; Social,
+                  expanded Safety &amp; Justice) are in validation and do not yet affect published
+                  scores or $SHE supply. Published annually, quarterly for registered governments.
                 </p>
               </div>
 
@@ -1281,10 +1281,10 @@ export default function Dashboard() {
                   Baseline data is derived from UN Women, World Bank Gender Data Portal,
                   WHO, UNICEF, OECD, ILO, and Amnesty International reports (2023–2025).
                 </p>
-                <p className="mb-2">
-                  Signals are extracted by a local AI classifier (Phi-3.5 Mini +
-                  Qwen2.5) from 100+ news sources across 15 languages and supplemented by
-                  academic research from arXiv and PubMed.
+                <p className="mb-2 text-muted-foreground/70">
+                  <span className="uppercase tracking-widest text-[10px] font-semibold">Future research</span> — not part of
+                  score calculation or $SHE mechanics: an experimental signal layer surfaces qualitative momentum between
+                  publications from public news and academic sources. It never affects the published score or token supply.
                 </p>
                 <p>
                   All scores are normalised 0–100. Higher = better for women.

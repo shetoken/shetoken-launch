@@ -510,7 +510,7 @@ export default function Compare() {
                     { label: "Bodily Autonomy",    fn: (c: CountryWEI) => (c.bodily_autonomy_score ?? 0).toFixed(1) },
                     { label: "Dignity & Welfare",  fn: (c: CountryWEI) => (c.dignity_welfare_score ?? 0).toFixed(1) },
                     { label: "Digital & Social",   fn: (c: CountryWEI) => (c.digital_social_score ?? 0).toFixed(1) },
-                    { label: "Violence Penalty",   fn: (c: CountryWEI) => `−${(c.violence_penalty_score ?? 0).toFixed(1)}` },
+                    { label: "Safety (Crime Penalty)",   fn: (c: CountryWEI) => `−${(c.violence_penalty_score ?? 0).toFixed(1)}` },
                     { label: "Population",         fn: (c: CountryWEI) => `${c.population_millions?.toFixed(1)}M` },
                     { label: "Recent Δ",           fn: (c: CountryWEI) => `${c.weekly_delta > 0 ? "+" : ""}${c.weekly_delta.toFixed(2)}` },
                   ].map((row, ri) => (

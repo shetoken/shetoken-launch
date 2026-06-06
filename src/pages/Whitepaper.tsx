@@ -126,14 +126,14 @@ function WhitepaperContent() {
           ["Health & Survival", "12%", "Maternal mortality, life expectancy, anaemia, cancer screening"],
           ["Dignity & Welfare", "10%", "Widow rights, caregiver burden, food insecurity, mental health"],
           ["Digital & Social", "10%", "Online harassment, internet & mobile gender gaps — new in v3.0"],
-          ["Violence Penalty", "−10%", "Rape, acid attacks, dowry violence, femicide — subtracted from score"],
+          ["Safety (Crime Penalty)", "−10%", "Rape, acid attacks, dowry violence, femicide — subtracted from score"],
         ]}
       />
       <div className="bg-card/40 border border-border/40 rounded-xl p-5 font-mono text-sm my-4">
         <p className="text-accent mb-1">SHE Score Formula:</p>
         <p className="text-muted-foreground">SHE Score = (Empowerment × 0.15) + (Bodily Autonomy × 0.15) + (Safety × 0.14)</p>
         <p className="text-muted-foreground">{"    "}+ (Education × 0.12) + (Economic × 0.12) + (Health × 0.12)</p>
-        <p className="text-muted-foreground">{"    "}+ (Dignity × 0.10) + (Digital × 0.10) − (Violence Penalty × 0.10)</p>
+        <p className="text-muted-foreground">{"    "}+ (Dignity × 0.10) + (Digital × 0.10) − (Safety (Crime Penalty) × 0.10)</p>
       </div>
       <Table
         headers={["Tier", "SHE Score", "Description"]}

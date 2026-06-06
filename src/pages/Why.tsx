@@ -153,7 +153,7 @@ export default function Why() {
           </div>
 
           <div className="mt-8 text-center text-sm text-muted-foreground bg-card/30 border border-border/40 rounded-2xl p-5 leading-relaxed">
-            <span className="text-accent font-semibold">The flywheel:</span> SHE Community + SHEconomy create real economic progress for women → the SHE Score rises → $SHE (backed by the SHE Score) appreciates → capital flows back into women's businesses and programs → progress compounds.
+            <span className="text-accent font-semibold">The flywheel:</span> SHE Community + SHEconomy create real economic progress for women → the SHE Score rises → $SHE supply expands (minted to the Impact Fund) → capital flows into women's businesses and programs → progress compounds.
           </div>
         </section>
 
@@ -224,7 +224,7 @@ export default function Why() {
             <div className="grid md:grid-cols-3 gap-6 text-left mb-12">
               {[
                 { icon: Shield, title: "Real data. Independent sources.", desc: "SHE Scores are built from UN Women, WHO, World Bank, UNESCO and UNODC — the same databases governments and researchers rely on. Not self-reported. Not curated by issuers." },
-                { icon: TrendingUp, title: "Price moves with outcomes.", desc: "When the global SHE Score rises — measurably, verifiably — $SHE tokens are minted. When it falls, tokens are burned. Progress is rewarded. Regression has a price." },
+                { icon: TrendingUp, title: "Supply moves with outcomes.", desc: "When the global SHE Score rises — measurably, verifiably — $SHE tokens are minted to the Impact Fund. When it falls, tokens are burned from reserve. Progress is rewarded. Regression has a cost." },
                 { icon: Globe2, title: "Blockchain accountability.", desc: "Every supply change is executed by a smart contract responding to oracle data. No intermediary. No board vote. No PR spin. The chain doesn't lie." },
               ].map((item) => (
                 <div key={item.title} className="bg-background/40 border border-border/40 rounded-xl p-5">

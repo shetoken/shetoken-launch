@@ -750,7 +750,7 @@ export default function CountryDetail() {
                       <ShieldAlert className="h-6 w-6 text-red-400" />
                       <div>
                         <div className="text-xs font-semibold uppercase tracking-widest text-red-400 mb-0.5">
-                          Violence Penalty ·{" "}
+                          Safety (Crime Penalty) ·{" "}
                           <span className={vSeverity.color}>{vSeverity.label}</span>
                         </div>
                         <div className="text-4xl font-bold text-red-400 leading-none">

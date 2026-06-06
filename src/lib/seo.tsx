@@ -13,8 +13,8 @@ const DEFAULT_IMAGE = `${BASE_URL}/og-image.png`;
 const SITE_NAME = "SHEtoken";
 
 export function SEO({
-  title = "SHEtoken — The World's First SHE Score Token",
-  description = "SHE Score: a data-backed 0–100 score for women in 105 countries, built from UN Women, World Bank, WHO & UNODC data. Published annually, quarterly for registered governments. $SHE rises when the world gets better for women.",
+  title = "SHEtoken — The SHE Score & $SHE Token",
+  description = "SHE Score: a data-backed 0–100 score for women in 105 countries, built from UN Women, World Bank, WHO & UNODC data. Published annually, quarterly for registered governments. $SHE supply expands when the score rises and contracts when it falls.",
   image = DEFAULT_IMAGE,
   url = BASE_URL,
   type = "website",

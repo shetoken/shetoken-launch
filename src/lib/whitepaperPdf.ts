@@ -155,14 +155,14 @@ export async function downloadWhitepaper() {
       ["Health & Survival", "12%", "Maternal mortality, life expectancy, anaemia, cancer screening"],
       ["Dignity & Welfare", "10%", "Widow rights, caregiver burden, food insecurity, mental health"],
       ["Digital & Social", "10%", "Online harassment, internet & mobile gender gaps — new in v3.0"],
-      ["Violence Penalty", "-10%", "Rape, acid attacks, dowry violence, femicide — subtracted from score"],
+      ["Safety (Crime Penalty)", "-10%", "Rape, acid attacks, dowry violence, femicide — subtracted from score"],
     ],
     [1.2, 0.7, 3]
   );
   formulaBox("SHE Score Formula", [
     "SHE Score = (Empowerment x 0.15) + (Bodily Autonomy x 0.15) + (Safety x 0.14)",
     "      + (Education x 0.12) + (Economic x 0.12) + (Health x 0.12)",
-    "      + (Dignity x 0.10) + (Digital x 0.10) - (Violence Penalty x 0.10)",
+    "      + (Dignity x 0.10) + (Digital x 0.10) - (Safety (Crime Penalty) x 0.10)",
   ]);
   table(
     ["Tier", "SHE Score", "Description"],

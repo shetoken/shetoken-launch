@@ -17,6 +17,22 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 const normCountry = (c: any): CountryWEI => ({ ...c, she_score: c.she_score ?? c.wei_score });
 const normState = (s: any): StateScore => ({ ...s, she_score: s.she_score ?? s.wei_score });
 const normSummary = (s: any): Summary => ({ ...s, global_she_score: s.global_she_score ?? s.global_wei_score });
+
+/* ── Offline fallback ─────────────────────────────────────────────────────
+   When the live scoring API is unavailable, fall back to the committed v2
+   baseline dataset (public/data/fallback-countries.json) so the dashboard and
+   safety map still show real numbers. Sets a window flag so the UI can show a
+   "baseline data — live API offline" notice. */
+let _fallbackCache: { countries: any[]; summary: any } | null = null;
+async function loadFallback() {
+  if (_fallbackCache) return _fallbackCache;
+  const res = await fetch("/data/fallback-countries.json");
+  if (!res.ok) throw new Error("no fallback data");
+  _fallbackCache = await res.json();
+  return _fallbackCache!;
+}
+function markFallback() { try { (window as any).__sheApiFallback = true; } catch { /* ssr */ } }
+export function isApiFallback() { try { return !!(window as any).__sheApiFallback; } catch { return false; } }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 /** Weekly scan stats emitted by the SHEtoken data agent. */
@@ -201,14 +217,17 @@ export interface MethodologyProvenance {
 }
 
 export const api = {
-  summary: () => apiFetch<Summary>('/v1/summary').then(normSummary),
+  summary: () => apiFetch<Summary>('/v1/summary').then(normSummary)
+    .catch(async () => { markFallback(); const f = await loadFallback(); return normSummary(f.summary); }),
 
   wei: {
     countries: (limit = 105) =>
       apiFetch<CountryListResponse>(`/v1/wei/countries?limit=${limit}&sort=wei_score&order=desc`)
-        .then((r) => ({ ...r, data: (r.data ?? []).map(normCountry) })),
+        .then((r) => ({ ...r, data: (r.data ?? []).map(normCountry) }))
+        .catch(async () => { markFallback(); const f = await loadFallback(); return { count: f.countries.length, data: f.countries.slice(0, limit).map(normCountry) }; }),
     country: (iso: string) =>
-      apiFetch<CountryWEI>(`/v1/wei/countries/${iso}`).then(normCountry),
+      apiFetch<CountryWEI>(`/v1/wei/countries/${iso}`).then(normCountry)
+        .catch(async () => { markFallback(); const f = await loadFallback(); const c = f.countries.find((x: { iso_code: string }) => x.iso_code === iso); if (!c) throw new Error("not found"); return normCountry(c); }),
     history: (iso: string) =>
       apiFetch<CountryHistory>(`/v1/wei/history/country/${iso}`),
     globalTrend: () =>
@@ -219,7 +238,8 @@ export const api = {
       apiFetch<CountryWEI[]>(`/v1/wei/leaderboard?limit=${limit}`).then((a) => (a ?? []).map(normCountry)),
     states: (country: string) =>
       apiFetch<StateListResponse>(`/v1/wei/states/${country}`)
-        .then((r) => ({ ...r, data: (r.data ?? []).map(normState) })),
+        .then((r) => ({ ...r, data: (r.data ?? []).map(normState) }))
+        .catch(() => { markFallback(); return { count: 0, data: [] as StateScore[] } as StateListResponse; }),
   },
 
   gpi: {

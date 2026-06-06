@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api, type VitalStats } from "@/lib/api";
 import { SEO } from "@/lib/seo";
@@ -162,6 +163,7 @@ export default function SheClock() {
   }, [data[0]]);
 
   const clock = new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+  const vitalDown = !q0.isLoading && !q0.data && !q1.isLoading && !q1.data && !q2.isLoading && !q2.data;
 
   return (
     <div className="min-h-screen bg-background">
@@ -172,6 +174,12 @@ export default function SheClock() {
       />
       <Nav />
       <main className="pt-24 pb-20 container max-w-5xl">
+        {vitalDown && (
+          <div className="mb-6 rounded-2xl border border-amber-400/30 bg-amber-400/5 p-4 text-sm text-muted-foreground text-center">
+            <span className="font-semibold text-foreground">Live vital-statistics data is temporarily unavailable</span> while the data API is upgraded.
+            The real-time clock resumes when the API is back. See the <Link to="/methodology" className="text-accent hover:underline">methodology</Link>.
+          </div>
+        )}
         <div className="mb-6 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/30 bg-accent/10 text-accent text-xs mb-3">
             <Clock className="h-3 w-3" /> The She-Clock · live

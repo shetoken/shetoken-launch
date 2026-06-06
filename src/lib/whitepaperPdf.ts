@@ -99,7 +99,7 @@ export async function downloadWhitepaper() {
     title: "SHEtoken",
     subtitle: "The world's first data-backed gender-accountability token",
     about: [
-      "SHEtoken ($SHE) ties the value of a cryptocurrency to real-world progress for women. Its supply is governed by the SHE Score — a composite 0–100 score across 8 weighted pillars for 105 countries, built from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data.",
+      "SHEtoken ($SHE) ties a token's supply to real-world progress for women. Its supply is governed by the SHE Score — a composite 0–100 score across five LIVE weighted pillars for 105 countries, built from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data.",
       "When women's conditions improve, tokens are minted; when they deteriorate, tokens are burned. The mission: to make the advancement of women's rights financially measurable, publicly transparent, and globally investable.",
     ],
   });
@@ -109,8 +109,8 @@ export async function downloadWhitepaper() {
 
   heading("", "Abstract");
   para(
-    "SHE (the SHE Score Token) is the world's first data-backed cryptocurrency whose value is " +
-    "algorithmically tied to real-world women's empowerment outcomes. SHE's value is governed by the SHE " +
+    "SHE (the SHE Score Token) is the world's first data-backed gender accountability token, whose supply is " +
+    "algorithmically tied to real-world women's empowerment outcomes. SHE's supply is governed by the SHE " +
     "Score — a composite annual score measuring female literacy, economic empowerment, safety " +
     "from crime, poverty levels, and political participation across 105 countries and major states or provinces."
   );
@@ -139,31 +139,34 @@ export async function downloadWhitepaper() {
     "dimensions. Existing indices are for researchers. Existing women-focused crypto is speculative. SHE bridges this gap."
   );
 
-  heading("2", "The SHE Score Formula v3.0");
+  heading("2", "The SHE Score Formula (v2)");
   para(
-    "The SHE Score is calculated annually for each country on a 0–100 scale, covering " +
-    "8 weighted pillars plus a violence penalty:"
+    "The published SHE Score is calculated on a 0–100 scale from five LIVE pillars. Four further " +
+    "pillars are part of the full framework but are in validation and do not yet affect the published " +
+    "score or $SHE supply mechanics."
   );
   table(
-    ["Pillar", "Weight", "Key Indicators"],
+    ["LIVE Pillar", "Weight", "Key Indicators"],
     [
-      ["Empowerment", "15%", "Parliamentary seats, ministerial roles, legal rights, freedom of movement"],
-      ["Bodily Autonomy", "15%", "Reproductive rights, child marriage, FGM, period poverty — new in v3.0"],
-      ["Safety & Justice", "14%", "DV laws, femicide, honour-based violence, legal aid, police responsiveness"],
-      ["Education", "12%", "Literacy, enrollment, STEM, menstrual barriers to attendance"],
-      ["Economic Inclusion", "12%", "Pay gap, formal employment, banking access, property rights"],
-      ["Health & Survival", "12%", "Maternal mortality, life expectancy, anaemia, cancer screening"],
-      ["Dignity & Welfare", "10%", "Widow rights, caregiver burden, food insecurity, mental health"],
-      ["Digital & Social", "10%", "Online harassment, internet & mobile gender gaps — new in v3.0"],
-      ["Safety (Crime Penalty)", "-10%", "Rape, acid attacks, dowry violence, femicide — subtracted from score"],
+      ["Empowerment", "25%", "Parliamentary seats, ministerial roles, legal rights, freedom of movement"],
+      ["Education & Literacy", "20%", "Literacy, enrollment, STEM participation, completion rates"],
+      ["Economic Inclusion", "20%", "Pay gap, formal employment, banking access, property rights"],
+      ["Health & Survival", "15%", "Maternal mortality, life expectancy, anaemia, cancer screening"],
+      ["Safety (Crime Penalty)", "-20%", "Rape, femicide, dowry violence — subtracted from the score"],
     ],
     [1.2, 0.7, 3]
   );
-  formulaBox("SHE Score Formula", [
-    "SHE Score = (Empowerment x 0.15) + (Bodily Autonomy x 0.15) + (Safety x 0.14)",
-    "      + (Education x 0.12) + (Economic x 0.12) + (Health x 0.12)",
-    "      + (Dignity x 0.10) + (Digital x 0.10) - (Safety (Crime Penalty) x 0.10)",
+  formulaBox("SHE Score (v2) Formula", [
+    "SHE Score = (Empowerment x 0.25) + (Education & Literacy x 0.20)",
+    "      + (Economic Inclusion x 0.20) + (Health & Survival x 0.15)",
+    "      - (Safety / Crime Penalty x 0.20)",
   ]);
+  para(
+    "v3 — in validation (weights TBD on activation): Bodily Autonomy, Dignity & Welfare, Digital & Social, " +
+    "and the expanded Safety & Justice indicators. Each activates when it meets the data standard — an " +
+    "independent institutional source covering at least 80% of scored countries, published within two years.",
+    C.mut, { size: 8.5 }
+  );
   table(
     ["Tier", "SHE Score", "Description"],
     [
@@ -211,7 +214,7 @@ export async function downloadWhitepaper() {
   );
 
   heading("5", "India as a Model");
-  para("India provides the most compelling real-world proof that targeted programs measurably improve women's empowerment.");
+  para("India provides compelling real-world proof that targeted programs measurably improve women's empowerment.");
   table(
     ["Scheme", "Scale", "SHE Score Pillar"],
     [

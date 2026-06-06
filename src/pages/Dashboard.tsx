@@ -64,7 +64,7 @@ const INDEX_CONFIGS: IndexConfig[] = [
       { label: "Digital & Social", weight: "×10%" },
       { label: "− Safety (Crime Penalty)",weight: "×10%" },
     ],
-    note: "SHEtoken's native index. 8 weighted pillars minus a violence penalty, all sub-scores normalised 0–100. The 7 cards to the right are external comparison indexes.",
+    note: "SHEtoken's native index. The published score (v2) uses five LIVE weighted pillars (Empowerment, Education, Economic, Health, Safety/Crime Penalty); four further pillars are in validation. All sub-scores normalised 0–100. The 7 cards to the right are external comparison indexes.",
   },
   {
     label: "GPI", desc: "Gender Poverty",

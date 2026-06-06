@@ -43,7 +43,7 @@ export default function Why() {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Why $SHE — The First Asset Backed by the Advancement of Women"
+        title="Why $SHE — An Asset Tied to the Advancement of Women"
         description="SHEtoken makes women's empowerment measurable, investable and economically active. One system, four parts: the Live Data index (the backing), the $SHE token (outcome-priced capital), SHEconomy (the women-owned marketplace) and SHE Community (the people)."
         url="https://www.shetoken.org/why"
       />
@@ -66,7 +66,7 @@ export default function Why() {
             It measures the condition of women across 105 countries — and ties real value to real progress,
             so lifting women up finally counts.
           </p>
-          <p className="text-base md:text-lg font-semibold text-foreground mt-6">The world's first cryptocurrency tied to the advancement of women.</p>
+          <p className="text-base md:text-lg font-semibold text-foreground mt-6">The world's first data-backed gender accountability token, tied to the advancement of women.</p>
         </section>
 
         {/* THE NUMBERS */}

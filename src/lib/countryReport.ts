@@ -116,7 +116,7 @@ export async function downloadCountryReport(opts: {
     title: "SHEtoken",
     subtitle: "The world's first data-backed gender-accountability token",
     about: [
-      "SHEtoken ($SHE) ties the value of a cryptocurrency to real-world progress for women, governed by the SHE Score — a composite 0–100 score across 8 weighted pillars for 105 countries, built from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data.",
+      "SHEtoken ($SHE) ties a token's supply to real-world progress for women, governed by the SHE Score — a composite 0–100 score across five LIVE weighted pillars for 105 countries, built from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data.",
       `This report summarises the SHE Score profile for ${c.country}: pillar breakdown, the eight sub-indices, trend and life-path outlook.`,
     ],
   });

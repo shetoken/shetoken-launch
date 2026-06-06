@@ -80,8 +80,8 @@ function WhitepaperContent() {
 
       <SectionHeading>Abstract</SectionHeading>
       <p className="text-muted-foreground leading-relaxed">
-        SHE (the SHE Score Token) is the world's first data-backed cryptocurrency whose value is
-        algorithmically tied to real-world women's empowerment outcomes. SHE's value is governed by the SHE
+        SHE (the SHE Score Token) is the world's first data-backed gender accountability token, whose supply is
+        algorithmically tied to real-world women's empowerment outcomes. SHE's supply is governed by the SHE
         Score — a composite annual score measuring female literacy, economic empowerment,
         safety from crime, poverty levels, and political participation across 105 countries and major states or provinces.
       </p>
@@ -110,31 +110,32 @@ function WhitepaperContent() {
         dimensions. Existing indices are for researchers. Existing women-focused crypto is speculative. SHE bridges this gap.
       </p>
 
-      <SectionHeading>2. The SHE Score Formula v3.0</SectionHeading>
+      <SectionHeading>2. The SHE Score Formula (v2)</SectionHeading>
       <p className="text-muted-foreground mb-4">
-        The SHE Score is calculated annually for each country on a <strong className="text-foreground">0–100 scale</strong>,
-        covering 8 weighted pillars plus a violence penalty:
+        The published SHE Score is calculated on a <strong className="text-foreground">0–100 scale</strong> from five
+        LIVE pillars. Four further pillars are part of the full framework but are in validation and do not yet affect
+        the published score or $SHE supply mechanics.
       </p>
       <Table
-        headers={["Pillar", "Weight", "Key Indicators"]}
+        headers={["LIVE Pillar", "Weight", "Key Indicators"]}
         rows={[
-          ["Empowerment", "15%", "Parliamentary seats, ministerial roles, legal rights, freedom of movement"],
-          ["Bodily Autonomy", "15%", "Reproductive rights, child marriage, FGM, period poverty — new in v3.0"],
-          ["Safety & Justice", "14%", "DV laws, femicide, honour-based violence, legal aid, police responsiveness"],
-          ["Education", "12%", "Literacy, enrollment, STEM, menstrual barriers to attendance"],
-          ["Economic Inclusion", "12%", "Pay gap, formal employment, banking access, property rights"],
-          ["Health & Survival", "12%", "Maternal mortality, life expectancy, anaemia, cancer screening"],
-          ["Dignity & Welfare", "10%", "Widow rights, caregiver burden, food insecurity, mental health"],
-          ["Digital & Social", "10%", "Online harassment, internet & mobile gender gaps — new in v3.0"],
-          ["Safety (Crime Penalty)", "−10%", "Rape, acid attacks, dowry violence, femicide — subtracted from score"],
+          ["Empowerment", "25%", "Parliamentary seats, ministerial roles, legal rights, freedom of movement"],
+          ["Education & Literacy", "20%", "Literacy, enrollment, STEM participation, completion rates"],
+          ["Economic Inclusion", "20%", "Pay gap, formal employment, banking access, property rights"],
+          ["Health & Survival", "15%", "Maternal mortality, life expectancy, anaemia, cancer screening"],
+          ["Safety (Crime Penalty)", "−20%", "Rape, femicide, dowry violence — subtracted from the score"],
         ]}
       />
       <div className="bg-card/40 border border-border/40 rounded-xl p-5 font-mono text-sm my-4">
-        <p className="text-accent mb-1">SHE Score Formula:</p>
-        <p className="text-muted-foreground">SHE Score = (Empowerment × 0.15) + (Bodily Autonomy × 0.15) + (Safety × 0.14)</p>
-        <p className="text-muted-foreground">{"    "}+ (Education × 0.12) + (Economic × 0.12) + (Health × 0.12)</p>
-        <p className="text-muted-foreground">{"    "}+ (Dignity × 0.10) + (Digital × 0.10) − (Safety (Crime Penalty) × 0.10)</p>
+        <p className="text-accent mb-1">SHE Score (v2) Formula:</p>
+        <p className="text-muted-foreground">SHE Score = (Empowerment × 0.25) + (Education &amp; Literacy × 0.20) + (Economic Inclusion × 0.20)</p>
+        <p className="text-muted-foreground">{"    "}+ (Health &amp; Survival × 0.15) − (Safety / Crime Penalty × 0.20)</p>
       </div>
+      <p className="text-muted-foreground text-sm">
+        <strong className="text-foreground">v3 — in validation (weights TBD on activation):</strong> Bodily Autonomy,
+        Dignity &amp; Welfare, Digital &amp; Social, and the expanded Safety &amp; Justice indicators. Each activates when it
+        meets the data standard: an independent institutional source covering ≥80% of scored countries, published within two years.
+      </p>
       <Table
         headers={["Tier", "SHE Score", "Description"]}
         rows={[
@@ -179,7 +180,7 @@ function WhitepaperContent() {
 
       <SectionHeading>5. India as a Model</SectionHeading>
       <p className="text-muted-foreground mb-4">
-        India provides the most compelling real-world proof that targeted programs measurably improve women's empowerment.
+        India provides compelling real-world proof that targeted programs measurably improve women's empowerment.
       </p>
       <Table
         headers={["Scheme", "Scale", "SHE Score Pillar"]}
@@ -352,7 +353,7 @@ export default function Whitepaper() {
         <div className="bg-gradient-card border border-border/40 rounded-2xl p-8 shadow-card mb-10">
           <h2 className="text-xl font-bold mb-3">Abstract</h2>
           <p className="text-muted-foreground leading-relaxed mb-4">
-            SHE is the world's first cryptocurrency whose supply mechanics are governed by real-world women's empowerment outcomes.
+            SHE is the world's first data-backed gender accountability token whose supply mechanics are governed by real-world women's empowerment outcomes.
             Built on the SHE Score — a composite of 8 weighted pillars across 105 countries — SHE mints
             tokens when women's conditions improve globally, and burns them when they deteriorate.
           </p>

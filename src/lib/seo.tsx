@@ -61,7 +61,7 @@ export function SEO({
             "name": "SHE Score",
             "alternateName": "SHE Score",
             "description":
-              "Data-backed SHE Score scoring 105 countries 0–100 across 8 weighted pillars (empowerment, bodily autonomy, safety & justice, education, economic, health, dignity & welfare, digital & social) minus a violence penalty. Published annually, quarterly for registered governments, from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data.",
+              "Data-backed SHE Score scoring 105 countries 0–100. The published score (v2) uses five LIVE weighted pillars — empowerment, education & literacy, economic inclusion, health & survival, and a safety (crime) penalty; four further pillars are in validation. Published annually, quarterly for registered governments, from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data.",
             "url": `${BASE_URL}/dashboard`,
             "keywords": ["women's empowerment", "gender equality index", "SHE Score", "gender data", "femicide", "maternal mortality"],
             "creator": { "@type": "Organization", "name": "SHEtoken" },

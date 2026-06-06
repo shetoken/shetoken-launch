@@ -56,17 +56,13 @@ const INDEX_CONFIGS: IndexConfig[] = [
     accent: "#f59e0b", scoreField: "she_score",
     title: "SHE Score",
     formula: [
-      { label: "Empowerment",      weight: "×15%" },
-      { label: "Bodily Autonomy",  weight: "×15%" },
-      { label: "Safety & Justice", weight: "×14%" },
-      { label: "Education",        weight: "×12%" },
-      { label: "Economic",         weight: "×12%" },
-      { label: "Health",           weight: "×12%" },
-      { label: "Dignity & Welfare",weight: "×10%" },
-      { label: "Digital & Social", weight: "×10%" },
-      { label: "− Safety (Crime Penalty)",weight: "×10%" },
+      { label: "Empowerment",             weight: "×25%" },
+      { label: "Education & Literacy",     weight: "×20%" },
+      { label: "Economic Inclusion",       weight: "×20%" },
+      { label: "Health & Survival",        weight: "×15%" },
+      { label: "− Safety (Crime Penalty)", weight: "×20%" },
     ],
-    note: "SHEtoken's native index. The published score (v2) uses five LIVE weighted pillars (Empowerment, Education, Economic, Health, Safety/Crime Penalty); four further pillars are in validation. All sub-scores normalised 0–100. The 7 cards to the right are external comparison indexes.",
+    note: "SHEtoken's native index (v2 — official). Five LIVE weighted pillars, normalised 0–100. The 7 cards to the right are external comparison indexes.",
   },
   {
     label: "GPI", desc: "Gender Poverty",
@@ -175,6 +171,21 @@ const INDEX_CONFIGS: IndexConfig[] = [
     note: "Higher score = stronger compliance. Adherence to international women's-rights treaties. Sources: UN, ILO.",
   },
 ];
+
+/* SHE Score methodology shown when the v3 SHADOW preview is selected — the five
+   LIVE pillars plus the four candidate pillars in validation (weights TBD). */
+const V3_SHE_FORMULA: { label: string; weight?: string }[] = [
+  { label: "Empowerment",                 weight: "×25% · LIVE" },
+  { label: "Education & Literacy",        weight: "×20% · LIVE" },
+  { label: "Economic Inclusion",          weight: "×20% · LIVE" },
+  { label: "Health & Survival",           weight: "×15% · LIVE" },
+  { label: "− Safety (Crime Penalty)",    weight: "×20% · LIVE" },
+  { label: "Bodily Autonomy",             weight: "TBD · v3" },
+  { label: "Dignity & Welfare",           weight: "TBD · v3" },
+  { label: "Digital & Social",            weight: "TBD · v3" },
+  { label: "Safety & Justice (expanded)", weight: "TBD · v3" },
+];
+const V3_SHE_NOTE = "v3 SHADOW expansion: the five LIVE pillars plus four candidate pillars in validation (weights TBD on activation). The v3 pillars do not yet affect published scores or $SHE supply mechanics.";
 
 /* ── Distribution curve types ── */
 interface DistPillar { label: string; color: string; width: number; }
@@ -732,8 +743,13 @@ export default function Dashboard() {
                         <p className="font-bold mb-2" style={{ color: idx.accent }}>
                           {idx.title}
                         </p>
+                        {idx.label === "SHE Score" && (
+                          <p className="text-[9px] font-bold mb-1" style={{ color: version === "v3" ? "#fbbf24" : idx.accent }}>
+                            {version === "v3" ? "v3 — SHADOW (9 pillars)" : "v2 — OFFICIAL (5 pillars)"}
+                          </p>
+                        )}
                         <div className="space-y-1 text-muted-foreground font-mono text-[10px] leading-relaxed">
-                          {idx.formula.map((f) => {
+                          {(idx.label === "SHE Score" && version === "v3" ? V3_SHE_FORMULA : idx.formula).map((f) => {
                             const isPenalty = f.label.trim().startsWith("−");
                             return (
                               <div
@@ -752,7 +768,7 @@ export default function Dashboard() {
                             );
                           })}
                         </div>
-                        <p className="text-muted-foreground/60 text-[9px] mt-2">{idx.note}</p>
+                        <p className="text-muted-foreground/60 text-[9px] mt-2">{idx.label === "SHE Score" && version === "v3" ? V3_SHE_NOTE : idx.note}</p>
                       </div>
                     </div>
                   </div>

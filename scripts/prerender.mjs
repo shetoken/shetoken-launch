@@ -62,8 +62,8 @@ function homepage(template) {
     `<p>$SHE is tied to the SHE Score — built from UN, World Bank, WHO, UNESCO and UNODC data across 105 countries. ` +
     `When women's lives improve, the index rises. When the index rises, $SHE rises.</p>` +
     `<h2>Nine pillars. One score.</h2>` +
-    `<p>The most comprehensive women's empowerment index ever published — the only one that prices period poverty, FGM, dowry violence, ` +
-    `caregiver burden and digital harassment. Nine weighted pillars, one auditable score, updated annually from independent institutional data.</p>` +
+    `<p>A women's empowerment index that prices conditions many indices omit — period poverty, FGM, dowry violence, ` +
+    `caregiver burden and digital harassment. Weighted pillars, one auditable score, published annually from independent institutional data.</p>` +
     `<ul>${pillarLis}</ul>` +
     `<p><a href="/dashboard">See live scores for 105 countries</a> · <a href="/why">Why this matters</a> · <a href="/index-landscape">The Landscape</a> · <a href="/methodology">Methodology</a></p>` +
     `<footer><p>SHE Score — the index (0–100, per country/state). $SHE — the token that tracks it. SHE Foundation — the publisher.</p>` +

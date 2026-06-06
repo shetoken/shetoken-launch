@@ -215,9 +215,9 @@ const Index = () => {
             <p className="text-accent text-sm uppercase tracking-widest mb-4">The SHE Score Formula · v3.0</p>
             <h2 className="text-4xl md:text-5xl font-bold mb-4">Nine pillars. <span className="text-gradient">One score.</span></h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              The most comprehensive women's empowerment index ever published — the only one that prices period poverty, FGM,
+              A women's empowerment index that prices conditions many indices omit — period poverty, FGM,
               dowry violence, caregiver burden and digital harassment.
-              Nine weighted pillars, one auditable score, updated annually from independent institutional data.
+              Weighted pillars, one auditable score, published annually from independent institutional data.
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

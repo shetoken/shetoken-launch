@@ -214,7 +214,7 @@ export async function downloadCountryReport(opts: {
   // Performance Summary
   heading("Performance Summary");
   para(performanceSummary, C.mut, 9.5);
-  para("Scores derived from UN Women, World Bank, WHO, UNESCO and UNODC data for 2025. Signal-backed summaries update after the weekly pipeline runs.", C.mut, 7.5, true);
+  para("Scores derived from UN Women, World Bank, WHO, UNESCO and UNODC data for 2025. Published annually, quarterly for registered governments; signal-backed summaries refresh between publications.", C.mut, 7.5, true);
 
   // ── Global Context ──────────────────────────────────────────────────────
   if (global) {
@@ -652,7 +652,7 @@ export async function downloadCountryReport(opts: {
     // Col 1 — SHE Score
     let c1 = colTitle(colX[0], top, "SHE Score");
     c1 = colBody(colX[0], c1, [
-      "SHEtoken's native composite index. Scores 105 countries across 8 pillars — Empowerment, Bodily Autonomy, Safety & Justice, Education, Economic, Health, Dignity & Welfare, and Digital & Social — weighted and adjusted by a Violence Penalty. Updated weekly by the SHEtoken AI agent from 100+ multilingual news sources, arXiv, PubMed, and GDELT.",
+      "SHEtoken's native composite index. Scores 105 countries across 8 pillars — Empowerment, Bodily Autonomy, Safety & Justice, Education, Economic, Health, Dignity & Welfare, and Digital & Social — weighted and adjusted by a Violence Penalty. Published annually, quarterly for registered governments; signals are drawn from 100+ multilingual news sources, arXiv, PubMed, and GDELT.",
     ]);
 
     // Col 2 — Comparison Indexes (coloured codes)
@@ -679,7 +679,7 @@ export async function downloadCountryReport(opts: {
     let c3 = colTitle(colX[2], top, "Sources & Methodology");
     c3 = colBody(colX[2], c3, [
       "Baseline data is derived from UN Women, World Bank Gender Data Portal, WHO, UNICEF, OECD, ILO, and Amnesty International reports (2023–2025).",
-      "Weekly signals are extracted by a local AI classifier (Phi-3.5 Mini + Qwen2.5) from 100+ news sources across 15 languages and supplemented by academic research from arXiv and PubMed.",
+      "Signals are extracted by a local AI classifier (Phi-3.5 Mini + Qwen2.5) from 100+ news sources across 15 languages and supplemented by academic research from arXiv and PubMed.",
       "All scores are normalised 0–100. Higher = better for women. Scores are indicative and intended for research & awareness, not as financial advice.",
     ]);
 

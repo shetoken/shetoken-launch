@@ -14,7 +14,7 @@ const SITE_NAME = "SHEtoken";
 
 export function SEO({
   title = "SHEtoken — The World's First SHE Score Token",
-  description = "SHE is the world's first data-backed cryptocurrency algorithmically tied to the SHE Score. $SHE goes up when the world gets better for women.",
+  description = "SHE Score: a data-backed 0–100 score for women in 105 countries, built from UN Women, World Bank, WHO & UNODC data. Published annually, quarterly for registered governments. $SHE rises when the world gets better for women.",
   image = DEFAULT_IMAGE,
   url = BASE_URL,
   type = "website",
@@ -61,7 +61,7 @@ export function SEO({
             "name": "SHE Score",
             "alternateName": "SHE Score",
             "description":
-              "Data-backed SHE Score scoring 105 countries 0–100 across 8 weighted pillars (empowerment, bodily autonomy, safety & justice, education, economic, health, dignity & welfare, digital & social) minus a violence penalty. Updated weekly from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data.",
+              "Data-backed SHE Score scoring 105 countries 0–100 across 8 weighted pillars (empowerment, bodily autonomy, safety & justice, education, economic, health, dignity & welfare, digital & social) minus a violence penalty. Published annually, quarterly for registered governments, from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data.",
             "url": `${BASE_URL}/dashboard`,
             "keywords": ["women's empowerment", "gender equality index", "SHE Score", "gender data", "femicide", "maternal mortality"],
             "creator": { "@type": "Organization", "name": "SHEtoken" },

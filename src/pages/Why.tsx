@@ -138,7 +138,7 @@ export default function Why() {
 
           <div className="grid md:grid-cols-2 gap-5 mt-12">
             {[
-              { n: "01", verb: "Measure", icon: Activity, title: "Live Data — the SHE Score", desc: "You can't value what you can't measure. The SHE Scores women's empowerment across 105 countries, updated weekly from UN, WHO and World Bank data. This is what $SHE is backed by.", to: "/dashboard", cta: "Explore the data" },
+              { n: "01", verb: "Measure", icon: Activity, title: "Live Data — the SHE Score", desc: "You can't value what you can't measure. The SHE Score measures women's empowerment across 105 countries, published annually (quarterly for registered governments) from UN, WHO and World Bank data. This is what $SHE is backed by.", to: "/dashboard", cta: "Explore the data" },
               { n: "02", verb: "Invest", icon: Coins, title: "$SHE — outcome-priced capital", desc: "When women's lives improve, $SHE is minted; when they deteriorate, it's burned. Progress for women becomes financial value — so investing in women becomes investing in $SHE.", to: "/simulator", cta: "Try the $SHE Simulator" },
               { n: "03", verb: "Build", icon: Store, title: "SHEconomy — the women-owned marketplace", desc: "Real women-owned businesses, real income. The marketplace is where empowerment is produced — turning the index from a number into livelihoods.", to: "/marketplace", cta: "Visit SHEconomy" },
               { n: "04", verb: "Belong", icon: Users, title: "SHE Community — the people behind the data", desc: "The verified women who power it all — sellers, members, supporters. A private, women-first space built for support and solidarity.", to: "/community", cta: "Join SHE Community" },

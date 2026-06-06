@@ -98,7 +98,7 @@ function pageFor(template, c) {
     `<nav><a href="/">SHEtoken</a> › <a href="/dashboard">Dashboard</a> › ${esc(name)}</nav>` +
     `<h1>${esc(name)} — SHE Score ${score}/100</h1>` +
     `<p>${esc(name)} (${esc(c.region)}) ranks #${c.rank} of 105 countries on the SHEtoken SHE Score, in Tier ${c.tier}. ` +
-    `The SHE Score is a data-backed 0–100 measure of how good life is for women, built from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data and updated weekly.</p>` +
+    `The SHE Score is a data-backed 0–100 measure of how good life is for women, built from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data and published annually, quarterly for registered governments.</p>` +
     `<h2>Pillar scores (0–100)</h2><ul>${pillarLis}<li>Violence penalty: ${Number(c.violence_penalty_score ?? 0).toFixed(1)}</li></ul>` +
     `<p><a href="/dashboard">Explore the live dashboard</a> · ` +
     `<a href="https://api.shetoken.org/v1/wei/countries/${iso}">Raw JSON data</a></p>` +

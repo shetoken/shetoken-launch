@@ -150,7 +150,7 @@ export default function SafetyHotspots() {
     <div className="min-h-screen bg-background">
       <SEO
         title="Women's Travel Safety Advisory — Safety Hotspots by Country"
-        description="A women's travel-safety advisory for every country, derived from WHO, UNODC and UN Women data: where it's generally safe, where not to walk alone after dark, and where to reconsider solo travel — plus local women's helplines."
+        description="A women's travel-safety advisory for 105 countries, derived from WHO, UNODC and UN Women data: where it's generally safe, where not to walk alone after dark, and where to reconsider solo travel — plus local women's helplines."
         url="https://www.shetoken.org/safety"
       />
       <Nav />

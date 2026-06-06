@@ -110,9 +110,9 @@ export async function downloadWhitepaper() {
   heading("", "Abstract");
   para(
     "SHE (the SHE Score Token) is the world's first data-backed cryptocurrency whose value is " +
-    "algorithmically tied to real-world women's empowerment outcomes. SHE's value is governed by the Women's " +
-    "Empowerment Index (SHE Score) — a composite annual score measuring female literacy, economic empowerment, safety " +
-    "from crime, poverty levels, and political participation across every nation and major state or province."
+    "algorithmically tied to real-world women's empowerment outcomes. SHE's value is governed by the SHE " +
+    "Score — a composite annual score measuring female literacy, economic empowerment, safety " +
+    "from crime, poverty levels, and political participation across 105 countries and major states or provinces."
   );
   bullet("When women's conditions improve, tokens are minted.", C.emerald);
   bullet("When crimes against women rise or female poverty deepens, tokens are burned.", C.red);

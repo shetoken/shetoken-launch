@@ -159,10 +159,10 @@ function performanceBlurb(c: CountryWEI): string {
 
   const trendCtx =
     c.weekly_delta > 0.5
-      ? `The SHE Score is currently trending upward (+${c.weekly_delta.toFixed(2)} this week), signalling recent positive signals.`
+      ? `The SHE Score is currently trending upward (+${c.weekly_delta.toFixed(2)} recently), signalling recent positive signals.`
       : c.weekly_delta < -0.5
-      ? `The SHE Score is declining (${c.weekly_delta.toFixed(2)} this week), flagging deteriorating conditions or new negative signals.`
-      : "The SHE Score is currently stable — no significant signal movement in the past week.";
+      ? `The SHE Score is declining (${c.weekly_delta.toFixed(2)} recently), flagging deteriorating conditions or new negative signals.`
+      : "The SHE Score is currently stable — no significant recent signal movement.";
 
   return (
     `${c.country} ${tierCtx[c.tier] ?? "has notable variation across pillars"}. ` +
@@ -502,7 +502,7 @@ export default function CountryDetail() {
                   {country.weekly_delta !== 0 && (
                     <div className={`flex items-center justify-end gap-1 mt-1 text-sm ${country.weekly_delta > 0 ? "text-emerald-400" : "text-red-400"}`}>
                       {country.weekly_delta > 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-                      {country.weekly_delta > 0 ? "+" : ""}{country.weekly_delta?.toFixed(2)} this week
+                      {country.weekly_delta > 0 ? "+" : ""}{country.weekly_delta?.toFixed(2)} recent
                     </div>
                   )}
                 </div>
@@ -632,7 +632,7 @@ export default function CountryDetail() {
                 {country.sources && country.sources.length > 0 && (
                   <div className="mt-4 pt-4 border-t border-border/20 space-y-2">
                     <p className="text-xs text-muted-foreground/60 uppercase tracking-widest mb-2">
-                      Signal sources this week
+                      Recent signal sources
                     </p>
                     {country.sources.map((src: PerformanceSource, i: number) => (
                       <a
@@ -667,7 +667,7 @@ export default function CountryDetail() {
                   <div className="mt-4 pt-4 border-t border-border/20">
                     <p className="text-xs text-muted-foreground/60 italic">
                       Scores derived from UN Women, World Bank, WHO, UNESCO and UNODC data for {country.year}.
-                      Signal-backed summaries appear after the weekly pipeline runs.
+                      Signal-backed summaries refresh between publications.
                     </p>
                   </div>
                 )}

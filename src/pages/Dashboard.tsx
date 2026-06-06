@@ -1254,8 +1254,9 @@ export default function Dashboard() {
                   SHEtoken's native composite index. Scores 105 countries across 8 pillars —
                   Empowerment, Bodily Autonomy, Safety &amp; Justice, Education, Economic,
                   Health, Dignity &amp; Welfare, and Digital &amp; Social — weighted and
-                  adjusted by a Violence Penalty. Updated weekly by the SHEtoken AI agent
-                  from 100+ multilingual news sources, arXiv, PubMed, and GDELT.
+                  adjusted by a Violence Penalty. Published annually, quarterly for
+                  registered governments; signals are drawn from 100+ multilingual news
+                  sources, arXiv, PubMed, and GDELT.
                 </p>
               </div>
 
@@ -1281,7 +1282,7 @@ export default function Dashboard() {
                   WHO, UNICEF, OECD, ILO, and Amnesty International reports (2023–2025).
                 </p>
                 <p className="mb-2">
-                  Weekly signals are extracted by a local AI classifier (Phi-3.5 Mini +
+                  Signals are extracted by a local AI classifier (Phi-3.5 Mini +
                   Qwen2.5) from 100+ news sources across 15 languages and supplemented by
                   academic research from arXiv and PubMed.
                 </p>

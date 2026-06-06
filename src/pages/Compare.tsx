@@ -512,7 +512,7 @@ export default function Compare() {
                     { label: "Digital & Social",   fn: (c: CountryWEI) => (c.digital_social_score ?? 0).toFixed(1) },
                     { label: "Violence Penalty",   fn: (c: CountryWEI) => `−${(c.violence_penalty_score ?? 0).toFixed(1)}` },
                     { label: "Population",         fn: (c: CountryWEI) => `${c.population_millions?.toFixed(1)}M` },
-                    { label: "Weekly Δ",           fn: (c: CountryWEI) => `${c.weekly_delta > 0 ? "+" : ""}${c.weekly_delta.toFixed(2)}` },
+                    { label: "Recent Δ",           fn: (c: CountryWEI) => `${c.weekly_delta > 0 ? "+" : ""}${c.weekly_delta.toFixed(2)}` },
                   ].map((row, ri) => (
                     <tr key={row.label} className={`border-b border-border/10 ${ri % 2 === 0 ? "" : "bg-card/20"}`}>
                       <td className="px-5 py-2.5 text-xs text-muted-foreground">{row.label}</td>
@@ -541,7 +541,7 @@ export default function Compare() {
                 <AlertCircle className="h-8 w-8 mx-auto mb-3 opacity-30" />
                 <p className="text-sm">
                   No recent signals found for these countries.
-                  Signals are generated weekly by the SLM pipeline.
+                  Signals are generated continuously by the SLM pipeline.
                 </p>
               </div>
             ) : (

@@ -80,9 +80,9 @@ function WhitepaperContent() {
       <SectionHeading>Abstract</SectionHeading>
       <p className="text-muted-foreground leading-relaxed">
         SHE (the SHE Score Token) is the world's first data-backed cryptocurrency whose value is
-        algorithmically tied to real-world women's empowerment outcomes. SHE's value is governed by the Women's
-        Empowerment Index (SHE Score) — a composite annual score measuring female literacy, economic empowerment,
-        safety from crime, poverty levels, and political participation across every nation and major state or province.
+        algorithmically tied to real-world women's empowerment outcomes. SHE's value is governed by the SHE
+        Score — a composite annual score measuring female literacy, economic empowerment,
+        safety from crime, poverty levels, and political participation across 105 countries and major states or provinces.
       </p>
       <ul className="mt-4 space-y-2 text-muted-foreground list-none pl-0">
         <li className="flex gap-2"><CheckCircle className="h-4 w-4 text-emerald-400 mt-0.5 shrink-0" /> When women's conditions improve → tokens are <strong className="text-foreground">minted</strong></li>

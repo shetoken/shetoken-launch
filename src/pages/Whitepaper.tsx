@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { api } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { Nav } from "@/components/Nav";
+import { SEO } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -326,6 +327,11 @@ export default function Whitepaper() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="SHEtoken Whitepaper — The SHE Score & $SHE Token"
+        description="The SHEtoken whitepaper: how the SHE Score — a data-backed 0–100 index for women across 105 countries — governs the $SHE token's supply, plus methodology, tier system and roadmap."
+        url="https://www.shetoken.org/whitepaper"
+      />
       <Nav />
 
       <main className="pt-24 pb-20 container max-w-4xl">

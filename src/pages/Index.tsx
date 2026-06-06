@@ -475,7 +475,7 @@ const Index = () => {
         </div>
         <div className="container flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            <img src={logo} alt="" className="h-6 w-6 rounded-full object-cover" />
+            <img src={logo} alt="SHEtoken coin logo" className="h-6 w-6 rounded-full object-cover" />
             <span>© 2026 SHE Foundation · shetoken.org</span>
           </div>
           <div className="flex flex-wrap gap-6 justify-center">

@@ -88,7 +88,7 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEO title="My Profile — SHEtoken" url="https://www.shetoken.org/profile" />
+      <SEO title="My Profile — SHEtoken" description="Manage your SHEtoken account, profile and preferences." url="https://www.shetoken.org/profile" />
       <Nav />
 
       <main className="pt-24 pb-20 container max-w-3xl">

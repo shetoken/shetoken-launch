@@ -34,6 +34,43 @@ const PILLARS = [
   ["dignity_welfare_score", "Dignity & Welfare"], ["digital_social_score", "Digital & Social"],
 ];
 
+/* Homepage pillar copy — mirrors src/pages/Index.tsx so crawlers see the same descriptions. */
+const HOME_PILLARS = [
+  ["Empowerment", "15%", "Parliamentary seats, ministerial roles, legal rights, freedom of movement"],
+  ["Bodily Autonomy", "15%", "Reproductive rights, child marriage, FGM, period poverty"],
+  ["Safety & Justice", "14%", "DV laws, femicide, honour-based violence, legal aid, police responsiveness"],
+  ["Education", "12%", "Literacy, enrollment, STEM, menstrual barriers to attendance"],
+  ["Economic Inclusion", "12%", "Pay gap, formal employment, banking access, property rights"],
+  ["Health & Survival", "12%", "Maternal mortality, life expectancy, anaemia, cancer screening"],
+  ["Dignity & Welfare", "10%", "Widow rights, caregiver burden, food insecurity, mental health"],
+  ["Digital & Social", "10%", "Online harassment, internet & mobile gender gaps"],
+  ["Violence Penalty", "-10%", "Rape, acid attacks, dowry violence, femicide — subtracted from score"],
+];
+
+/* Inject a crawler-only static snapshot of the homepage into #root.
+   React's createRoot().render() clears #root on mount, so real users still get the SPA. */
+function homepage(template) {
+  const pillarLis = HOME_PILLARS
+    .map(([title, weight, desc]) => `<li><strong>${esc(title)} (${esc(weight)}):</strong> ${esc(desc)}</li>`)
+    .join("");
+
+  const snapshot =
+    `<div id="root"><main style="max-width:820px;margin:40px auto;padding:0 16px;font-family:system-ui,sans-serif;line-height:1.5;color:#1e1b26">` +
+    `<nav><a href="/">SHEtoken</a> · <a href="/dashboard">Live Data</a> · <a href="/why">Why $SHE</a> · <a href="/community">Community</a> · <a href="/whitepaper">Whitepaper</a></nav>` +
+    `<p>World's first data-backed gender accountability token</p>` +
+    `<h1>She was always the currency. We just never measured it. Until now.</h1>` +
+    `<p>$SHE is tied to the Women's Empowerment Index — built from UN, World Bank, WHO, UNESCO and UNODC data across 105 countries. ` +
+    `When women's lives improve, the index rises. When the index rises, $SHE rises.</p>` +
+    `<h2>Nine pillars. One score.</h2>` +
+    `<p>The most comprehensive women's empowerment index ever published — the only one that prices period poverty, FGM, dowry violence, ` +
+    `caregiver burden and digital harassment. Nine weighted pillars, one auditable score, updated annually from independent institutional data.</p>` +
+    `<ul>${pillarLis}</ul>` +
+    `<p><a href="/dashboard">See live scores for 105 countries</a> · <a href="/why">Why this matters</a></p>` +
+    `</main></div>`;
+
+  return template.replace(/<div id="root"><\/div>/, snapshot);
+}
+
 function pageFor(template, c) {
   const iso = c.iso_code, name = c.country, score = Number(c.wei_score ?? 0).toFixed(1);
   const url = `${BASE}/country/${iso}`;
@@ -85,7 +122,17 @@ function pageFor(template, c) {
 async function main() {
   const tmplPath = resolve(DIST, "index.html");
   if (!existsSync(tmplPath)) { console.warn("[prerender] no dist/index.html — skipping"); return; }
+  // Capture the raw template (empty #root) BEFORE we overwrite index.html — the
+  // per-country pages reuse this in-memory copy as their template.
   const template = readFileSync(tmplPath, "utf8");
+
+  // Homepage crawlability (Task 1) — independent of the country API, so it always runs.
+  try {
+    writeFileSync(tmplPath, homepage(template), "utf8");
+    console.log("[prerender] wrote homepage snapshot → dist/index.html");
+  } catch (e) {
+    console.warn(`[prerender] homepage snapshot failed (${e}); leaving SPA index.html untouched`);
+  }
 
   let countries = [];
   try {

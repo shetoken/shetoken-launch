@@ -1,11 +1,18 @@
 import { Link } from "react-router-dom";
 import logo from "@/assets/she-logo.svg";
+import { STATUS_RIBBON } from "@/config/site";
 
-/* Global footer — rendered on every route (App.tsx) so the naming key and the
-   independence disclaimer appear site-wide (Phase 2.1 Task 6c). */
+/* Global footer — rendered on every route (App.tsx) so the status ribbon,
+   naming key and independence disclaimer appear site-wide
+   (Phase 2.1 Task 6c + Phase 3 Task 7). */
 export function SiteFooter() {
   return (
-    <footer className="border-t border-border/40 py-12 bg-background">
+    <footer className="border-t border-border/40 bg-background">
+      {/* Status ribbon (Phase 3 Task 7) — phase number from one config constant */}
+      <div className="border-b border-border/40 bg-card/30">
+        <p className="container py-2.5 text-center text-[11px] md:text-xs text-muted-foreground">{STATUS_RIBBON}</p>
+      </div>
+      <div className="py-12">
       {/* Naming key */}
       <div className="container mb-8">
         <div className="mx-auto max-w-3xl rounded-xl border border-border/40 bg-card/30 px-5 py-4 text-xs text-muted-foreground flex flex-col sm:flex-row sm:items-center sm:justify-center gap-x-6 gap-y-1.5 text-center">
@@ -42,6 +49,7 @@ export function SiteFooter() {
           The SHE Score is an independent project and is not affiliated with, endorsed by, or derived from the
           UNDP/UN Women Women's Empowerment Index, the SHE Index powered by EY, or any other index referenced on this site.
         </p>
+      </div>
       </div>
     </footer>
   );

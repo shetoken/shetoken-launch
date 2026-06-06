@@ -5,6 +5,8 @@ import { SEO } from "@/lib/seo";
 import { Nav } from "@/components/Nav";
 import { WorldMap } from "@/components/WorldMap";
 import { StateChoroplethMap, stateKey, type CityLabel } from "@/components/StateChoroplethMap";
+import { ApiVersionSelect, ShadowBanner } from "@/components/ApiVersionSelect";
+import { useApiVersion } from "@/config/apiVersion";
 import { ShieldAlert, Phone, MapPin, Search, Info, Moon, Users, Ban } from "lucide-react";
 
 /* ── Advisory tiers from the SHE Score Safety & Justice pillar (0–100, higher = safer) ── */
@@ -97,6 +99,7 @@ export default function SafetyHotspots() {
   const [selIso, setSelIso] = useState("IND");
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
   const [stateSort, setStateSort] = useState<"least" | "safest" | "name">("least");
+  const { version } = useApiVersion();
 
   const { data: countriesRes, isLoading } = useQuery({
     queryKey: ["she-countries"], queryFn: () => api.wei.countries(105), staleTime: 10 * 60 * 1000,
@@ -155,6 +158,8 @@ export default function SafetyHotspots() {
       />
       <Nav />
       <main className="pt-24 pb-20 container max-w-7xl">
+        <div className="flex justify-end mb-3"><ApiVersionSelect /></div>
+        {version === "v3" && <ShadowBanner />}
         <div className="mb-5">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/30 bg-accent/10 text-accent text-xs mb-3">
             <ShieldAlert className="h-3 w-3" /> Women's Travel Safety Advisory

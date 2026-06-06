@@ -10,6 +10,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/AuthModal";
 import { SiteFooter } from "@/components/SiteFooter";
+import { ApiVersionProvider } from "@/config/apiVersion";
 import Index from "./pages/Index.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import CountryDetail from "./pages/CountryDetail.tsx";
@@ -31,6 +32,7 @@ import Lab from "./pages/Lab.tsx";
 import WhyBackShe from "./pages/WhyBackShe.tsx";
 import Petition from "./pages/Petition.tsx";
 import Privacy from "./pages/Privacy.tsx";
+import ApiDocs from "./pages/ApiDocs.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 /** Records a page view on every route change (best-effort). */
@@ -58,6 +60,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
+          <ApiVersionProvider>
             {/* Global auth modal — openable from any component via useAuth().openAuth() */}
             <AuthModal />
             <PageTracker />
@@ -79,6 +82,7 @@ const App = () => (
               <Route path="/why-back-she" element={<WhyBackShe />} />
               <Route path="/petition" element={<Petition />} />
               <Route path="/privacy" element={<Privacy />} />
+              <Route path="/api" element={<ApiDocs />} />
               <Route path="/simulator" element={<Simulator />} />
               <Route path="/sheconomy" element={<Navigate to="/marketplace" replace />} />
               <Route path="/she-clock" element={<SheClock />} />
@@ -89,6 +93,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
             <SiteFooter />
+          </ApiVersionProvider>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

@@ -2,6 +2,8 @@ import { useState, useMemo, useEffect } from "react";
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { api, isApiFallback, CountryWEI, IndexScore } from "@/lib/api";
+import { ApiVersionSelect, ShadowBanner } from "@/components/ApiVersionSelect";
+import { useApiVersion } from "@/config/apiVersion";
 import { SEO } from "@/lib/seo";
 import { Nav } from "@/components/Nav";
 import { Button } from "@/components/ui/button";
@@ -268,6 +270,7 @@ export default function Dashboard() {
   // A3 — graceful fallback when the live data API is unavailable.
   const apiDown = !loadingCountries && countries.length === 0;
   const usingBaseline = !loadingCountries && countries.length > 0 && isApiFallback();
+  const { version } = useApiVersion();
 
   /* ── Lazy-loaded non-SHE Score index data ── */
   const { data: activeIndexData, isLoading: loadingIndex } = useQuery({
@@ -492,6 +495,10 @@ export default function Dashboard() {
       <Nav />
 
       <main className="pt-24 pb-20 container max-w-7xl">
+
+        {/* ── API VERSION SELECTOR ── */}
+        <div className="flex justify-end mb-3"><ApiVersionSelect /></div>
+        {version === "v3" && <ShadowBanner />}
 
         {/* ── LIVE-DATA FALLBACK (A3) ── */}
         {(apiDown || usingBaseline) && (

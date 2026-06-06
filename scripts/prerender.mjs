@@ -188,6 +188,24 @@ function simplePage(template, { path, title, desc, bodyHtml }) {
     .replace(/<div id="root"><\/div>/, snapshot);
 }
 
+function apiDocsPage(template) {
+  return simplePage(template, {
+    path: "/api",
+    title: "API Reference — SHEtoken Data API | SHEtoken",
+    desc: "The SHEtoken Data API: SHE Score, comparison indexes, vital statistics, history, signals, and the versioned v2 (official) / v3-preview (shadow) score endpoints. Read-only JSON over HTTPS.",
+    bodyHtml:
+      `<h1>SHEtoken Data API</h1>` +
+      `<p>A public read-only REST API serving the SHE Score, comparison indexes, vital statistics, history and signals. Base URL: https://api.shetoken.org. Interactive docs at https://api.shetoken.org/docs.</p>` +
+      `<h2>Versioned scores</h2><ul>` +
+      `<li>GET /api/scores — official SHE Score (alias of v2)</li>` +
+      `<li>GET /api/v2/scores — official v2 (published five-pillar methodology)</li>` +
+      `<li>GET /api/v2/scores/{iso} — one country, v2</li>` +
+      `<li>GET /api/v3-preview/scores — SHADOW v3 only; carries version/status + per-pillar coverage; never affects published scores or $SHE supply mechanics</li></ul>` +
+      `<h2>SHE Score</h2><ul><li>GET /v1/summary</li><li>GET /v1/wei/countries</li><li>GET /v1/wei/countries/{iso}</li><li>GET /v1/wei/states/{country}</li><li>GET /v1/wei/leaderboard</li></ul>` +
+      `<h2>Comparison indexes, vital stats, history, signals</h2><p>GET /v1/gpi · /v1/svi · /v1/wadi · /v1/wevi · /v1/whi · /v1/wvi · /v1/vital/countries/{iso} · /v1/lifepath/{iso} · /v1/wei/history/* · /v1/signals/latest. Comparison indexes are shown for reference only and are never inputs to the SHE Score.</p>`,
+  });
+}
+
 function communityPage(template) {
   return simplePage(template, {
     path: "/community",
@@ -385,7 +403,8 @@ async function main() {
     writeFileSync(resolve(DIST, "privacy.html"), privacyPage(template), "utf8");
     writeFileSync(resolve(DIST, "community.html"), communityPage(template), "utf8");
     writeFileSync(resolve(DIST, "lab.html"), labPage(template), "utf8");
-    console.log("[prerender] wrote → whitepaper, dashboard, why-back-she, simulator, petition, privacy, community, lab .html");
+    writeFileSync(resolve(DIST, "api.html"), apiDocsPage(template), "utf8");
+    console.log("[prerender] wrote → whitepaper, dashboard, why-back-she, simulator, petition, privacy, community, lab, api .html");
   } catch (e) {
     console.warn(`[prerender] whitepaper/dashboard/why-back-she snapshot failed (${e})`);
   }

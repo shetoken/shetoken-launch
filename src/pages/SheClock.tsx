@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { api, type VitalStats } from "@/lib/api";
 import { SEO } from "@/lib/seo";
 import { Nav } from "@/components/Nav";
+import { ApiVersionSelect, ShadowBanner } from "@/components/ApiVersionSelect";
+import { useApiVersion } from "@/config/apiVersion";
 import { Clock, Info } from "lucide-react";
 
 const WEEK_SECONDS = 7 * 24 * 3600;
@@ -164,6 +166,7 @@ export default function SheClock() {
 
   const clock = new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
   const vitalDown = !q0.isLoading && !q0.data && !q1.isLoading && !q1.data && !q2.isLoading && !q2.data;
+  const { version } = useApiVersion();
 
   return (
     <div className="min-h-screen bg-background">
@@ -174,6 +177,8 @@ export default function SheClock() {
       />
       <Nav />
       <main className="pt-24 pb-20 container max-w-5xl">
+        <div className="flex justify-end mb-3"><ApiVersionSelect /></div>
+        {version === "v3" && <ShadowBanner />}
         {vitalDown && (
           <div className="mb-6 rounded-2xl border border-amber-400/30 bg-amber-400/5 p-4 text-sm text-muted-foreground text-center">
             <span className="font-semibold text-foreground">Live vital-statistics data is temporarily unavailable</span> while the data API is upgraded.

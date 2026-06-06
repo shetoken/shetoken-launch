@@ -15,6 +15,7 @@
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/community", "destination": "/community.html" },
     { "source": "/lab", "destination": "/lab.html" },
+    { "source": "/api", "destination": "/api.html" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "crons": [

@@ -166,10 +166,10 @@ const Index = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button asChild size="lg" className="bg-gradient-primary text-primary-foreground border-0 shadow-glow hover:opacity-90 text-base h-12 px-8">
-              <a href="#subscribe">Get early access <ArrowRight className="ml-2 h-4 w-4" /></a>
+              <Link to="/simulator">See how it will work <ArrowRight className="ml-2 h-4 w-4" /></Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="h-12 px-8 border-border/60 bg-card/40 backdrop-blur">
-              <Link to="/why">Why this matters</Link>
+              <a href="#subscribe">Get early access</a>
             </Button>
           </div>
         </div>

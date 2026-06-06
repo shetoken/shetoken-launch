@@ -10,6 +10,7 @@
     { "source": "/whitepaper", "destination": "/whitepaper.html" },
     { "source": "/dashboard", "destination": "/dashboard.html" },
     { "source": "/why-back-she", "destination": "/why-back-she.html" },
+    { "source": "/simulator", "destination": "/simulator.html" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "crons": [

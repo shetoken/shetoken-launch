@@ -188,6 +188,20 @@ function simplePage(template, { path, title, desc, bodyHtml }) {
     .replace(/<div id="root"><\/div>/, snapshot);
 }
 
+function simulatorPage(template) {
+  return simplePage(template, {
+    path: "/simulator",
+    title: "SHE Score Simulator — How It Will Work | SHEtoken",
+    desc: "An interactive, illustrative simulation of how the SHE Score (v2) will drive $SHE token-supply mechanics. Simulation only — no real token exists; nothing here is an offer to sell or a solicitation to buy any asset.",
+    bodyHtml:
+      `<p><strong>SIMULATION — illustrative data only. No real token exists. Nothing on this page is an offer to sell or a solicitation to buy any asset.</strong></p>` +
+      `<h1>How It Will Work</h1>` +
+      `<p>Pre-launch — Phase 3 of 7. An interactive client-side simulation of the SHE Score (v2) and its documented token-supply mechanics.</p>` +
+      `<p>Move the five LIVE pillar sliders (Empowerment, Education & Literacy, Economic Inclusion, Health & Survival, and Safety / Crime Penalty). The score recomputes from the published formula: (E×0.25)+(Ed×0.20)+(Ec×0.20)+(H×0.15)−(C×0.20). Baseline is the West Bengal worked example — 52, 67, 52, 71, 42 → 39.1.</p>` +
+      `<p>Supply mechanics (illustrative): from a starting supply of 1,000,000,000 SHE, 10,000,000 SHE units are minted to the Impact Fund per point of score increase, or burned from the Reserve per point of decrease. If the Crime Penalty rises more than 15% above baseline, a DAO emergency vote opens for 72 hours (options A–D). Token quantities are shown in SHE units only and do not represent any price or monetary value. Informational only — not financial or legal advice.</p>`,
+  });
+}
+
 function whyBackShePage(template) {
   return simplePage(template, {
     path: "/why-back-she",
@@ -314,7 +328,8 @@ async function main() {
     writeFileSync(resolve(DIST, "whitepaper.html"), whitepaperPage(template), "utf8");
     writeFileSync(resolve(DIST, "dashboard.html"), dashboardPage(template), "utf8");
     writeFileSync(resolve(DIST, "why-back-she.html"), whyBackShePage(template), "utf8");
-    console.log("[prerender] wrote → dist/whitepaper.html, dist/dashboard.html, dist/why-back-she.html");
+    writeFileSync(resolve(DIST, "simulator.html"), simulatorPage(template), "utf8");
+    console.log("[prerender] wrote → dist/whitepaper.html, dist/dashboard.html, dist/why-back-she.html, dist/simulator.html");
   } catch (e) {
     console.warn(`[prerender] whitepaper/dashboard/why-back-she snapshot failed (${e})`);
   }

@@ -149,6 +149,7 @@ export default function WhyBackShe() {
             morally. $SHE exists to change which side capital is on.
           </p>
           <div className="mt-6 flex flex-wrap gap-4 justify-center text-sm">
+            <Link to="/simulator" className="text-accent hover:underline font-semibold">See how it will work →</Link>
             <Link to="/methodology" className="text-accent hover:underline">Read the methodology →</Link>
             <Link to="/index-landscape" className="text-accent hover:underline">See how it compares →</Link>
           </div>

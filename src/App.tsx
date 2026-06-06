@@ -18,7 +18,7 @@ import Why from "./pages/Why.tsx";
 import Community from "./pages/Community.tsx";
 import Profile from "./pages/Profile.tsx";
 import Compare from "./pages/Compare.tsx";
-import SHEconomy from "./pages/SHEconomy.tsx";
+import Simulator from "./pages/Simulator.tsx";
 import SheClock from "./pages/SheClock.tsx";
 import SafetyHotspots from "./pages/SafetyHotspots.tsx";
 import AdminConsole from "./pages/AdminConsole.tsx";
@@ -73,7 +73,7 @@ const App = () => (
               <Route path="/index-landscape" element={<IndexLandscape />} />
               <Route path="/methodology" element={<Methodology />} />
               <Route path="/why-back-she" element={<WhyBackShe />} />
-              <Route path="/simulator" element={<SHEconomy />} />
+              <Route path="/simulator" element={<Simulator />} />
               <Route path="/sheconomy" element={<Navigate to="/marketplace" replace />} />
               <Route path="/she-clock" element={<SheClock />} />
               <Route path="/safety" element={<SafetyHotspots />} />

@@ -25,7 +25,7 @@ import { toast } from "sonner";
 /* ── Pillar definitions with global-average and improvement lever ── */
 const PILLAR_COLS: Array<{
   key: keyof CountryWEI;
-  code: string;          // short WEI sub-pillar code shown on the card
+  code: string;          // short SHE Score sub-pillar code shown on the card
   label: string;
   description: string;
   color: string;
@@ -98,7 +98,7 @@ const PILLAR_COLS: Array<{
   },
 ];
 
-/* ── 8 external SheToken indexes (separate from WEI's internal pillars) ── */
+/* ── 8 external SheToken indexes (separate from SHE Score's internal pillars) ── */
 const INDEX_STRIP = [
   { code: "GPI",        label: "Gender Poverty",       color: "text-purple-400", accent: "#a855f7", scoreField: "gpi_score",        queryFn: (iso: string) => import("@/lib/api").then(m => m.api.gpi.country(iso)) },
   { code: "SVI",        label: "Sexual Violence",       color: "text-red-400",    accent: "#ef4444", scoreField: "svi_score",        queryFn: (iso: string) => import("@/lib/api").then(m => m.api.svi.country(iso)) },
@@ -123,7 +123,7 @@ function violenceSeverity(score: number): { label: string; color: string; contex
       label: "High",
       color: "text-orange-400",
       context:
-        "Significant documented violence against women, pulling the WEI materially downward. Drivers include elevated femicide rates, under-prosecuted sexual violence, and systemic barriers to legal recourse for survivors.",
+        "Significant documented violence against women, pulling the SHE Score materially downward. Drivers include elevated femicide rates, under-prosecuted sexual violence, and systemic barriers to legal recourse for survivors.",
     };
   if (score >= 6)
     return {
@@ -159,17 +159,17 @@ function performanceBlurb(c: CountryWEI): string {
 
   const trendCtx =
     c.weekly_delta > 0.5
-      ? `The WEI is currently trending upward (+${c.weekly_delta.toFixed(2)} this week), signalling recent positive signals.`
+      ? `The SHE Score is currently trending upward (+${c.weekly_delta.toFixed(2)} this week), signalling recent positive signals.`
       : c.weekly_delta < -0.5
-      ? `The WEI is declining (${c.weekly_delta.toFixed(2)} this week), flagging deteriorating conditions or new negative signals.`
-      : "The WEI is currently stable — no significant signal movement in the past week.";
+      ? `The SHE Score is declining (${c.weekly_delta.toFixed(2)} this week), flagging deteriorating conditions or new negative signals.`
+      : "The SHE Score is currently stable — no significant signal movement in the past week.";
 
   return (
     `${c.country} ${tierCtx[c.tier] ?? "has notable variation across pillars"}. ` +
     `Its strongest area is ${best.label} (${best.score.toFixed(1)} / 100), while ${worst.label} ` +
     `(${worst.score.toFixed(1)} / 100) remains the primary drag on the overall score. ` +
     trendCtx +
-    ` A sustained improvement in ${worst.label} would have the largest single impact on ${c.country}'s WEI ranking.`
+    ` A sustained improvement in ${worst.label} would have the largest single impact on ${c.country}'s SHE Score ranking.`
   );
 }
 
@@ -313,7 +313,7 @@ export default function CountryDetail() {
     staleTime: 60 * 60 * 1000,
   });
 
-  /* ── All-country WEI history (faint backdrop for the trend) ── */
+  /* ── All-country SHE Score history (faint backdrop for the trend) ── */
   const { data: allHistory } = useQuery({
     queryKey: ["wei-all-history"],
     queryFn:  api.wei.allHistory,
@@ -323,7 +323,7 @@ export default function CountryDetail() {
   /* ── Global summary (averages, tier distribution) for the report's global context ── */
   const { data: summary } = useQuery({ queryKey: ["summary"], queryFn: api.summary, staleTime: 10 * 60 * 1000 });
 
-  /* ── All countries (for the report's world map + WEI distribution) ── */
+  /* ── All countries (for the report's world map + SHE Score distribution) ── */
   const { data: allCountriesRes } = useQuery({
     queryKey: ["wei-countries", 105], queryFn: () => api.wei.countries(105), staleTime: 10 * 60 * 1000,
   });
@@ -364,7 +364,7 @@ export default function CountryDetail() {
       return;
     }
     const indexes = [
-      { code: "WEI", label: "Women's Empowerment", accent: "#f59e0b", score: country.wei_score ?? null },
+      { code: "SHE Score", label: "Women's Empowerment", accent: "#f59e0b", score: country.wei_score ?? null },
       ...INDEX_STRIP.map((idx, i) => {
         const raw = indexQueries[i].data as Record<string, unknown> | undefined;
         const score = raw
@@ -379,7 +379,7 @@ export default function CountryDetail() {
     }));
     const vs = violenceSeverity(country.violence_penalty_score ?? 0);
     const methodRows: Record<string, Record<string, unknown> | undefined> = {
-      WEI: country as unknown as Record<string, unknown>,
+      "SHE Score": country as unknown as Record<string, unknown>,
     };
     INDEX_STRIP.forEach((idx, i) => {
       methodRows[idx.code] = indexQueries[i].data as Record<string, unknown> | undefined;
@@ -402,7 +402,7 @@ export default function CountryDetail() {
         lowest: { country: summary.lowest_country, score: summary.lowest_score },
         tiers: [summary.tier_1_count, summary.tier_2_count, summary.tier_3_count, summary.tier_4_count] as [number, number, number, number],
         indexAvgs: {
-          WEI: summary.global_wei_score, GPI: summary.gpi_global_avg, SVI: summary.svi_global_avg,
+          "SHE Score": summary.global_wei_score, GPI: summary.gpi_global_avg, SVI: summary.svi_global_avg,
           WADI: summary.wadi_global_avg, WEVI: summary.wevi_global_avg, WHI: summary.whi_global_avg,
           WVI: summary.wvi_global_avg, Compliance: summary.compliance_global_avg,
         },
@@ -498,7 +498,7 @@ export default function CountryDetail() {
                 </div>
                 <div className="text-right">
                   <div className="text-7xl font-bold text-gradient">{country.wei_score?.toFixed(1)}</div>
-                  <div className="text-muted-foreground text-sm">WEI Score / 100</div>
+                  <div className="text-muted-foreground text-sm">SHE Score / 100</div>
                   {country.weekly_delta !== 0 && (
                     <div className={`flex items-center justify-end gap-1 mt-1 text-sm ${country.weekly_delta > 0 ? "text-emerald-400" : "text-red-400"}`}>
                       {country.weekly_delta > 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
@@ -545,17 +545,17 @@ export default function CountryDetail() {
               <h2 className="text-xl font-bold mb-1">8-Index Scorecard</h2>
               <p className="text-xs text-muted-foreground mb-4 flex items-center gap-1">
                 <Info className="h-3 w-3" />
-                These are 8 separate SheToken indexes — not WEI sub-pillars. Click any tile to see how its score is calculated and the data sources.
+                These are 8 separate SheToken indexes — not SHE Score sub-pillars. Click any tile to see how its score is calculated and the data sources.
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
-                {/* WEI tile */}
+                {/* SHE Score tile */}
                 <button
-                  onClick={() => setOpenMethod(openMethod === "WEI" ? null : "WEI")}
+                  onClick={() => setOpenMethod(openMethod === "SHE Score" ? null : "SHE Score")}
                   className={`bg-gradient-card border rounded-xl p-3 text-center shadow-card transition-all hover:scale-[1.03] cursor-pointer ${
-                    openMethod === "WEI" ? "ring-2 ring-amber-400 border-amber-400/60" : "border-amber-400/30"
+                    openMethod === "SHE Score" ? "ring-2 ring-amber-400 border-amber-400/60" : "border-amber-400/30"
                   }`}
                 >
-                  <div className="text-[10px] font-bold font-mono text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded px-1.5 py-0.5 inline-block mb-2">WEI</div>
+                  <div className="text-[10px] font-bold font-mono text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded px-1.5 py-0.5 inline-block mb-2">SHE Score</div>
                   <div className="text-2xl font-bold text-gradient leading-none mb-1">{country.wei_score?.toFixed(1)}</div>
                   <div className="text-[10px] text-muted-foreground leading-tight">Women's<br />Empowerment</div>
                 </button>
@@ -602,7 +602,7 @@ export default function CountryDetail() {
                   code={openMethod}
                   country={country.country}
                   row={
-                    openMethod === "WEI"
+                    openMethod === "SHE Score"
                       ? (country as unknown as Record<string, unknown>)
                       : (indexQueries[INDEX_STRIP.findIndex((x) => x.code === openMethod)]?.data as Record<string, unknown> | undefined)
                   }
@@ -712,7 +712,7 @@ export default function CountryDetail() {
                           −{country.violence_penalty_score?.toFixed(1)} pts
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
-                          subtracted from total WEI score
+                          subtracted from total SHE Score
                         </div>
                       </div>
                     </div>
@@ -723,7 +723,7 @@ export default function CountryDetail() {
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         {[
                           { label: "Covers", value: "Rape prevalence, femicide, acid attacks, dowry violence, HBV" },
-                          { label: "Impact", value: `Removes ${country.violence_penalty_score?.toFixed(1)} points directly from the composite WEI score` },
+                          { label: "Impact", value: `Removes ${country.violence_penalty_score?.toFixed(1)} points directly from the composite SHE Score` },
                           { label: "Data sources", value: "WHO, UNODC, UN Women — verified annually" },
                           { label: "To reduce this", value: "Prosecution rates, survivor legal aid, DV law enforcement" },
                         ].map((item) => (
@@ -739,10 +739,10 @@ export default function CountryDetail() {
               </section>
             )}
 
-            {/* WEI TREND CHART — selected country vs. all 105 countries */}
+            {/* SHE Score TREND CHART — selected country vs. all 105 countries */}
             <section className="mb-10">
               <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-                <h2 className="text-xl font-bold">WEI Score Trend (2015–2024)</h2>
+                <h2 className="text-xl font-bold">SHE Score Trend (2015–2024)</h2>
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1.5"><span className="w-5 h-0.5 rounded" style={{ background: "#f59e0b" }} />{country.country}</span>
                   <span className="flex items-center gap-1.5"><span className="w-5 h-0.5 rounded border-t border-dashed" style={{ borderColor: "hsl(260 15% 65%)", height: 0 }} />Global avg</span>

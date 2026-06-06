@@ -568,7 +568,7 @@ export default function Community() {
                 {loading ? "…" : done ? "Subscribed ✓" : "Subscribe"}
               </Button>
             </form>
-            <p className="text-[11px] text-muted-foreground mt-2">WEI reports, safety signals and early-access invites. No spam — unsubscribe anytime.</p>
+            <p className="text-[11px] text-muted-foreground mt-2">SHE Score reports, safety signals and early-access invites. No spam — unsubscribe anytime.</p>
           </div>
         </section>
 
@@ -576,7 +576,7 @@ export default function Community() {
         <section className="container max-w-4xl">
           <div className="grid sm:grid-cols-3 gap-4">
             {[
-              { icon: Mail, title: "Stay in the loop", desc: "Women's-empowerment intelligence: WEI movements, safety signals and the stories behind the numbers." },
+              { icon: Mail, title: "Stay in the loop", desc: "Women's-empowerment intelligence: SHE Score movements, safety signals and the stories behind the numbers." },
               { icon: ShieldCheck, title: "A space built for women", desc: "A verified, women-first community — trust-based and privacy-first. Early members get in first." },
               { icon: Heart, title: "Help drive change", desc: "Your voice and the data make the index sharper and the case for women stronger, everywhere." },
             ].map((x) => (

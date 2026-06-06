@@ -34,7 +34,7 @@ const PILLAR_COLS: Array<{ key: keyof CountryWEI; label: string }> = [
 ];
 
 /* ── Index configuration ── */
-type IndexKey = "WEI" | "GPI" | "SVI" | "WADI" | "WEVI" | "WHI" | "WVI" | "Compliance";
+type IndexKey = "SHE Score" | "GPI" | "SVI" | "WADI" | "WEVI" | "WHI" | "WVI" | "Compliance";
 
 interface IndexConfig {
   label: IndexKey;
@@ -49,10 +49,10 @@ interface IndexConfig {
 
 const INDEX_CONFIGS: IndexConfig[] = [
   {
-    label: "WEI", desc: "Women's Empowerment",
+    label: "SHE Score", desc: "Women's Empowerment",
     tailwind: "text-amber-400  border-amber-400/30  bg-amber-400/5",
     accent: "#f59e0b", scoreField: "wei_score",
-    title: "Women's Empowerment Index",
+    title: "SHE Score",
     formula: [
       { label: "Empowerment",      weight: "×15%" },
       { label: "Bodily Autonomy",  weight: "×15%" },
@@ -177,7 +177,7 @@ const INDEX_CONFIGS: IndexConfig[] = [
 /* ── Distribution curve types ── */
 interface DistPillar { label: string; color: string; width: number; }
 
-// When WEI is active the KDE shows all 8 external index distributions —
+// When SHE Score is active the KDE shows all 8 external index distributions —
 // one curve per index, derived live from INDEX_CONFIGS + allIndexQueries data.
 
 /* ── Relative time helper ── */
@@ -246,12 +246,12 @@ export default function Dashboard() {
   const [sortAsc, setSortAsc]                 = useState(true);
   const [view, setView]                       = useState<ViewMode>("map");
   const [selectedCountry, setSelectedCountry] = useState<CountryWEI | null>(null);
-  const [selectedIndex, setSelectedIndex]     = useState<IndexKey>("WEI");
+  const [selectedIndex, setSelectedIndex]     = useState<IndexKey>("SHE Score");
 
-  const isWEI    = selectedIndex === "WEI";
+  const isWEI    = selectedIndex === "SHE Score";
   const idxConf  = INDEX_CONFIGS.find((c) => c.label === selectedIndex)!;
 
-  /* ── Core WEI data ── */
+  /* ── Core SHE Score data ── */
   const { data: summary, isLoading: loadingSummary } = useQuery({
     queryKey: ["summary"],
     queryFn:  api.summary,
@@ -266,7 +266,7 @@ export default function Dashboard() {
 
   const countries = countriesRes?.data ?? [];
 
-  /* ── Lazy-loaded non-WEI index data ── */
+  /* ── Lazy-loaded non-SHE Score index data ── */
   const { data: activeIndexData, isLoading: loadingIndex } = useQuery({
     queryKey: ["index-data", selectedIndex],
     queryFn: async (): Promise<IndexScore[]> => {
@@ -293,7 +293,7 @@ export default function Dashboard() {
   });
   const scanHistory = scanStatsRes?.data ?? [];
 
-  /* ── Eager-load all non-WEI indexes for global average computation ── */
+  /* ── Eager-load all non-SHE Score indexes for global average computation ── */
   const allIndexQueries = useQueries({
     queries: [
       { queryKey: ["index-data", "GPI"],        queryFn: () => api.gpi.all(),              staleTime: 10 * 60 * 1000 },
@@ -306,7 +306,7 @@ export default function Dashboard() {
     ],
   });
 
-  /* ── Build scoreOverride map for the active non-WEI index ── */
+  /* ── Build scoreOverride map for the active non-SHE Score index ── */
   const scoreOverride = useMemo<Map<string, number> | undefined>(() => {
     if (isWEI || !activeIndexData?.length) return undefined;
     const map = new Map<string, number>();
@@ -320,12 +320,12 @@ export default function Dashboard() {
     return map;
   }, [isWEI, selectedIndex, activeIndexData, idxConf.scoreField]);
 
-  /* ── Distribution pillars — one curve per index (WEI mode = all 8) ── */
+  /* ── Distribution pillars — one curve per index (SHE Score mode = all 8) ── */
   const activeDistPillars = useMemo<DistPillar[]>(() => {
     if (isWEI) {
-      // All 8 index curves; only include non-WEI ones whose data has arrived
+      // All 8 index curves; only include non-SHE Score ones whose data has arrived
       const pillars: DistPillar[] = [
-        { label: "WEI", color: "#f59e0b", width: 2.5 },
+        { label: "SHE Score", color: "#f59e0b", width: 2.5 },
       ];
       const extras = [
         { label: "GPI",        q: allIndexQueries[0], color: "#a855f7" },
@@ -353,7 +353,7 @@ export default function Dashboard() {
       // Build a dataset per index (only those with loaded data)
       type DS = { label: string; values: number[] };
       const datasets: DS[] = [
-        { label: "WEI", values: countries.map(c => c.wei_score).filter(v => v > 0) },
+        { label: "SHE Score", values: countries.map(c => c.wei_score).filter(v => v > 0) },
       ];
 
       const extras = [
@@ -382,7 +382,7 @@ export default function Dashboard() {
       });
     }
 
-    // Non-WEI: single curve from the active index data
+    // Non-SHE Score: single curve from the active index data
     if (!activeIndexData?.length) return [];
     const values = activeIndexData
       .map((r) => (r[idxConf.scoreField] as number | undefined) ?? (r.score as number | undefined))
@@ -434,7 +434,7 @@ export default function Dashboard() {
       (q) => q.data as IndexScore[] | undefined
     );
     return {
-      WEI:        summary?.global_wei_score          ?? null,
+      "SHE Score":      summary?.global_wei_score          ?? null,
       GPI:        summary?.gpi_global_avg            ?? avgScore(gpiD,  "gpi_score"),
       SVI:        summary?.svi_global_avg            ?? avgScore(sviD,  "svi_score"),
       WADI:       summary?.wadi_global_avg           ?? avgScore(wadiD, "wadi_score"),
@@ -482,8 +482,8 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Live WEI Dashboard — Women's Empowerment Index for 105 Countries"
-        description="Track the Women's Empowerment Index live across 105 countries. Interactive world map, country leaderboard, and 8 pillar scores — all built from UN, World Bank and WHO data."
+        title="Live SHE Score Dashboard — SHE Score for 105 Countries"
+        description="Track the SHE Score live across 105 countries. Interactive world map, country leaderboard, and 8 pillar scores — all built from UN, World Bank and WHO data."
         url="https://www.shetoken.org/dashboard"
       />
       <Nav />
@@ -495,10 +495,10 @@ export default function Dashboard() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/30 bg-accent/10 text-accent text-xs mb-3 animate-glow-pulse">
-                <Sparkles className="h-3 w-3" /> Live WEI Data · {summary?.countries_scored ?? "…"} countries scored
+                <Sparkles className="h-3 w-3" /> Live SHE Score Data · {summary?.countries_scored ?? "…"} countries scored
               </div>
               <h1 className="text-3xl md:text-4xl font-bold leading-tight">
-                Global WEI Score:{" "}
+                Global SHE Score:{" "}
                 {loadingSummary ? (
                   <span className="text-muted-foreground">loading…</span>
                 ) : (
@@ -507,7 +507,7 @@ export default function Dashboard() {
                 <span className="text-muted-foreground font-normal text-xl ml-2">/ 100</span>
               </h1>
               <p className="text-xs text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
-                Women's Empowerment Index ·{" "}
+                SHE Score ·{" "}
                 {new Date(summary?.last_updated ?? Date.now()).toLocaleDateString("en-US", {
                   month: "long", year: "numeric",
                 })}
@@ -658,7 +658,7 @@ export default function Dashboard() {
             <div className="flex gap-2 flex-wrap px-2 py-2">
               {INDEX_CONFIGS.map((idx) => {
                 const isActive = selectedIndex === idx.label;
-                const isNative = idx.label === "WEI";
+                const isNative = idx.label === "SHE Score";
                 const isDerived = idx.label === "Compliance";
                 return (
                   <div key={idx.label} className="relative flex-1 min-w-[105px] group/idx">
@@ -735,7 +735,7 @@ export default function Dashboard() {
               })}
             </div>
 
-            {/* Sub-label when a non-WEI index is active */}
+            {/* Sub-label when a non-SHE Score index is active */}
             {!isWEI && (
               <p className="text-xs text-muted-foreground mt-3 flex items-center gap-2 flex-wrap">
                 {loadingIndex ? (
@@ -754,10 +754,10 @@ export default function Dashboard() {
                     </span>
                     <span className="text-border/60">·</span>
                     <button
-                      onClick={() => setSelectedIndex("WEI")}
+                      onClick={() => setSelectedIndex("SHE Score")}
                       className="text-accent hover:underline"
                     >
-                      ← back to WEI
+                      ← back to SHE Score
                     </button>
                   </>
                 )}
@@ -835,7 +835,7 @@ export default function Dashboard() {
                     selectedIso={selectedCountry?.iso_code}
                     onSelect={setSelectedCountry}
                     scoreOverride={scoreOverride}
-                    indexLabel={isWEI ? "WEI" : selectedIndex}
+                    indexLabel={isWEI ? "SHE Score" : selectedIndex}
                     mapHeight={380}
                   />
                 </div>
@@ -859,7 +859,7 @@ export default function Dashboard() {
                         {selectedCountry.country}
                       </div>
 
-                      {/* Active index score — shown prominently when non-WEI */}
+                      {/* Active index score — shown prominently when non-SHE Score */}
                       {!isWEI && (
                         <div className="mb-3 pb-3 border-b border-border/30">
                           <div className="text-xs text-muted-foreground mb-0.5">{selectedIndex} Score</div>
@@ -880,13 +880,13 @@ export default function Dashboard() {
                         </div>
                       )}
 
-                      {/* WEI score */}
+                      {/* SHE Score */}
                       <div className="flex items-baseline gap-2 mb-1">
                         <span className={`font-bold text-gradient leading-none ${!isWEI ? "text-3xl" : "text-5xl"}`}>
                           {selectedCountry.wei_score.toFixed(1)}
                         </span>
                         <span className="text-muted-foreground text-sm">
-                          {!isWEI ? "WEI" : ""} / 100
+                          {!isWEI ? "SHE Score" : ""} / 100
                         </span>
                       </div>
 
@@ -904,7 +904,7 @@ export default function Dashboard() {
                         </span>
                       </div>
 
-                      {/* WEI pillar mini-bars */}
+                      {/* SHE Score pillar mini-bars */}
                       <div className="space-y-2 flex-1">
                         {[
                           { key: "empowerment_score",    label: "Empowerment", bar: "bg-purple-500" },
@@ -945,7 +945,7 @@ export default function Dashboard() {
                       <Globe2 className="h-10 w-10 text-muted-foreground/30" />
                       <p className="text-sm text-muted-foreground leading-relaxed max-w-[200px]">
                         Click any country on the map to see its{" "}
-                        {isWEI ? "WEI scores" : `${selectedIndex} score`} and pillar breakdown
+                        {isWEI ? "SHE Scores" : `${selectedIndex} score`} and pillar breakdown
                       </p>
                     </div>
                   )}
@@ -969,7 +969,7 @@ export default function Dashboard() {
                   </div>
                   <p className="text-xs text-muted-foreground mb-4">
                     {isWEI
-                      ? "Each curve is one of the 8 SheToken indexes — these are separate scoring systems, not WEI sub-pillars."
+                      ? "Each curve is one of the 8 SheToken indexes — these are separate scoring systems, not SHE Score sub-pillars."
                       : `${idxConf.desc} scores (0–100). Higher score = better performance.`}
                     {selectedCountry && selectedIndexScore != null && (
                       <span className="text-amber-400 ml-1">
@@ -1020,7 +1020,7 @@ export default function Dashboard() {
                         {activeDistPillars.map(p => (
                           <polyline key={p.label} points={toPolyline(p.label)}
                             stroke={p.color} strokeWidth={p.width * 0.7} fill="none"
-                            strokeOpacity={isWEI && p.label !== "WEI" ? 0.5 : 1} />
+                            strokeOpacity={isWEI && p.label !== "SHE Score" ? 0.5 : 1} />
                         ))}
                         {/* selected country reference line */}
                         {selectedCountry && selectedIndexScore != null && (
@@ -1063,10 +1063,10 @@ export default function Dashboard() {
                 <div className="bg-gradient-card border border-border/40 rounded-2xl p-5 shadow-card flex flex-col h-full">
                   <div className="flex items-center justify-between mb-1">
                     <h3 className="text-sm font-semibold">Country Distribution by Tier</h3>
-                    <span className="text-xs text-muted-foreground hidden sm:block">WEI tiers · {countries.length} countries</span>
+                    <span className="text-xs text-muted-foreground hidden sm:block">SHE Score tiers · {countries.length} countries</span>
                   </div>
                   <p className="text-xs text-muted-foreground mb-4">
-                    How countries are distributed across the four WEI investment tiers.
+                    How countries are distributed across the four SHE Score investment tiers.
                   </p>
 
                   {/* Pure CSS horizontal bars — no Recharts, no crashes */}
@@ -1142,7 +1142,7 @@ export default function Dashboard() {
                       <th className="text-left px-4 py-3 text-muted-foreground font-medium hidden md:table-cell">Ticker</th>
                       <th className="text-left px-4 py-3 text-muted-foreground font-medium">
                         <button onClick={() => toggleSort("wei_score")} className="flex items-center gap-1 hover:text-foreground">
-                          WEI Score <ArrowUpDown className="h-3 w-3" />
+                          SHE Score <ArrowUpDown className="h-3 w-3" />
                         </button>
                       </th>
                       <th className="text-left px-4 py-3 text-muted-foreground font-medium hidden lg:table-cell">Δ Week</th>
@@ -1247,9 +1247,9 @@ export default function Dashboard() {
 
             <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6 text-xs text-muted-foreground leading-relaxed">
 
-              {/* WEI */}
+              {/* SHE Score */}
               <div>
-                <p className="font-semibold text-foreground mb-1">Women's Empowerment Index (WEI)</p>
+                <p className="font-semibold text-foreground mb-1">SHE Score</p>
                 <p>
                   SHEtoken's native composite index. Scores 105 countries across 8 pillars —
                   Empowerment, Bodily Autonomy, Safety &amp; Justice, Education, Economic,
@@ -1299,7 +1299,7 @@ export default function Dashboard() {
               {summary?.last_updated
                 ? new Date(summary.last_updated).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
                 : "—"}{" "}
-              · WEI v3.0 · {summary?.countries_scored ?? "…"} countries scored ·{" "}
+              · SHE Score v3.0 · {summary?.countries_scored ?? "…"} countries scored ·{" "}
               <a href="https://www.shetoken.org/whitepaper" target="_blank" rel="noopener noreferrer"
                  className="underline hover:text-muted-foreground/80">
                 Full methodology →
@@ -1313,7 +1313,7 @@ export default function Dashboard() {
       <footer className="border-t border-border/40 py-8">
         <div className="container flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
           <span>© 2026 SheToken · shetoken.org · Data: api.shetoken.org</span>
-          <span>WEI v3.0 · {summary?.countries_scored ?? "…"} countries scored</span>
+          <span>SHE Score v3.0 · {summary?.countries_scored ?? "…"} countries scored</span>
         </div>
       </footer>
     </div>

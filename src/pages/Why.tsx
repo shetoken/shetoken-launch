@@ -138,7 +138,7 @@ export default function Why() {
 
           <div className="grid md:grid-cols-2 gap-5 mt-12">
             {[
-              { n: "01", verb: "Measure", icon: Activity, title: "Live Data — the Women's Empowerment Index", desc: "You can't value what you can't measure. The WEI scores women's empowerment across 105 countries, updated weekly from UN, WHO and World Bank data. This is what $SHE is backed by.", to: "/dashboard", cta: "Explore the data" },
+              { n: "01", verb: "Measure", icon: Activity, title: "Live Data — the SHE Score", desc: "You can't value what you can't measure. The SHE Scores women's empowerment across 105 countries, updated weekly from UN, WHO and World Bank data. This is what $SHE is backed by.", to: "/dashboard", cta: "Explore the data" },
               { n: "02", verb: "Invest", icon: Coins, title: "$SHE — outcome-priced capital", desc: "When women's lives improve, $SHE is minted; when they deteriorate, it's burned. Progress for women becomes financial value — so investing in women becomes investing in $SHE.", to: "/simulator", cta: "Try the $SHE Simulator" },
               { n: "03", verb: "Build", icon: Store, title: "SHEconomy — the women-owned marketplace", desc: "Real women-owned businesses, real income. The marketplace is where empowerment is produced — turning the index from a number into livelihoods.", to: "/marketplace", cta: "Visit SHEconomy" },
               { n: "04", verb: "Belong", icon: Users, title: "SHE Community — the people behind the data", desc: "The verified women who power it all — sellers, members, supporters. A private, women-first space built for support and solidarity.", to: "/community", cta: "Join SHE Community" },
@@ -153,7 +153,7 @@ export default function Why() {
           </div>
 
           <div className="mt-8 text-center text-sm text-muted-foreground bg-card/30 border border-border/40 rounded-2xl p-5 leading-relaxed">
-            <span className="text-accent font-semibold">The flywheel:</span> SHE Community + SHEconomy create real economic progress for women → the WEI rises → $SHE (backed by the WEI) appreciates → capital flows back into women's businesses and programs → progress compounds.
+            <span className="text-accent font-semibold">The flywheel:</span> SHE Community + SHEconomy create real economic progress for women → the SHE Score rises → $SHE (backed by the SHE Score) appreciates → capital flows back into women's businesses and programs → progress compounds.
           </div>
         </section>
 
@@ -223,8 +223,8 @@ export default function Why() {
             </p>
             <div className="grid md:grid-cols-3 gap-6 text-left mb-12">
               {[
-                { icon: Shield, title: "Real data. Independent sources.", desc: "WEI scores are built from UN Women, WHO, World Bank, UNESCO and UNODC — the same databases governments and researchers rely on. Not self-reported. Not curated by issuers." },
-                { icon: TrendingUp, title: "Price moves with outcomes.", desc: "When the global WEI score rises — measurably, verifiably — $SHE tokens are minted. When it falls, tokens are burned. Progress is rewarded. Regression has a price." },
+                { icon: Shield, title: "Real data. Independent sources.", desc: "SHE Scores are built from UN Women, WHO, World Bank, UNESCO and UNODC — the same databases governments and researchers rely on. Not self-reported. Not curated by issuers." },
+                { icon: TrendingUp, title: "Price moves with outcomes.", desc: "When the global SHE Score rises — measurably, verifiably — $SHE tokens are minted. When it falls, tokens are burned. Progress is rewarded. Regression has a price." },
                 { icon: Globe2, title: "Blockchain accountability.", desc: "Every supply change is executed by a smart contract responding to oracle data. No intermediary. No board vote. No PR spin. The chain doesn't lie." },
               ].map((item) => (
                 <div key={item.title} className="bg-background/40 border border-border/40 rounded-xl p-5">
@@ -239,7 +239,7 @@ export default function Why() {
 
         {/* DATA SOURCES STRIP */}
         <section className="py-10 container max-w-5xl">
-          <p className="text-center text-xs uppercase tracking-widest text-muted-foreground mb-6">WEI data draws from</p>
+          <p className="text-center text-xs uppercase tracking-widest text-muted-foreground mb-6">SHE Score data draws from</p>
           <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
             {[
               { name: "UN Women", href: "https://www.unwomen.org/en/digital-library/sdg-report" },
@@ -273,7 +273,7 @@ export default function Why() {
             {[
               { num: "01", title: "Institutional ESG is under pressure to prove impact", desc: "Regulators in the EU, UK and US are demanding ESG funds show measurable outcomes — not just policies. SHEtoken provides the measurement layer that institutional funds currently lack." },
               { num: "02", title: "Web3 infrastructure is mature enough", desc: "Chainlink oracles can reliably connect real-world data to on-chain contracts. Layer 2 networks make transactions affordable. The infrastructure that didn't exist in 2017 exists now." },
-              { num: "03", title: "The data has never been better", desc: "WHO, UN Women, World Bank and UNODC now publish granular, country-level gender data annually. The WEI can be calculated rigorously across 105 countries. Five years ago this wasn't possible." },
+              { num: "03", title: "The data has never been better", desc: "WHO, UN Women, World Bank and UNODC now publish granular, country-level gender data annually. The SHE Score can be calculated rigorously across 105 countries. Five years ago this wasn't possible." },
             ].map((item) => (
               <div key={item.num} className="flex gap-5 p-6 bg-gradient-card border border-border/40 rounded-2xl shadow-card">
                 <div className="text-4xl font-bold text-accent/30 shrink-0 w-12">{item.num}</div>

@@ -18,7 +18,7 @@ interface Hover {
   iso: string; name: string; year: number; score: number; left: number; top: number; selected: boolean;
 }
 
-/** Multi-country WEI trend: faint backdrop + global average + highlighted selected, with hover-to-identify. */
+/** Multi-country SHE Score trend: faint backdrop + global average + highlighted selected, with hover-to-identify. */
 export function WeiTrendChart({ years, countries, globalAvg, selectedIso, selectedName, selectedScores }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<Hover | null>(null);
@@ -115,7 +115,7 @@ export function WeiTrendChart({ years, countries, globalAvg, selectedIso, select
             {hover.name}{hover.selected ? " (selected)" : ""}
           </div>
           <div className="text-muted-foreground tabular-nums">
-            {hover.year} · WEI {hover.score.toFixed(1)}
+            {hover.year} · SHE Score {hover.score.toFixed(1)}
           </div>
         </div>
       )}

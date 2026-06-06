@@ -1,4 +1,8 @@
 {
+  "redirects": [
+    { "source": "/wei", "destination": "/dashboard", "permanent": true },
+    { "source": "/wei/:path*", "destination": "/dashboard", "permanent": true }
+  ],
   "rewrites": [
     { "source": "/country/:iso", "destination": "/country/:iso.html" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }

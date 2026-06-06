@@ -80,20 +80,20 @@ interface WorldMapProps {
   /** If provided, clicking fires this instead of navigating to the country page */
   onSelect?: (country: CountryWEI) => void;
   /**
-   * When a non-WEI index is active, supply a map of iso_code → score.
+   * When a non-SHE Score index is active, supply a map of iso_code → score.
    * Countries missing from this map are rendered grey (no data).
    * When undefined, falls back to each country's wei_score.
    */
   scoreOverride?: Map<string, number>;
-  /** Index name shown in the tooltip, e.g. "SVI". Defaults to "WEI". */
+  /** Index name shown in the tooltip, e.g. "SVI". Defaults to "SHE Score". */
   indexLabel?: string;
   /** Map canvas height in px. Default 500. */
   mapHeight?: number;
   /** ISO alpha-3 codes that have state-level drill-down — highlighted with a gold border + tooltip note. */
   subnationalIsos?: Set<string>;
-  /** Override the fill colour for a score (e.g. travel-advisory tiers instead of WEI tiers). */
+  /** Override the fill colour for a score (e.g. travel-advisory tiers instead of SHE Score tiers). */
   colorFor?: (score: number | null | undefined) => string;
-  /** Hide the built-in WEI-tier legend (e.g. when the page shows its own legend). */
+  /** Hide the built-in SHE Score-tier legend (e.g. when the page shows its own legend). */
   hideLegend?: boolean;
 }
 
@@ -102,7 +102,7 @@ export function WorldMap({
   selectedIso,
   onSelect,
   scoreOverride,
-  indexLabel = "WEI",
+  indexLabel = "SHE Score",
   mapHeight = 500,
   subnationalIsos,
   colorFor,
@@ -132,7 +132,7 @@ export function WorldMap({
     [scoreMap, isoForGeo]
   );
 
-  /** Resolve the display score: scoreOverride if provided, else WEI score */
+  /** Resolve the display score: scoreOverride if provided, else SHE Score */
   const getDisplayScore = useCallback(
     (iso3: string | undefined): number | null => {
       if (!iso3) return null;
@@ -194,7 +194,7 @@ export function WorldMap({
             <p className="text-xs text-muted-foreground mt-0.5">
               {indexLabel} Score:{" "}
               <span className="font-bold text-foreground">{tooltip.score.toFixed(1)}</span>
-              {indexLabel === "WEI" && (
+              {indexLabel === "SHE Score" && (
                 <>
                   {" · "}
                   <span className={TIER_COLORS[tooltip.tier]}>
@@ -238,7 +238,7 @@ export function WorldMap({
                   // Keep the country's scale colour and mark selection with a white
                   // outline — recolouring it gold collides with the yellow tiers.
                   const fill        = colorFor ? colorFor(displayScore) : scoreToColor(displayScore);
-                  const hasData     = !!data;   // clickable if WEI record exists
+                  const hasData     = !!data;   // clickable if SHE Score record exists
                   const hasSub      = !!data && !!subnationalIsos?.has(data.iso_code);
 
                   return (

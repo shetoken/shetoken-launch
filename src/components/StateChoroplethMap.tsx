@@ -107,7 +107,7 @@ export function StateChoroplethMap({
               <div className="font-semibold mb-1.5" style={{ color: hover.advisory.color }}>{hover.advisory.label}</div>
               <div className="flex justify-between"><span className="text-muted-foreground">Safety &amp; Justice</span>
                 <span className="font-medium" style={{ color: hover.advisory.color }}>{Number(hover.score).toFixed(0)}/100</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Overall WEI</span>
+              <div className="flex justify-between"><span className="text-muted-foreground">Overall SHE Score</span>
                 <span className="font-medium">{Number(hover.wei).toFixed(1)}/100</span></div>
             </>
           ) : (

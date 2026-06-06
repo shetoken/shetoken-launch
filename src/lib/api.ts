@@ -37,7 +37,7 @@ export interface Summary {
   lowest_score: number;
   last_updated: string;
   /**
-   * Pre-computed global averages for the 7 non-WEI indexes.
+   * Pre-computed global averages for the 7 non-SHE Score indexes.
    * Added to GET /v1/summary by the data-engine pipeline.
    * Frontend falls back to client-side averaging until these fields are present.
    */

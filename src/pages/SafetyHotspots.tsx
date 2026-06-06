@@ -7,7 +7,7 @@ import { WorldMap } from "@/components/WorldMap";
 import { StateChoroplethMap, stateKey, type CityLabel } from "@/components/StateChoroplethMap";
 import { ShieldAlert, Phone, MapPin, Search, Info, Moon, Users, Ban } from "lucide-react";
 
-/* ── Advisory tiers from the WEI Safety & Justice pillar (0–100, higher = safer) ── */
+/* ── Advisory tiers from the SHE Score Safety & Justice pillar (0–100, higher = safer) ── */
 interface Advisory { tier: number; label: string; action: string; color: string; Icon: typeof Ban; }
 function advisoryFor(score: number): Advisory {
   if (score >= 65) return { tier: 1, label: "Generally safe", color: "#10b981", Icon: ShieldAlert,

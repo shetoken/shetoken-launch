@@ -22,7 +22,7 @@ export function MethodologyPanel({ code, row, country, provenance, onClose }: Pr
   const [expandedPillar, setExpandedPillar] = useState<string | null>(null);
   if (!m) return null;
 
-  // Provenance lookups by field name (indicator/average kinds) or indicator label (WEI).
+  // Provenance lookups by field name (indicator/average kinds) or indicator label (SHE Score).
   const prov = (key: string): IndicatorProvenance | undefined => provenance?.[key];
   const yearOf = (key: string) => prov(key)?.year;
   // Computed vintage range from this index's indicator years.

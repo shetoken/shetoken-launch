@@ -2,8 +2,8 @@
  * /compare — Side-by-side country comparison
  *
  * Select up to 4 countries. Shows:
- *  • Grouped horizontal bar chart: 8 WEI pillars vs global average
- *  • WEI score cards per country (tier, weekly delta, top 5 pillar bars)
+ *  • Grouped horizontal bar chart: 8 SHE Score pillars vs global average
+ *  • SHE Score cards per country (tier, weekly delta, top 5 pillar bars)
  *  • Recent news signals filtered to selected countries (global signals endpoint)
  *
  * URL: /compare?countries=USA,IND,NGA  (pre-loads countries from query string)
@@ -78,7 +78,7 @@ export default function Compare() {
     }
   }, [selectedIsos, setSearchParams]);
 
-  /* ── All WEI countries (for picker autocomplete) ── */
+  /* ── All SHE Score countries (for picker autocomplete) ── */
   const { data: countriesRes } = useQuery({
     queryKey: ["wei-countries"],
     queryFn: () => api.wei.countries(105),
@@ -160,8 +160,8 @@ export default function Compare() {
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Compare Countries — Women's Empowerment Index"
-        description="Compare WEI scores, pillar breakdowns and gender equality metrics side-by-side for up to 4 countries."
+        title="Compare Countries — SHE Score"
+        description="Compare SHE Scores, pillar breakdowns and gender equality metrics side-by-side for up to 4 countries."
         url="https://www.shetoken.org/compare"
       />
       <Nav />
@@ -499,7 +499,7 @@ export default function Compare() {
                 </thead>
                 <tbody>
                   {[
-                    { label: "WEI Score",         fn: (c: CountryWEI) => c.wei_score.toFixed(1) },
+                    { label: "SHE Score",         fn: (c: CountryWEI) => c.wei_score.toFixed(1) },
                     { label: "Global Rank",        fn: (c: CountryWEI) => `#${c.rank}` },
                     { label: "Tier",               fn: (c: CountryWEI) => `${c.tier} — ${TIER_LABELS[c.tier]?.label}` },
                     { label: "Empowerment",        fn: (c: CountryWEI) => (c.empowerment_score ?? 0).toFixed(1) },
@@ -610,7 +610,7 @@ export default function Compare() {
             <Globe2 className="h-16 w-16 text-muted-foreground/20 mx-auto mb-6" />
             <h2 className="text-xl font-semibold mb-2">No countries selected</h2>
             <p className="text-muted-foreground max-w-md mx-auto text-sm mb-6">
-              Search for up to 4 countries above to compare their WEI scores,
+              Search for up to 4 countries above to compare their SHE Scores,
               8-pillar breakdowns, and recent news signals side-by-side.
             </p>
             <Button asChild variant="outline" className="border-border/60 bg-card/40">

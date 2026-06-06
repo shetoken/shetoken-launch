@@ -134,7 +134,7 @@ export default function SHEconomy() {
           <h1 className="text-3xl md:text-4xl font-bold">Learn to invest — risk-free.</h1>
           <p className="text-sm text-muted-foreground mt-2 max-w-2xl">
             Trade $SHE, Bitcoin and Ethereum with <strong>virtual</strong> money and see if you can beat
-            <strong> SHE-Bot</strong>. $SHE's price rises when the world's Women's Empowerment Index improves.
+            <strong> SHE-Bot</strong>. $SHE's price rises when the world's SHE Score improves.
             This is a learning game — <em>not financial advice</em>, no real money.
           </p>
         </div>
@@ -261,7 +261,7 @@ export default function SHEconomy() {
 
         <p className="text-[11px] text-muted-foreground/50 flex items-start gap-1.5">
           <Info className="h-3 w-3 mt-0.5 shrink-0" />
-          SHEconomy is an educational simulation. $SHE is a simulated price anchored to the global WEI ({globalWEI.toFixed(1)});
+          SHEconomy is an educational simulation. $SHE is a simulated price anchored to the global SHE Score ({globalWEI.toFixed(1)});
           BTC/ETH start from live CoinGecko prices. No real money, no real trades, not financial advice.
         </p>
       </main>

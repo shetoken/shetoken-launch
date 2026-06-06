@@ -3,7 +3,7 @@
  * Drives the "How this score is calculated" breakdown on the country profile.
  *
  * Three calculation kinds:
- *   weighted   — score = Σ(value × weight) ÷ Σweight   (WEI, Compliance) — exactly reproducible
+ *   weighted   — score = Σ(value × weight) ÷ Σweight   (SHE Score, Compliance) — exactly reproducible
  *   average    — score = mean(sub-scores)               (GPI)            — exactly reproducible
  *   indicators — raw inputs shown; normalised & combined per methodology v3.0
  *                (SVI, WADI, WEVI, WHI, WVI) — inputs + sources shown, exact weights in the doc
@@ -13,7 +13,7 @@
 
 export type MethodKind = "weighted" | "average" | "indicators";
 
-/** A primary-source indicator that composes a WEI pillar. */
+/** A primary-source indicator that composes a SHE Score pillar. */
 export interface SubIndicator {
   label: string;
   weight: string;     // intra-pillar weight, e.g. "30%"
@@ -27,7 +27,7 @@ export interface MethodComponent {
   invert?: boolean;   // value used = 100 − raw (e.g. WADI inside Compliance)
   unit?: string;      // "%", "/100k", "/10", "/6", "yrs"
   source?: string;    // short per-indicator source tag
-  indicators?: SubIndicator[];  // pillar sub-indicators (WEI only) — drill-down
+  indicators?: SubIndicator[];  // pillar sub-indicators (SHE Score only) — drill-down
 }
 
 export interface IndexMethodology {
@@ -62,13 +62,13 @@ const SRC = {
 } as const;
 
 export const METHODOLOGY: Record<string, IndexMethodology> = {
-  WEI: {
-    code: "WEI",
-    title: "Women's Empowerment Index",
+  "SHE Score": {
+    code: "SHE Score",
+    title: "SHE Score",
     accent: "#f59e0b",
     kind: "weighted",
     scoreField: "wei_score",
-    formula: "WEI = Σ(pillar × weight) − (Violence Penalty × 0.10)",
+    formula: "SHE Score = Σ(pillar × weight) − (Violence Penalty × 0.10)",
     components: [
       { label: "Empowerment", field: "empowerment_score", weight: 0.15, indicators: [
         { label: "% parliamentary seats held by women", weight: "30%", source: "IPU Parline" },
@@ -134,7 +134,7 @@ export const METHODOLOGY: Record<string, IndexMethodology> = {
       ]},
     ],
     sources: [SRC.unwomen, SRC.wbgender, SRC.unesco, SRC.who, SRC.unodc, SRC.ilo, SRC.ipu, SRC.oecd],
-    note: "SHEtoken's native composite. 8 pillars (each a weighted blend of primary-source indicators, normalised 0–100) minus a violence penalty. Click any pillar below to see its indicators and sources. Inverted indicators (e.g. maternal mortality, pay gap, rape rate) are flipped so higher always = better. The penalty is subtracted — a higher penalty lowers the WEI; where WHO survey data exists it is weighted 70% vs 30% UNODC to correct underreporting.",
+    note: "SHEtoken's native composite. 8 pillars (each a weighted blend of primary-source indicators, normalised 0–100) minus a violence penalty. Click any pillar below to see its indicators and sources. Inverted indicators (e.g. maternal mortality, pay gap, rape rate) are flipped so higher always = better. The penalty is subtracted — a higher penalty lowers the SHE Score; where WHO survey data exists it is weighted 70% vs 30% UNODC to correct underreporting.",
     vintage: "2025 baseline · primary-source releases 2023–2025",
   },
 
@@ -275,16 +275,16 @@ export const METHODOLOGY: Record<string, IndexMethodology> = {
     accent: "#10b981",
     kind: "weighted",
     scoreField: "compliance_score",
-    formula: "Compliance = (WEI×0.40 + SVI×0.25 + GPI×0.20 + (100−WADI)×0.15) ÷ Σweight",
+    formula: "Compliance = (SHE Score×0.40 + SVI×0.25 + GPI×0.20 + (100−WADI)×0.15) ÷ Σweight",
     components: [
-      { label: "WEI",            field: "wei_score",  weight: 0.40 },
+      { label: "SHE Score",            field: "wei_score",  weight: 0.40 },
       { label: "SVI",            field: "svi_score",  weight: 0.25 },
       { label: "GPI",            field: "gpi_score",  weight: 0.20 },
       { label: "WADI (inverted)",field: "wadi_score", weight: 0.15, invert: true },
     ],
     sources: [SRC.unwomen, SRC.wbgender, SRC.who, SRC.unodc, SRC.ilo],
-    note: "A DERIVED index — unlike the others it uses no new primary data. It is a weighted re-mix of WEI, SVI, GPI and WADI to give corporations a single outsourcing-risk number. WADI is inverted (100−WADI) because higher AI-displacement risk worsens compliance. Its true data sources are whatever feed those four upstream indexes.",
-    vintage: "2025 · recomputed from current WEI / SVI / GPI / WADI",
+    note: "A DERIVED index — unlike the others it uses no new primary data. It is a weighted re-mix of SHE Score, SVI, GPI and WADI to give corporations a single outsourcing-risk number. WADI is inverted (100−WADI) because higher AI-displacement risk worsens compliance. Its true data sources are whatever feed those four upstream indexes.",
+    vintage: "2025 · recomputed from current SHE Score / SVI / GPI / WADI",
     derived: true,
   },
 };
@@ -306,7 +306,7 @@ export function computeScore(
   if (m.kind === "weighted") {
     const totalWeight = m.components.reduce((s, c) => s + Math.abs(c.weight ?? 0), 0);
     const sum = contributions.reduce((s, c) => s + (c.contribution ?? 0), 0);
-    // WEI weights sum to 1.0 incl. the −0.10 penalty already in the sum; Compliance weights sum to 1.0.
+    // SHE Score weights sum to 1.0 incl. the −0.10 penalty already in the sum; Compliance weights sum to 1.0.
     const total = totalWeight ? sum / (m.code === "Compliance" ? totalWeight : 1) : null;
     return { contributions, total: total != null ? Math.round(total * 10) / 10 : null };
   }

@@ -87,7 +87,7 @@ export function AuthModal() {
             <span className="text-gradient">SHEtoken</span> account
           </DialogTitle>
           <DialogDescription className="text-muted-foreground text-sm">
-            Access the WEI dashboard, focus groups and your saved countries.
+            Access the SHE Score dashboard, focus groups and your saved countries.
           </DialogDescription>
         </DialogHeader>
 

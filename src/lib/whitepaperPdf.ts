@@ -99,7 +99,7 @@ export async function downloadWhitepaper() {
     title: "SHEtoken",
     subtitle: "The world's first data-backed gender-accountability token",
     about: [
-      "SHEtoken ($SHE) ties the value of a cryptocurrency to real-world progress for women. Its supply is governed by the Women's Empowerment Index (WEI) — a composite 0–100 score across 8 weighted pillars for 105 countries, built from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data.",
+      "SHEtoken ($SHE) ties the value of a cryptocurrency to real-world progress for women. Its supply is governed by the SHE Score — a composite 0–100 score across 8 weighted pillars for 105 countries, built from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data.",
       "When women's conditions improve, tokens are minted; when they deteriorate, tokens are burned. The mission: to make the advancement of women's rights financially measurable, publicly transparent, and globally investable.",
     ],
   });
@@ -109,9 +109,9 @@ export async function downloadWhitepaper() {
 
   heading("", "Abstract");
   para(
-    "SHE (the Women's Empowerment Index Token) is the world's first data-backed cryptocurrency whose value is " +
+    "SHE (the SHE Score Token) is the world's first data-backed cryptocurrency whose value is " +
     "algorithmically tied to real-world women's empowerment outcomes. SHE's value is governed by the Women's " +
-    "Empowerment Index (WEI) — a composite annual score measuring female literacy, economic empowerment, safety " +
+    "Empowerment Index (SHE Score) — a composite annual score measuring female literacy, economic empowerment, safety " +
     "from crime, poverty levels, and political participation across every nation and major state or province."
   );
   bullet("When women's conditions improve, tokens are minted.", C.emerald);
@@ -139,9 +139,9 @@ export async function downloadWhitepaper() {
     "dimensions. Existing indices are for researchers. Existing women-focused crypto is speculative. SHE bridges this gap."
   );
 
-  heading("2", "The WEI Formula v3.0");
+  heading("2", "The SHE Score Formula v3.0");
   para(
-    "The Women's Empowerment Index (WEI) is calculated annually for each country on a 0–100 scale, covering " +
+    "The SHE Score is calculated annually for each country on a 0–100 scale, covering " +
     "8 weighted pillars plus a violence penalty:"
   );
   table(
@@ -159,13 +159,13 @@ export async function downloadWhitepaper() {
     ],
     [1.2, 0.7, 3]
   );
-  formulaBox("WEI Formula", [
-    "WEI = (Empowerment x 0.15) + (Bodily Autonomy x 0.15) + (Safety x 0.14)",
+  formulaBox("SHE Score Formula", [
+    "SHE Score = (Empowerment x 0.15) + (Bodily Autonomy x 0.15) + (Safety x 0.14)",
     "      + (Education x 0.12) + (Economic x 0.12) + (Health x 0.12)",
     "      + (Dignity x 0.10) + (Digital x 0.10) - (Violence Penalty x 0.10)",
   ]);
   table(
-    ["Tier", "WEI Score", "Description"],
+    ["Tier", "SHE Score", "Description"],
     [
       ["Tier 1 — Preferred", "70+", "High-performing nations (Nordic, Canada, NZ) — recommended for investment"],
       ["Tier 2 — Acceptable", "45–69", "Mid-performing, showing progress"],
@@ -179,7 +179,7 @@ export async function downloadWhitepaper() {
   table(
     ["Parameter", "Value"],
     [
-      ["Token Name", "SHE (Women's Empowerment Index Token)"],
+      ["Token Name", "SHE (SHE Score Token)"],
       ["Ticker", "$SHE"],
       ["Blockchain", "Ethereum ERC-20 + Polygon L2"],
       ["Total Supply", "1,000,000,000 SHE"],
@@ -191,7 +191,7 @@ export async function downloadWhitepaper() {
     ["Allocation", "%"],
     [
       ["Public Sale / Community", "40%"],
-      ["WEI Impact Fund", "25%"],
+      ["SHE Score Impact Fund", "25%"],
       ["Founding Team (3-year vesting)", "15%"],
       ["Ecosystem & Partnerships", "10%"],
       ["Reserve & Liquidity", "10%"],
@@ -203,8 +203,8 @@ export async function downloadWhitepaper() {
   table(
     ["Tier", "Token Format", "Description", "Launch"],
     [
-      ["Global Index", "$SHE", "Tracks worldwide WEI score. One token, whole world", "Year 1"],
-      ["Country Sub-Token", "$SHE-IND, $SHE-NGA, $SHE-USA", "Each country pegged to its own national WEI score", "Year 2"],
+      ["Global Index", "$SHE", "Tracks worldwide SHE Score. One token, whole world", "Year 1"],
+      ["Country Sub-Token", "$SHE-IND, $SHE-NGA, $SHE-USA", "Each country pegged to its own national SHE Score", "Year 2"],
       ["State / Province Token", "$SHE-WB, $SHE-KL, $SHE-MH", "State-level tokens. Profit directly from local programs", "Year 3"],
     ],
     [1, 1.3, 2, 0.6]
@@ -213,7 +213,7 @@ export async function downloadWhitepaper() {
   heading("5", "India as a Model");
   para("India provides the most compelling real-world proof that targeted programs measurably improve women's empowerment.");
   table(
-    ["Scheme", "Scale", "WEI Pillar"],
+    ["Scheme", "Scale", "SHE Score Pillar"],
     [
       ["Lakshmi Bhandar (West Bengal)", "24.1M beneficiaries — direct cash Rs 1,500–1,700/month", "Economic Inclusion"],
       ["Kanyashree (West Bengal)", "10M girls — UNESCO top honour winner", "Education & Literacy"],
@@ -243,7 +243,7 @@ export async function downloadWhitepaper() {
   table(
     ["Phase", "Timeline", "Key Milestone"],
     [
-      ["Foundation", "Months 1–3", "Whitepaper, WEI formula, shetoken.org live"],
+      ["Foundation", "Months 1–3", "Whitepaper, SHE Score formula, shetoken.org live"],
       ["Build", "Months 4–6", "Smart contract dev, NGO outreach, institutional pitches"],
       ["Testnet", "Months 7–9", "Ethereum testnet, Chainlink oracle, DAO governance"],
       ["Mainnet", "Months 10–12", "Public token sale, Uniswap V3, CoinGecko listing"],

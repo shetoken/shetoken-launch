@@ -13,8 +13,8 @@ const DEFAULT_IMAGE = `${BASE_URL}/og-image.png`;
 const SITE_NAME = "SHEtoken";
 
 export function SEO({
-  title = "SHEtoken — The World's First Women's Empowerment Index Token",
-  description = "SHE is the world's first data-backed cryptocurrency algorithmically tied to the Women's Empowerment Index. $SHE goes up when the world gets better for women.",
+  title = "SHEtoken — The World's First SHE Score Token",
+  description = "SHE is the world's first data-backed cryptocurrency algorithmically tied to the SHE Score. $SHE goes up when the world gets better for women.",
   image = DEFAULT_IMAGE,
   url = BASE_URL,
   type = "website",
@@ -42,7 +42,7 @@ export function SEO({
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={image} />
 
-      {/* JSON-LD — Organization + the WEI as a citable Dataset */}
+      {/* JSON-LD — Organization + the SHE Score as a citable Dataset */}
       <script type="application/ld+json">{JSON.stringify({
         "@context": "https://schema.org",
         "@graph": [
@@ -58,12 +58,12 @@ export function SEO({
           },
           {
             "@type": "Dataset",
-            "name": "Women's Empowerment Index (WEI)",
-            "alternateName": "WEI",
+            "name": "SHE Score",
+            "alternateName": "SHE Score",
             "description":
-              "Data-backed Women's Empowerment Index scoring 105 countries 0–100 across 8 weighted pillars (empowerment, bodily autonomy, safety & justice, education, economic, health, dignity & welfare, digital & social) minus a violence penalty. Updated weekly from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data.",
+              "Data-backed SHE Score scoring 105 countries 0–100 across 8 weighted pillars (empowerment, bodily autonomy, safety & justice, education, economic, health, dignity & welfare, digital & social) minus a violence penalty. Updated weekly from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data.",
             "url": `${BASE_URL}/dashboard`,
-            "keywords": ["women's empowerment", "gender equality index", "WEI", "gender data", "femicide", "maternal mortality"],
+            "keywords": ["women's empowerment", "gender equality index", "SHE Score", "gender data", "femicide", "maternal mortality"],
             "creator": { "@type": "Organization", "name": "SHEtoken" },
             "license": "https://creativecommons.org/licenses/by/4.0/",
             "isAccessibleForFree": true,
@@ -83,8 +83,8 @@ export function CountrySEO({ country, iso, score, region }: {
   country: string; iso: string; score: number; region: string;
 }) {
   const url = `${BASE_URL}/country/${iso}`;
-  const title = `${country} Women's Empowerment Index Score 2026 — WEI ${score}`;
-  const description = `${country}'s Women's Empowerment Index (WEI) score is ${score}/100 in 2026. Explore all 8 pillar scores, the 2015–2024 trend, and the Life Path for 100 girls in ${country}. Part of SHEtoken's global gender accountability index covering 105 countries.`;
+  const title = `${country} SHE Score 2026 — SHE Score ${score}`;
+  const description = `${country}'s SHE Score is ${score}/100 in 2026. Explore all 8 pillar scores, the 2015–2024 trend, and the Life Path for 100 girls in ${country}. Part of SHEtoken's global gender accountability index covering 105 countries.`;
   return (
     <>
       <SEO title={title} description={description} url={url} type="article" />
@@ -95,10 +95,10 @@ export function CountrySEO({ country, iso, score, region }: {
           "@graph": [
             {
               "@type": "Dataset",
-              "name": `${country} — Women's Empowerment Index ${new Date().getFullYear()}`,
-              "description": `${country} (${region}) scores ${score}/100 on the SHEtoken Women's Empowerment Index.`,
+              "name": `${country} — SHE Score ${new Date().getFullYear()}`,
+              "description": `${country} (${region}) scores ${score}/100 on the SHEtoken SHE Score.`,
               "url": url,
-              "variableMeasured": "Women's Empowerment Index (WEI), 0–100",
+              "variableMeasured": "SHE Score, 0–100",
               "creator": { "@type": "Organization", "name": "SHEtoken" },
               "isAccessibleForFree": true,
               "distribution": [{

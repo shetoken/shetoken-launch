@@ -79,9 +79,9 @@ function WhitepaperContent() {
 
       <SectionHeading>Abstract</SectionHeading>
       <p className="text-muted-foreground leading-relaxed">
-        SHE (the Women's Empowerment Index Token) is the world's first data-backed cryptocurrency whose value is
+        SHE (the SHE Score Token) is the world's first data-backed cryptocurrency whose value is
         algorithmically tied to real-world women's empowerment outcomes. SHE's value is governed by the Women's
-        Empowerment Index (WEI) — a composite annual score measuring female literacy, economic empowerment,
+        Empowerment Index (SHE Score) — a composite annual score measuring female literacy, economic empowerment,
         safety from crime, poverty levels, and political participation across every nation and major state or province.
       </p>
       <ul className="mt-4 space-y-2 text-muted-foreground list-none pl-0">
@@ -109,9 +109,9 @@ function WhitepaperContent() {
         dimensions. Existing indices are for researchers. Existing women-focused crypto is speculative. SHE bridges this gap.
       </p>
 
-      <SectionHeading>2. The WEI Formula v3.0</SectionHeading>
+      <SectionHeading>2. The SHE Score Formula v3.0</SectionHeading>
       <p className="text-muted-foreground mb-4">
-        The Women's Empowerment Index (WEI) is calculated annually for each country on a <strong className="text-foreground">0–100 scale</strong>,
+        The SHE Score is calculated annually for each country on a <strong className="text-foreground">0–100 scale</strong>,
         covering 8 weighted pillars plus a violence penalty:
       </p>
       <Table
@@ -129,13 +129,13 @@ function WhitepaperContent() {
         ]}
       />
       <div className="bg-card/40 border border-border/40 rounded-xl p-5 font-mono text-sm my-4">
-        <p className="text-accent mb-1">WEI Formula:</p>
-        <p className="text-muted-foreground">WEI = (Empowerment × 0.15) + (Bodily Autonomy × 0.15) + (Safety × 0.14)</p>
+        <p className="text-accent mb-1">SHE Score Formula:</p>
+        <p className="text-muted-foreground">SHE Score = (Empowerment × 0.15) + (Bodily Autonomy × 0.15) + (Safety × 0.14)</p>
         <p className="text-muted-foreground">{"    "}+ (Education × 0.12) + (Economic × 0.12) + (Health × 0.12)</p>
         <p className="text-muted-foreground">{"    "}+ (Dignity × 0.10) + (Digital × 0.10) − (Violence Penalty × 0.10)</p>
       </div>
       <Table
-        headers={["Tier", "WEI Score", "Description"]}
+        headers={["Tier", "SHE Score", "Description"]}
         rows={[
           ["Tier 1 — Preferred", "70+", "High-performing nations (Nordic, Canada, NZ) — recommended for investment"],
           ["Tier 2 — Acceptable", "45–69", "Mid-performing, showing progress"],
@@ -148,7 +148,7 @@ function WhitepaperContent() {
       <Table
         headers={["Parameter", "Value"]}
         rows={[
-          ["Token Name", "SHE (Women's Empowerment Index Token)"],
+          ["Token Name", "SHE (SHE Score Token)"],
           ["Ticker", "$SHE"],
           ["Blockchain", "Ethereum ERC-20 + Polygon L2"],
           ["Total Supply", "1,000,000,000 SHE"],
@@ -159,7 +159,7 @@ function WhitepaperContent() {
         headers={["Allocation", "%"]}
         rows={[
           ["Public Sale / Community", "40%"],
-          ["WEI Impact Fund", "25%"],
+          ["SHE Score Impact Fund", "25%"],
           ["Founding Team (3-year vesting)", "15%"],
           ["Ecosystem & Partnerships", "10%"],
           ["Reserve & Liquidity", "10%"],
@@ -170,8 +170,8 @@ function WhitepaperContent() {
       <Table
         headers={["Tier", "Token Format", "Description", "Launch"]}
         rows={[
-          ["Global Index", "$SHE", "Tracks worldwide WEI score. One token, whole world", "Year 1"],
-          ["Country Sub-Token", "$SHE-IND, $SHE-NGA, $SHE-USA", "Each country pegged to its own national WEI score", "Year 2"],
+          ["Global Index", "$SHE", "Tracks worldwide SHE Score. One token, whole world", "Year 1"],
+          ["Country Sub-Token", "$SHE-IND, $SHE-NGA, $SHE-USA", "Each country pegged to its own national SHE Score", "Year 2"],
           ["State / Province Token", "$SHE-WB, $SHE-KL, $SHE-MH", "State-level tokens. Profit directly from local programs", "Year 3"],
         ]}
       />
@@ -181,7 +181,7 @@ function WhitepaperContent() {
         India provides the most compelling real-world proof that targeted programs measurably improve women's empowerment.
       </p>
       <Table
-        headers={["Scheme", "Scale", "WEI Pillar"]}
+        headers={["Scheme", "Scale", "SHE Score Pillar"]}
         rows={[
           ["Lakshmi Bhandar (West Bengal)", "24.1M beneficiaries — direct cash ₹1,500–1,700/month", "Economic Inclusion"],
           ["Kanyashree (West Bengal)", "10M girls — UNESCO top honour winner", "Education & Literacy"],
@@ -209,7 +209,7 @@ function WhitepaperContent() {
       <Table
         headers={["Phase", "Timeline", "Key Milestone"]}
         rows={[
-          ["Foundation", "Months 1–3", "Whitepaper, WEI formula, shetoken.org live"],
+          ["Foundation", "Months 1–3", "Whitepaper, SHE Score formula, shetoken.org live"],
           ["Build", "Months 4–6", "Smart contract dev, NGO outreach, institutional pitches"],
           ["Testnet", "Months 7–9", "Ethereum testnet, Chainlink oracle, DAO governance"],
           ["Mainnet", "Months 10–12", "Public token sale, Uniswap V3, CoinGecko listing"],
@@ -347,7 +347,7 @@ export default function Whitepaper() {
           <h2 className="text-xl font-bold mb-3">Abstract</h2>
           <p className="text-muted-foreground leading-relaxed mb-4">
             SHE is the world's first cryptocurrency whose supply mechanics are governed by real-world women's empowerment outcomes.
-            Built on the Women's Empowerment Index (WEI) — a composite of 8 weighted pillars across 105 countries — SHE mints
+            Built on the SHE Score — a composite of 8 weighted pillars across 105 countries — SHE mints
             tokens when women's conditions improve globally, and burns them when they deteriorate.
           </p>
           <p className="text-muted-foreground leading-relaxed">

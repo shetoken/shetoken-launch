@@ -34,7 +34,7 @@ const ADVISORY = (s: number): { label: string; color: string } =>
             { label: "Reconsider non-essential travel", color: "#ef4444" };
 const percentileTier = (v: number) => (v >= 70 ? "Top tier" : v >= 40 ? "Mid tier" : "Bottom tier");
 
-/** Comprehensive Women's Empowerment Index country report — styled to match the website. */
+/** Comprehensive SHE Score country report — styled to match the website. */
 export async function downloadCountryReport(opts: {
   country: CountryWEI;
   indexes: ReportIndexTile[];
@@ -71,11 +71,11 @@ export async function downloadCountryReport(opts: {
     doc.addPage();
     page += 1;
     paintBackground(doc);
-    headerBand(doc, "Women's Empowerment Index — Country Report", logo);
+    headerBand(doc, "SHE Score — Country Report", logo);
     pageFooter(
       doc,
       "Sources: UN Women, World Bank, WHO, UNODC, UNESCO, ILO, UNICEF, IPU, NCRB. Scores 0–100. Indicative — not financial advice.",
-      `shetoken.org/country/${c.iso_code}  ·  WEI v3.0  ·  p.${page}`
+      `shetoken.org/country/${c.iso_code}  ·  SHE Score v3.0  ·  p.${page}`
     );
     y = 92;
   };
@@ -116,8 +116,8 @@ export async function downloadCountryReport(opts: {
     title: "SHEtoken",
     subtitle: "The world's first data-backed gender-accountability token",
     about: [
-      "SHEtoken ($SHE) ties the value of a cryptocurrency to real-world progress for women, governed by the Women's Empowerment Index (WEI) — a composite 0–100 score across 8 weighted pillars for 105 countries, built from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data.",
-      `This report summarises the WEI profile for ${c.country}: pillar breakdown, the eight sub-indices, trend and life-path outlook.`,
+      "SHEtoken ($SHE) ties the value of a cryptocurrency to real-world progress for women, governed by the SHE Score — a composite 0–100 score across 8 weighted pillars for 105 countries, built from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data.",
+      `This report summarises the SHE Score profile for ${c.country}: pillar breakdown, the eight sub-indices, trend and life-path outlook.`,
     ],
   });
 
@@ -135,7 +135,7 @@ export async function downloadCountryReport(opts: {
   doc.setTextColor(...C.mut);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
-  doc.text("WEI Score / 100", PW - M, y + 26, { align: "right" });
+  doc.text("SHE Score / 100", PW - M, y + 26, { align: "right" });
   y += 26;
   doc.setFontSize(9.5);
   doc.setTextColor(...C.mut);
@@ -185,7 +185,7 @@ export async function downloadCountryReport(opts: {
   // 8-Index Scorecard (4 × 2)
   heading("8-Index Scorecard");
   doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...C.mut);
-  doc.text("Eight separate SHEtoken indexes — not WEI sub-pillars.", M, y); y += 12;
+  doc.text("Eight separate SHEtoken indexes — not SHE Score sub-pillars.", M, y); y += 12;
   {
     const cols = 4, gap = 8, tW = (CONTENT_W - (cols - 1) * gap) / cols, tH = 52;
     for (let r = 0; r < 2; r++) {
@@ -221,7 +221,7 @@ export async function downloadCountryReport(opts: {
     heading("Global Context");
     para(`Where ${c.country} sits among ${global.countriesScored} countries, with the global index averages for reference.`, C.mut, 8.5);
 
-    // World map — WEI choropleth with this country in gold
+    // World map — SHE Score choropleth with this country in gold
     if (mapPng) {
       const mh = CONTENT_W * 0.46;
       ensure(mh + 28);
@@ -244,9 +244,9 @@ export async function downloadCountryReport(opts: {
       y += 12;
     }
 
-    // WEI distribution across all countries, with this country marked
+    // SHE Score distribution across all countries, with this country marked
     if (distribution.length >= 8) {
-      subHeading(`WEI distribution — ${distribution.length} countries`);
+      subHeading(`SHE Score distribution — ${distribution.length} countries`);
       ensure(94);
       const ch = 78, x0 = M, y0 = y;
       panel(doc, x0, y0, CONTENT_W, ch, C.card);
@@ -284,7 +284,7 @@ export async function downloadCountryReport(opts: {
 
     // Snapshot — 4 cells (2 × 2)
     const cells: [string, string, RGB][] = [
-      ["Global WEI average", `${global.weiAvg.toFixed(1)} / 100`, C.gold],
+      ["Global SHE Score average", `${global.weiAvg.toFixed(1)} / 100`, C.gold],
       [`${c.country} · rank #${c.rank} of ${global.countriesScored}`, `${(c.wei_score ?? 0).toFixed(1)} / 100`, C.ink],
       ["Highest", `${global.highest.country} · ${global.highest.score.toFixed(1)}`, C.emerald],
       ["Lowest", `${global.lowest.country} · ${global.lowest.score.toFixed(1)}`, C.red],
@@ -400,13 +400,13 @@ export async function downloadCountryReport(opts: {
   doc.setFont("helvetica", "bold"); doc.setFontSize(22); doc.setTextColor(...C.red);
   doc.text(`-${violence.score.toFixed(1)} pts`, M, y + 18);
   doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(...C.red);
-  doc.text(`${violence.label.toUpperCase()}  ·  subtracted from the composite WEI score`, M + 110, y + 18);
+  doc.text(`${violence.label.toUpperCase()}  ·  subtracted from the composite SHE Score`, M + 110, y + 18);
   y += 32;
   para(violence.context, C.mut, 9);
   {
     const boxes: [string, string][] = [
       ["Covers", "Rape prevalence, femicide, acid attacks, dowry violence, honour-based violence"],
-      ["Impact", `Removes ${violence.score.toFixed(1)} points directly from the composite WEI score`],
+      ["Impact", `Removes ${violence.score.toFixed(1)} points directly from the composite SHE Score`],
       ["Data sources", "WHO, UNODC, UN Women — verified annually"],
       ["To reduce this", "Prosecution rates, survivor legal aid, DV-law enforcement"],
     ];
@@ -537,7 +537,7 @@ export async function downloadCountryReport(opts: {
     heading("How Each Score Is Calculated");
     para("The formula, this country's actual inputs, and the source documents behind each of the eight SHEtoken indexes.", C.mut, 8.5);
 
-    ["WEI", "GPI", "SVI", "WADI", "WEVI", "WHI", "WVI", "Compliance"].forEach((code) => {
+    ["SHE Score", "GPI", "SVI", "WADI", "WEVI", "WHI", "WVI", "Compliance"].forEach((code) => {
       const m = METHODOLOGY[code];
       const row = methodRows[code];
       if (!m || !row) return;
@@ -649,8 +649,8 @@ export async function downloadCountryReport(opts: {
       return yy;
     };
 
-    // Col 1 — WEI
-    let c1 = colTitle(colX[0], top, "Women's Empowerment Index (WEI)");
+    // Col 1 — SHE Score
+    let c1 = colTitle(colX[0], top, "SHE Score");
     c1 = colBody(colX[0], c1, [
       "SHEtoken's native composite index. Scores 105 countries across 8 pillars — Empowerment, Bodily Autonomy, Safety & Justice, Education, Economic, Health, Dignity & Welfare, and Digital & Social — weighted and adjusted by a Violence Penalty. Updated weekly by the SHEtoken AI agent from 100+ multilingual news sources, arXiv, PubMed, and GDELT.",
     ]);
@@ -687,10 +687,10 @@ export async function downloadCountryReport(opts: {
     doc.setDrawColor(...C.border); doc.setLineWidth(0.5); doc.line(M, y, PW - M, y); y += 12;
     doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(...C.mut);
     doc.text(
-      `Data last updated: ${new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}  ·  WEI v3.0  ·  105 countries scored  ·  Full methodology at shetoken.org/whitepaper`,
+      `Data last updated: ${new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}  ·  SHE Score v3.0  ·  105 countries scored  ·  Full methodology at shetoken.org/whitepaper`,
       M, y
     );
   }
 
-  doc.save(`SHEtoken-WEI-${c.iso_code}-report.pdf`);
+  doc.save(`SHEtoken-SHE Score-${c.iso_code}-report.pdf`);
 }

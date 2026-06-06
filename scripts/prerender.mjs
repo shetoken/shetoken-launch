@@ -59,7 +59,7 @@ function homepage(template) {
     `<nav><a href="/">SHEtoken</a> · <a href="/dashboard">Live Data</a> · <a href="/why">Why $SHE</a> · <a href="/community">Community</a> · <a href="/whitepaper">Whitepaper</a></nav>` +
     `<p>World's first data-backed gender accountability token</p>` +
     `<h1>She was always the currency. We just never measured it. Until now.</h1>` +
-    `<p>$SHE is tied to the Women's Empowerment Index — built from UN, World Bank, WHO, UNESCO and UNODC data across 105 countries. ` +
+    `<p>$SHE is tied to the SHE Score — built from UN, World Bank, WHO, UNESCO and UNODC data across 105 countries. ` +
     `When women's lives improve, the index rises. When the index rises, $SHE rises.</p>` +
     `<h2>Nine pillars. One score.</h2>` +
     `<p>The most comprehensive women's empowerment index ever published — the only one that prices period poverty, FGM, dowry violence, ` +
@@ -74,8 +74,8 @@ function homepage(template) {
 function pageFor(template, c) {
   const iso = c.iso_code, name = c.country, score = Number(c.wei_score ?? 0).toFixed(1);
   const url = `${BASE}/country/${iso}`;
-  const title = `${name} Women's Empowerment Index Score 2026 — WEI ${score} | SHEtoken`;
-  const desc = `${name}'s Women's Empowerment Index (WEI) score is ${score}/100 in 2026 (rank #${c.rank} of 105). Explore all 8 pillar scores, the 2015–2024 trend, and the Life Path for 100 girls in ${name}.`;
+  const title = `${name} SHE Score 2026 — ${score}/100 | SHEtoken`;
+  const desc = `${name}'s SHE Score is ${score}/100 in 2026 (rank #${c.rank} of 105). Explore all 8 pillar scores, the 2015–2024 trend, and the Life Path for 100 girls in ${name}.`;
 
   const pillarLis = PILLARS
     .map(([k, label]) => `<li>${label}: ${Number(c[k] ?? 0).toFixed(1)}/100</li>`)
@@ -84,10 +84,10 @@ function pageFor(template, c) {
   const jsonld = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "Dataset",
-    name: `${name} — Women's Empowerment Index 2026`,
+    name: `${name} — SHE Score 2026`,
     description: desc,
     url,
-    variableMeasured: "Women's Empowerment Index (WEI), 0–100",
+    variableMeasured: "SHE Score, 0–100",
     creator: { "@type": "Organization", name: "SHEtoken" },
     isAccessibleForFree: true,
     distribution: [{ "@type": "DataDownload", encodingFormat: "application/json", contentUrl: `https://api.shetoken.org/v1/wei/countries/${iso}` }],
@@ -96,9 +96,9 @@ function pageFor(template, c) {
   const snapshot =
     `<div id="root"><main style="max-width:760px;margin:40px auto;padding:0 16px;font-family:system-ui,sans-serif;line-height:1.5;color:#1e1b26">` +
     `<nav><a href="/">SHEtoken</a> › <a href="/dashboard">Dashboard</a> › ${esc(name)}</nav>` +
-    `<h1>${esc(name)} — Women's Empowerment Index (WEI) ${score}/100</h1>` +
-    `<p>${esc(name)} (${esc(c.region)}) ranks #${c.rank} of 105 countries on the SHEtoken Women's Empowerment Index, in Tier ${c.tier}. ` +
-    `The WEI is a data-backed 0–100 measure of how good life is for women, built from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data and updated weekly.</p>` +
+    `<h1>${esc(name)} — SHE Score ${score}/100</h1>` +
+    `<p>${esc(name)} (${esc(c.region)}) ranks #${c.rank} of 105 countries on the SHEtoken SHE Score, in Tier ${c.tier}. ` +
+    `The SHE Score is a data-backed 0–100 measure of how good life is for women, built from UN Women, World Bank, WHO, UNODC, UNESCO and ILO data and updated weekly.</p>` +
     `<h2>Pillar scores (0–100)</h2><ul>${pillarLis}<li>Violence penalty: ${Number(c.violence_penalty_score ?? 0).toFixed(1)}</li></ul>` +
     `<p><a href="/dashboard">Explore the live dashboard</a> · ` +
     `<a href="https://api.shetoken.org/v1/wei/countries/${iso}">Raw JSON data</a></p>` +

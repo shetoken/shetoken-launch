@@ -1,7 +1,7 @@
 /**
  * SHEconomy — risk-free paper-trading simulator.
  * Pure logic: assets, price engine, portfolio ops, the SHE-Bot agent, persistence.
- * No real money. $SHE price is simulated (anchored to the global WEI); BTC/ETH are
+ * No real money. $SHE price is simulated (anchored to the global SHE Score); BTC/ETH are
  * seeded from live CoinGecko prices then random-walk for a live feel.
  */
 
@@ -48,7 +48,7 @@ function randn(): number {
   return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 }
 
-/** $SHE: random walk with a small upward drift when the world's WEI is above 50. */
+/** $SHE: random walk with a small upward drift when the world's SHE Score is above 50. */
 export function stepSHE(price: number, globalWEI: number): number {
   const drift = 0.0006 * ((globalWEI - 50) / 10);
   return Math.max(0.01, price * (1 + drift + randn() * 0.013));

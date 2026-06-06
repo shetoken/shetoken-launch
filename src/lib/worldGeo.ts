@@ -1,6 +1,6 @@
 /**
  * Shared world-geography helpers: the world-atlas source, the numeric→ISO3
- * lookup, the WEI colour scale, and an offscreen choropleth → PNG rasteriser
+ * lookup, the SHE Score colour scale, and an offscreen choropleth → PNG rasteriser
  * used to embed the world map in the country-report PDF (jsPDF can't draw SVG).
  */
 import { geoEqualEarth, geoPath } from "d3-geo";
@@ -43,7 +43,7 @@ export const NUM_TO_ISO3: Record<string, string> = {
   "894": "ZMB", "51": "ARM",
 };
 
-/** WEI score → choropleth colour (matches the dashboard map legend). */
+/** SHE Score → choropleth colour (matches the dashboard map legend). */
 export function scoreToColor(score: number | undefined | null): string {
   if (score == null) return "#283143";
   if (score >= 75) return "#10b981";
@@ -59,7 +59,7 @@ const isoForNum = (raw: string) => NUM_TO_ISO3[raw] ?? NUM_TO_ISO3[String(Number
 const _mapCache: Record<string, string | null> = {};
 
 /**
- * Render a world choropleth (Equal-Earth) coloured by WEI, with the selected
+ * Render a world choropleth (Equal-Earth) coloured by SHE Score, with the selected
  * country in gold, and return it as a PNG data URL. Null on any failure.
  */
 export async function getCountryMapPng(opts: {

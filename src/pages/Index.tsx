@@ -112,7 +112,7 @@ const Index = () => {
       border: "border-yellow-400/20",
       bg: "bg-yellow-400/5",
       members: 63,
-      teaser: "Discussion: How to weight WEI compliance scores in SFDR Article 9 reporting...",
+      teaser: "Discussion: How to weight SHE Score compliance scores in SFDR Article 9 reporting...",
     },
     {
       id: "south-asia",
@@ -132,7 +132,7 @@ const Index = () => {
       border: "border-pink-400/20",
       bg: "bg-pink-400/5",
       members: 38,
-      teaser: "Resource shared: Template for citing WEI data in UN funding applications...",
+      teaser: "Resource shared: Template for citing SHE Score data in UN funding applications...",
     },
   ];
 
@@ -159,7 +159,7 @@ const Index = () => {
             <span className="italic font-serif">Until now.</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-            $SHE is tied to the Women's Empowerment Index — built from UN, World Bank, WHO, UNESCO and UNODC data across 105 nations.
+            $SHE is tied to the SHE Score — built from UN, World Bank, WHO, UNESCO and UNODC data across 105 nations.
             When women's lives improve, the index rises. When the index rises, $SHE rises.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -208,11 +208,11 @@ const Index = () => {
         </div>
       </section>
 
-      {/* WEI INDEX */}
+      {/* SHE Score INDEX */}
       <section id="index" className="py-28">
         <div className="container max-w-6xl">
           <div className="text-center mb-16">
-            <p className="text-accent text-sm uppercase tracking-widest mb-4">The WEI Formula · v3.0</p>
+            <p className="text-accent text-sm uppercase tracking-widest mb-4">The SHE Score Formula · v3.0</p>
             <h2 className="text-4xl md:text-5xl font-bold mb-4">Nine pillars. <span className="text-gradient">One score.</span></h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               The most comprehensive women's empowerment index ever published — the only one that prices period poverty, FGM,
@@ -254,7 +254,7 @@ const Index = () => {
               <span className="text-gradient">financially measurable.</span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Impact investors, NGOs, policy researchers and advocates — connected by WEI data.
+              Impact investors, NGOs, policy researchers and advocates — connected by SHE Score data.
               Closed focus groups. Real intelligence. Not noise.
             </p>
           </div>
@@ -307,8 +307,8 @@ const Index = () => {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { icon: TrendingUp, title: "Index-linked value", desc: "As the global WEI improves year on year, $SHE token supply expands and value appreciates. You hold accountability, not just currency." },
-              { icon: Flame, title: "Regression burns tokens", desc: "When the WEI score falls — when conditions worsen — tokens are permanently burned. Regression has a cost. Progress has a reward." },
+              { icon: TrendingUp, title: "Index-linked value", desc: "As the global SHE Score improves year on year, $SHE token supply expands and value appreciates. You hold accountability, not just currency." },
+              { icon: Flame, title: "Regression burns tokens", desc: "When the SHE Score falls — when conditions worsen — tokens are permanently burned. Regression has a cost. Progress has a reward." },
               { icon: Lock, title: "Long-term commitment", desc: "Lock $SHE for 6–12 months and earn bonus tokens for sustained belief in the mission. We reward patience and conviction." },
             ].map((f) => (
               <div key={f.title} className="bg-gradient-card border border-border/40 rounded-2xl p-8 shadow-card">
@@ -395,7 +395,7 @@ const Index = () => {
               <h3 className="text-xl font-semibold mb-3">Strategic Partner</h3>
               <p className="text-muted-foreground text-sm leading-relaxed flex-1">
                 NGOs, research institutions, government bodies and media organisations —
-                co-brand research, access early WEI data and help shape the index methodology.
+                co-brand research, access early SHE Score data and help shape the index methodology.
               </p>
               <a
                 href="mailto:contact@shetoken.org?subject=Partnership Interest — SHEtoken&body=Hi, we're interested in exploring a strategic partnership with SHEtoken. Our organisation is..."
@@ -436,7 +436,7 @@ const Index = () => {
         <div className="container relative z-10 max-w-2xl text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-5">Be first in line.</h2>
           <p className="text-lg text-foreground/80 mb-10">
-            Join the SheToken newsletter — WEI score reports, signal alerts, community updates and early-access invites.
+            Join the SheToken newsletter — SHE Score reports, signal alerts, community updates and early-access invites.
           </p>
           <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
             <Input
@@ -463,6 +463,16 @@ const Index = () => {
 
       {/* FOOTER */}
       <footer className="border-t border-border/40 py-12">
+        {/* Naming key — keep the three terms unambiguous */}
+        <div className="container mb-8">
+          <div className="mx-auto max-w-3xl rounded-xl border border-border/40 bg-card/30 px-5 py-4 text-xs text-muted-foreground flex flex-col sm:flex-row sm:items-center sm:justify-center gap-x-6 gap-y-1.5 text-center">
+            <span><span className="font-semibold text-foreground">SHE Score</span> — the index (0–100, per country/state)</span>
+            <span className="hidden sm:inline text-border">·</span>
+            <span><span className="font-semibold text-accent">$SHE</span> — the token that tracks it</span>
+            <span className="hidden sm:inline text-border">·</span>
+            <span><span className="font-semibold text-foreground">SHE Foundation</span> — the publisher</span>
+          </div>
+        </div>
         <div className="container flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <img src={logo} alt="" className="h-6 w-6 rounded-full object-cover" />

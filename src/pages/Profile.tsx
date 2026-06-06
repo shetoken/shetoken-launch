@@ -245,7 +245,7 @@ export default function Profile() {
                 <BookOpen className="h-4 w-4 text-accent" /> Whitepaper
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-                Full WEI methodology, tokenomics and roadmap.
+                Full SHE Score methodology, tokenomics and roadmap.
               </p>
               <Button asChild size="sm" variant="outline" className="w-full border-border/60 text-xs">
                 <Link to="/whitepaper">Read the whitepaper</Link>

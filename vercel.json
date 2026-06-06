@@ -1,7 +1,7 @@
 {
   "redirects": [
-    { "source": "/wei", "destination": "/dashboard", "permanent": true },
-    { "source": "/wei/:path*", "destination": "/dashboard", "permanent": true }
+    { "source": "/wei", "destination": "/dashboard", "statusCode": 301 },
+    { "source": "/wei/:path*", "destination": "/dashboard", "statusCode": 301 }
   ],
   "rewrites": [
     { "source": "/country/:iso", "destination": "/country/:iso.html" },

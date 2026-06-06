@@ -68,7 +68,7 @@ function homepage(template) {
     `<p>The SHE Score (v2) is computed from the five LIVE pillars using the published formula. The four v3 pillars ` +
     `(Bodily Autonomy, Dignity & Welfare, Digital & Social, and the expanded Safety & Justice indicators) are part of the ` +
     `full framework but do not yet affect published scores or $SHE supply mechanics.</p>` +
-    `<p><a href="/dashboard">See live scores for 105 countries</a> · <a href="/why">Why this matters</a> · <a href="/index-landscape">The Landscape</a> · <a href="/methodology">Methodology</a></p>` +
+    `<p><a href="/dashboard">Explore the scores</a> · <a href="/why">Why this matters</a> · <a href="/index-landscape">The Landscape</a> · <a href="/methodology">Methodology</a> · <a href="/lab">The Lab</a></p>` +
     `<footer><p>SHE Score — the index (0–100, per country/state). $SHE — the token that tracks it. SHE Foundation — the publisher.</p>` +
     `<p>The SHE Score is an independent project and is not affiliated with, endorsed by, or derived from the UNDP/UN Women Women's Empowerment Index, the SHE Index powered by EY, or any other index referenced on this site.</p></footer>` +
     `</main></div>`;
